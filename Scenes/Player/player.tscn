@@ -1,0 +1,53 @@
+[gd_scene load_steps=7 format=3 uid="uid://7gv6q50fuutj"]
+
+[ext_resource type="Script" path="res://Scenes/Player/player.gd" id="1_1w47b"]
+[ext_resource type="Script" path="res://Scenes/Player/SmoothFlashlight.gd" id="1_h2o6c"]
+[ext_resource type="PackedScene" uid="uid://dbduds4bsaaby" path="res://Scenes/Bullet/Bullet.tscn" id="2_je25s"]
+[ext_resource type="Texture2D" uid="uid://i14u4rcieiwl" path="res://textures/flashlight4.png" id="3_huk2y"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_emkox"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_6b3ky"]
+
+[node name="Player" type="CharacterBody3D"]
+script = ExtResource("1_1w47b")
+_bullet_scene = ExtResource("2_je25s")
+
+[node name="SpotLight3D" type="SpotLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.356984, 0.037104, -0.516456)
+light_energy = 10.0
+light_indirect_energy = 1.25
+light_volumetric_fog_energy = 0.0
+light_projector = ExtResource("3_huk2y")
+shadow_enabled = true
+spot_range = 100.0
+spot_attenuation = 1.5
+spot_angle = 30.0
+
+[node name="CollisionShape3d" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_emkox")
+
+[node name="MeshInstance3d" type="MeshInstance3D" parent="."]
+mesh = SubResource("CapsuleMesh_6b3ky")
+
+[node name="Head" type="Node3D" parent="."]
+
+[node name="Camera3d" type="Camera3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.821315, -0.127823)
+
+[node name="RayCast3d" type="RayCast3D" parent="Head/Camera3d"]
+transform = Transform3D(2.98023e-08, 0, 1, 0, 1, 0, -1, 0, 2.98023e-08, 0, -0.00588068, 0.463024)
+target_position = Vector3(60, 0, 0)
+
+[node name="OmniLight3D" type="OmniLight3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.775055, -0.444192)
+visible = false
+light_energy = 0.25
+light_volumetric_fog_energy = 0.0
+omni_range = 10.0
+omni_attenuation = 2.0
+
+[node name="SmoothFlashlight" type="Node3D" parent="."]
+script = ExtResource("1_h2o6c")
+
+[node name="Node3D" type="Node3D" parent="."]

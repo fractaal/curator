@@ -1,0 +1,114 @@
+[gd_scene load_steps=10 format=3 uid="uid://c5nn4hpuwrtes"]
+
+[ext_resource type="Script" path="res://Scenes/GameLight.gd" id="1_txb8k"]
+[ext_resource type="Texture2D" uid="uid://i14u4rcieiwl" path="res://textures/flashlight4.png" id="2_dlu7o"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gba8v"]
+emission_enabled = true
+emission = Color(1, 0.898039, 0.658824, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g3nf5"]
+emission_enabled = true
+emission = Color(1, 1, 0.176471, 1)
+emission_energy_multiplier = 20.68
+
+[sub_resource type="Gradient" id="Gradient_svys5"]
+offsets = PackedFloat32Array(0, 0.795053, 1)
+colors = PackedColorArray(1, 1, 0.854902, 1, 0.976563, 0.909067, 0.6616, 1, 0.648371, 0.510475, 0, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_1hfgu"]
+gradient = SubResource("Gradient_svys5")
+use_hdr = true
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_cnlpd"]
+lifetime_randomness = 0.9
+direction = Vector3(2.08165e-12, -10, 2.08165e-12)
+spread = 10.0
+initial_velocity_min = 5.0
+initial_velocity_max = 15.0
+angular_velocity_min = 250.0
+angular_velocity_max = 500.0
+angle_min = -720.0
+angle_max = 720.0
+color_ramp = SubResource("GradientTexture1D_1hfgu")
+turbulence_enabled = true
+turbulence_noise_scale = 0.01
+turbulence_influence_min = 0.01
+collision_mode = 1
+collision_friction = 0.0
+collision_bounce = 0.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ge6xl"]
+transparency = 2
+alpha_scissor_threshold = 0.5
+alpha_antialiasing_mode = 0
+blend_mode = 1
+depth_draw_mode = 2
+shading_mode = 0
+vertex_color_use_as_albedo = true
+
+[sub_resource type="BoxMesh" id="BoxMesh_2k75j"]
+material = SubResource("StandardMaterial3D_ge6xl")
+size = Vector3(0.015, 0.015, 0.015)
+
+[node name="FloorLamp" type="Node3D" node_paths=PackedStringArray("nodesWithEmission") groups=["lights"]]
+script = ExtResource("1_txb8k")
+nodesWithEmission = [NodePath("CSGCylinder3D2")]
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1.98895, 0, 0, 0, 1, 0, 0, 0, 1.98895, 0, 0.0521736, 0)
+radius = 0.2
+height = 0.0695413
+
+[node name="CSGCylinder3D2" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1.98895, 0, 0, 0, 1, 0, 0, 0, 1.98895, 0, 2.6965, 0)
+radius = 0.15
+height = 1.814
+material = SubResource("StandardMaterial3D_gba8v")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(-1, 0, 1.50996e-07, 0, 1, 0, -1.50996e-07, 0, -1, 0.00163913, 1.58206, -0.00504506)
+size = Vector3(0.1, 3, 0.1)
+
+[node name="GPUParticlesCollisionBox3D2" type="GPUParticlesCollisionBox3D" parent="."]
+transform = Transform3D(0.98889, 0, 0, 0, 0.98889, 0, 0, 0, 0.98889, 0.0101972, -0.38857, -0.0067873)
+size = Vector3(10, 1, 10)
+
+[node name="SpotLight3D3" type="SpotLight3D" parent="."]
+transform = Transform3D(1, -6.66422e-31, -1.5246e-23, -1.5246e-23, -4.37114e-08, -1, 0, 1, -4.37114e-08, 2.08165e-12, 3.53519, 2.08165e-12)
+light_color = Color(0.960784, 0.760784, 0.576471, 1)
+light_indirect_energy = 8.0
+light_projector = ExtResource("2_dlu7o")
+light_size = 1.0
+shadow_enabled = true
+shadow_blur = 2.0
+spot_angle = 70.0
+
+[node name="SpotLight3D2" type="SpotLight3D" parent="."]
+transform = Transform3D(1, -6.97574e-16, -1.5246e-23, -1.5246e-23, -4.37114e-08, 1, -6.97574e-16, -1, -4.37114e-08, 2.08165e-12, 1.81389, 2.08165e-12)
+light_color = Color(0.960784, 0.760784, 0.576471, 1)
+light_indirect_energy = 8.0
+light_projector = ExtResource("2_dlu7o")
+light_size = 1.0
+shadow_enabled = true
+shadow_blur = 2.0
+spot_angle = 70.0
+
+[node name="Sparks" type="GPUParticles3D" parent="."]
+transform = Transform3D(0.98889, 0, 0, 0, 0.98889, 0, 0, 0, 0.98889, 0.0106502, 2.90815, -0.0068078)
+material_overlay = SubResource("StandardMaterial3D_g3nf5")
+cast_shadow = 0
+gi_mode = 0
+emitting = false
+amount = 256
+lifetime = 2.0
+one_shot = true
+explosiveness = 1.0
+randomness = 1.0
+fixed_fps = 0
+interpolate = false
+fract_delta = false
+visibility_aabb = AABB(-2.5, -5, -2.5, 5, 10, 5)
+trail_lifetime = 1.0
+process_material = SubResource("ParticleProcessMaterial_cnlpd")
+draw_pass_1 = SubResource("BoxMesh_2k75j")
