@@ -61,21 +61,21 @@ radius = 0.2
 height = 0.0695413
 
 [node name="CSGCylinder3D2" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1.98895, 0, 0, 0, 1, 0, 0, 0, 1.98895, 0, 2.6965, 0)
+transform = Transform3D(1.98895, 0, 0, 0, 1, 0, 0, 0, 1.98895, 0, 1.88261, 0)
 radius = 0.15
-height = 1.814
+height = 1.37225
 material = SubResource("StandardMaterial3D_gba8v")
 
 [node name="CSGBox3D" type="CSGBox3D" parent="."]
-transform = Transform3D(-1, 0, 1.50996e-07, 0, 1, 0, -1.50996e-07, 0, -1, 0.00163913, 1.58206, -0.00504506)
-size = Vector3(0.1, 3, 0.1)
+transform = Transform3D(-1, 0, 1.50996e-07, 0, 1, 0, -1.50996e-07, 0, -1, 0.00163913, 1.1433, -0.00504506)
+size = Vector3(0.1, 2.33322, 0.1)
 
 [node name="GPUParticlesCollisionBox3D2" type="GPUParticlesCollisionBox3D" parent="."]
 transform = Transform3D(0.98889, 0, 0, 0, 0.98889, 0, 0, 0, 0.98889, 0.0101972, -0.38857, -0.0067873)
 size = Vector3(10, 1, 10)
 
 [node name="SpotLight3D3" type="SpotLight3D" parent="."]
-transform = Transform3D(1, -6.66422e-31, -1.5246e-23, -1.5246e-23, -4.37114e-08, -1, 0, 1, -4.37114e-08, 2.08165e-12, 3.53519, 2.08165e-12)
+transform = Transform3D(1, -6.66424e-31, -1.5246e-23, -1.5246e-23, -4.37114e-08, -1, 0, 1, -4.37114e-08, 2.08165e-12, 2.52889, 2.08165e-12)
 light_color = Color(0.960784, 0.760784, 0.576471, 1)
 light_indirect_energy = 8.0
 light_projector = ExtResource("2_dlu7o")
@@ -85,7 +85,7 @@ shadow_blur = 2.0
 spot_angle = 70.0
 
 [node name="SpotLight3D2" type="SpotLight3D" parent="."]
-transform = Transform3D(1, -6.97574e-16, -1.5246e-23, -1.5246e-23, -4.37114e-08, 1, -6.97574e-16, -1, -4.37114e-08, 2.08165e-12, 1.81389, 2.08165e-12)
+transform = Transform3D(1, -6.97574e-16, -1.52459e-23, -1.5246e-23, -4.37114e-08, 1, -6.97574e-16, -1, -4.37114e-08, 2.08165e-12, 1.16673, 2.08165e-12)
 light_color = Color(0.960784, 0.760784, 0.576471, 1)
 light_indirect_energy = 8.0
 light_projector = ExtResource("2_dlu7o")
@@ -93,6 +93,11 @@ light_size = 1.0
 shadow_enabled = true
 shadow_blur = 2.0
 spot_angle = 70.0
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.85622, 0)
+light_color = Color(0.960784, 0.760784, 0.576471, 1)
+light_energy = 0.5
 
 [node name="Sparks" type="GPUParticles3D" parent="."]
 transform = Transform3D(0.98889, 0, 0, 0, 0.98889, 0, 0, 0, 0.98889, 0.0106502, 2.90815, -0.0068078)

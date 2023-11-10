@@ -6,7 +6,7 @@ func _ready():
 
 func _input(event):
 	if (event.is_action_pressed("ui_text_completion_accept") && has_focus()):
-		CommandInterpreter.interpretCommand(text)
+		Curator.Interpret(text)
 		clear()
 		release_focus()
 

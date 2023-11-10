@@ -17,13 +17,12 @@ config/features=PackedStringArray("4.1", "C#", "Forward Plus")
 [autoload]
 
 Settings="*res://Global/Settings.gd"
-CommandInterpreter="*res://Scenes/CommandInterpreter.gd"
+Curator="*res://Curator/Curator.tscn"
 
 [display]
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
-window/size/mode=3
 
 [dotnet]
 
@@ -86,7 +85,6 @@ FocusCommandLine={
 lights_and_shadows/directional_shadow/size=8192
 global_illumination/gi/use_half_resolution=true
 scaling_3d/mode=1
-scaling_3d/scale=0.35
 scaling_3d/fsr_sharpness=1.0
 global_illumination/sdfgi/probe_ray_count=3
 global_illumination/sdfgi/frames_to_converge=3

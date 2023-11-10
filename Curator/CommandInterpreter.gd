@@ -4,10 +4,15 @@ extends Node
 @export var Ghost: Node3D
 
 # This is more for recognizing commands
-const VERBS = ['toggle', 'flicker', 'explode', 'ring', 'throw', 'knock', 'open', 'close', 'lock']
+const VERBS = ['toggle', 'flicker', 'explode', 'ring', 'throw', 'knock', 'open', 'close', 'lock', 'restore']
 const OBJECTS = ['Lights', 'TVs']
 
 enum ObjectType {LIGHT, TV} # PHONE, CHAIR, PHYSICS_OBJECT, WINDOW, DOOR}
+
+func _ready():
+	Player = get_tree().get_first_node_in_group("player")
+	Ghost = get_tree().get_first_node_in_group("ghost")
+	print("Set player & ghost to ", Player, Ghost)
 
 func interpretCommand(rawCommand: String):
 
@@ -21,33 +26,58 @@ func interpretCommand(rawCommand: String):
 	print("command was ", command, " with args ", args)
 
 	var isObjectInteractionCommand = false
-
-	for verb in VERBS:
-		if command.contains(verb):
+	
+	var verb: String = ""
+	
+	for _verb in VERBS:
+		if command.contains(_verb):
 			isObjectInteractionCommand = true
+			verb = _verb 
 			break
-
+	
 	if isObjectInteractionCommand:
+
 		var type: ObjectType
 
-		if command.contains("Lights"):
+		if command.to_lower().contains("light"):
 			type = ObjectType.LIGHT
-		elif command.contains("TVs"):
-			type = ObjectType.
-		var type = ObjectType.LIGHT if command.contains("light") else ObjectType.TV
-		object = _resolveObject(
+		elif command.to_lower().contains("tv"):
+			type = ObjectType.TV
+		else:
+			push_warning("Invalid object type ", command, ". Defaulting to light")
+			type = ObjectType.LIGHT
+
+		var object = _resolveObject(type, args[0]);
+
+		if (object is Array):
+			for o in object:
+				print("calling ", verb, " on ", o)
+				o.call(verb)
+		else:
+			print("calling ", verb, " on ", object)
+			object.call(verb)
+		
+	if command == "moveToPlayer":
+		get_tree().call_group("enemies", "update_target_location", Player.global_transform.origin)
+		pass
 	
 
 # target only really matters for nearby, and is the name of the entity
 
 func _resolveObject(type: ObjectType, selector: String):
-	var mode = selector.split(" ")[0].to_lower().strip_edges()
-	var target = selector.split(" ")[1].to_lower().strip_edges()
+
+	var splitted = selector.split(" ")
+
+	var mode = splitted[0].to_lower().strip_edges()
+	var target
+
+	if (splitted.size() > 1):
+		target = splitted[1].to_lower().strip_edges()
 
 	var lights = get_tree().get_nodes_in_group("lights")
 	var tvs = get_tree().get_nodes_in_group("tvs")
 
-	var object: Node3D
+	var object
 
 	if mode.contains("at"):
 
@@ -85,7 +115,10 @@ func _resolveObject(type: ObjectType, selector: String):
 			push_warning("Invalid object type ", type, ". Defaulting to light")
 			object = lights[randi() % lights.size()]
 	
-	elif mode == "all":
+	else:
+		if mode != "all":
+			push_warning("Invalid mode ", mode, " defaulting to all")
+		
 		if type == ObjectType.LIGHT:
 			object = lights
 		elif type == ObjectType.TV:
@@ -93,6 +126,8 @@ func _resolveObject(type: ObjectType, selector: String):
 		else:
 			push_warning("Invalid object type ", type, ". Defaulting to light")
 			object = lights
+
+
 
 	return object
 

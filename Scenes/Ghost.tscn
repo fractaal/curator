@@ -871,7 +871,7 @@ _data = {
 "mixamocom": SubResource("Animation_5n7es")
 }
 
-[node name="Zombie" type="Node3D"]
+[node name="Zombie" type="Node3D" groups=["ghost"]]
 
 [node name="RootNode" type="CharacterBody3D" parent="." groups=["enemies"]]
 script = ExtResource("4_m1s54")
