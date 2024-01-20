@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://cu4t280a3i24a"]
+[gd_scene load_steps=24 format=3 uid="uid://cu4t280a3i24a"]
 
 [ext_resource type="Script" path="res://Scenes/GameLight.gd" id="1_rr66r"]
 [ext_resource type="Texture2D" uid="uid://b5c821vgfv7s" path="res://models/wall_lamp_01_0.png" id="1_sqod2"]
@@ -244,6 +244,9 @@ vertex_color_use_as_albedo = true
 material = SubResource("StandardMaterial3D_lkvsb")
 size = Vector3(0.015, 0.015, 0.015)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_r3m1e"]
+size = Vector3(62.8871, 144.633, 58.4216)
+
 [node name="wall_lamp_01" type="Node3D" groups=["lights"]]
 transform = Transform3D(0.003, 0, 0, 0, 0.003, 0, 0, 0, 0.003, 0, 0, 0)
 script = ExtResource("1_rr66r")
@@ -326,11 +329,12 @@ shadow_enabled = true
 shadow_blur = 2.0
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 32.7618, -4.3648)
+transform = Transform3D(333.333, 0, 0, 0, 333.333, 0, 0, 0, 333.333, 0, 32.7618, 6.53858)
 light_color = Color(0.956863, 0.670588, 0.407843, 1)
 light_energy = 0.1
 light_indirect_energy = 5.0
 light_size = 0.317
+shadow_enabled = true
 shadow_normal_bias = 1.667
 shadow_blur = 5.0
 omni_attenuation = 0.5
@@ -356,3 +360,8 @@ draw_pass_1 = SubResource("BoxMesh_2f4do")
 [node name="GPUParticlesCollisionBox3D2" type="GPUParticlesCollisionBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0771682, -27.5351, -54.158)
 size = Vector3(337.59, 533.28, 79.12)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("BoxShape3D_r3m1e")

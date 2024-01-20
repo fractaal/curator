@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://ctahsvj88g1om"]
+[gd_scene load_steps=22 format=3 uid="uid://ctahsvj88g1om"]
 
 [ext_resource type="Script" path="res://levels/node_3d.gd" id="1_7plsp"]
 [ext_resource type="PackedScene" uid="uid://7gv6q50fuutj" path="res://Scenes/Player/player.tscn" id="1_eisjc"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://b4y50lhr65yom" path="res://Scenes/Television.tscn" id="7_xyigj"]
 [ext_resource type="PackedScene" uid="uid://c5nn4hpuwrtes" path="res://Scenes/FloorLamp.tscn" id="8_50qpy"]
 [ext_resource type="PackedScene" uid="uid://bbhrmf5ph6a17" path="res://Scenes/Ghost.tscn" id="9_1ok4b"]
+[ext_resource type="PackedScene" uid="uid://cbnyfileu33e7" path="res://Scenes/CeilingLight.tscn" id="10_oimnh"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6g5uc"]
 sky_energy_multiplier = 0.76
@@ -31,14 +32,8 @@ ssr_enabled = true
 ssao_enabled = true
 ssil_enabled = true
 sdfgi_enabled = true
-sdfgi_use_occlusion = true
-sdfgi_bounce_feedback = 0.99
 sdfgi_cascades = 7
 sdfgi_min_cell_size = 0.19
-sdfgi_y_scale = 0
-sdfgi_energy = 1.1
-sdfgi_normal_bias = 1.0
-sdfgi_probe_bias = 1.0
 glow_enabled = true
 glow_intensity = 1.0
 glow_bloom = 1.0
@@ -148,6 +143,12 @@ albedo_texture = ExtResource("3_m1rsk")
 uv1_scale = Vector3(3, 3, 3)
 uv1_triplanar = true
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_hvrpw"]
+size = Vector3(8.63, 4.87, 14.15)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_b58na"]
+size = Vector3(9.46, 6.255, 20.49)
+
 [node name="Node3d" type="Node3D"]
 script = ExtResource("1_7plsp")
 
@@ -164,7 +165,7 @@ libraries = {
 transform = Transform3D(-0.866025, -1.1675e-08, -0.5, 0, 1, 0, 0.5, -2.76722e-08, -0.866025, -1.09166, 1.90678, 1.51714)
 
 [node name="DirectionalLight3d" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.966348, 0.25091, -0.0567081, 0.182364, -0.512741, 0.838951, 0.181425, -0.821059, -0.541244, -5.00738, 1.43702, -7.98034)
+transform = Transform3D(0.966348, 0.250909, -0.0567081, 0.182364, -0.512741, 0.838951, 0.181425, -0.821058, -0.541244, -5.00738, 1.43702, -7.98034)
 visible = false
 light_energy = 1.232
 shadow_enabled = true
@@ -250,9 +251,9 @@ transform = Transform3D(-1.31134e-10, 0, -0.003, 0, 0.003, 0, 0.003, 0, -1.31134
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.00783, 2.35466, 1.40491)
 
 [node name="FloorLamp" parent="." instance=ExtResource("8_50qpy")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.05638, 0.5, 7.59629)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.49568, 0.5, -0.359735)
 
-[node name="Zombie" parent="." instance=ExtResource("9_1ok4b")]
+[node name="Ghost" parent="." instance=ExtResource("9_1ok4b")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.0523, 0.5, 6.84054)
 
 [node name="LineEdit" type="LineEdit" parent="."]
@@ -323,7 +324,7 @@ transform = Transform3D(-0.000533331, 0.0211808, -4.24074, 3.60687e-05, 10.8244,
 block_color_group = 2
 
 [node name="BasicBlock10" parent="Room" instance=ExtResource("1_ujgwk")]
-transform = Transform3D(-0.000534947, 0.0210599, -16.6031, 3.6178e-05, 10.7627, 0.032487, 0.514849, -0.000734516, -0.0172535, -15.135, 2.10538, 34.9568)
+transform = Transform3D(-0.000534947, 0.0210599, -16.6031, 3.6178e-05, 10.7627, 0.032487, 0.514849, -0.000734516, -0.0172535, -15.135, 2.10538, 23.9025)
 block_color_group = 2
 
 [node name="CSGBox3D" type="CSGBox3D" parent="Room"]
@@ -354,6 +355,9 @@ block_color_group = 2
 [node name="wall_lamp_01" parent="Room" instance=ExtResource("5_2hejl")]
 transform = Transform3D(-1.31134e-10, 0, -0.003, 0, 0.003, 0, 0.003, 0, -1.31134e-10, -12.1926, 2.50351, 15)
 
+[node name="wall_lamp_02" parent="Room" instance=ExtResource("5_2hejl")]
+transform = Transform3D(-0.003, 0, 2.62268e-10, 0, 0.003, 0, -2.62268e-10, 0, -0.003, -13.3671, 2.50351, 23.633)
+
 [node name="wall_lamp_06" parent="Room" instance=ExtResource("5_2hejl")]
 transform = Transform3D(-0.003, 0, 2.62268e-10, 0, 0.003, 0, -2.62268e-10, 0, -0.003, -14.4086, 6.11058, 23.4193)
 
@@ -373,9 +377,36 @@ use_collision = true
 size = Vector3(0.549911, 4.13572, 4.574)
 
 [node name="CSGBox3D5" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.80611, 0.831219, 3.00068)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.49978, 0.831219, 2.55049)
 use_collision = true
-size = Vector3(2.54197, 1.69389, 4.89534)
+size = Vector3(2.49218, 1.69389, 4.89534)
+
+[node name="CSGBox3D12" type="CSGBox3D" parent="."]
+transform = Transform3D(-3.33514e-08, 0, -0.853552, 0, 0.896069, 0, 0.762991, 0, -3.731e-08, 0.392264, 0.812412, 8.61185)
+use_collision = true
+size = Vector3(2.49218, 1.69389, 4.89534)
+
+[node name="CSGBox3D13" type="CSGBox3D" parent="CSGBox3D12"]
+transform = Transform3D(0.897905, 0, -3.55271e-15, 0, 0.883175, 0, 0, 0, 1.13031, 0, 0, 0)
+operation = 2
+use_collision = true
+size = Vector3(2.49218, 1.69389, 4.89534)
+
+[node name="CSGBox3D14" type="CSGBox3D" parent="CSGBox3D12"]
+transform = Transform3D(1.20647, 0, -3.55271e-15, 0, 0.883175, 0, 0, 0, 0.963134, 0, 0, 0)
+operation = 2
+use_collision = true
+size = Vector3(2.49218, 1.69389, 4.89534)
+
+[node name="CSGBox3D10" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.1878, 0.831219, 4.15715)
+use_collision = true
+size = Vector3(2.49218, 1.69389, 12.6823)
+
+[node name="CSGBox3D11" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.1878, 3.77862, 4.15715)
+use_collision = true
+size = Vector3(2.49218, 1.69389, 12.6823)
 
 [node name="CSGBox3D6" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.22922, 0.831219, 2.71803)
@@ -387,3 +418,55 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.331898, 0.827112, 0)
 operation = 2
 use_collision = true
 size = Vector3(1.64225, 1.29331, 4.59659)
+
+[node name="CSGBox3D7" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.68346, 1.77029, 17.5283)
+use_collision = true
+size = Vector3(2.15267, 4.34341, 1)
+
+[node name="CSGBox3D8" type="CSGBox3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 2.50794, 1.7738, 19.9212)
+use_collision = true
+size = Vector3(4.20013, 4.34341, 0.491351)
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="CSGBox3D8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.245131, 0, 0.0381794)
+operation = 2
+size = Vector3(1.37264, 2.93833, 1)
+
+[node name="CSGBox3D9" type="CSGBox3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 5.42122, 1.7738, 19.9212)
+use_collision = true
+size = Vector3(4.98519, 4.34341, 0.491351)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="CSGBox3D9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.245131, 0, 0)
+operation = 2
+size = Vector3(1.37264, 2.93833, 1)
+
+[node name="CeilingLight" parent="." instance=ExtResource("10_oimnh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.35122, 3.86406, 20.0274)
+
+[node name="CeilingLight3" parent="." node_paths=PackedStringArray("nodesWithEmission") instance=ExtResource("10_oimnh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.81897, 3.86406, 20.0274)
+nodesWithEmission = [NodePath("../CeilingLight/CSGCylinder3D4"), NodePath("../CeilingLight/CSGCylinder3D2")]
+
+[node name="CeilingLight4" parent="." node_paths=PackedStringArray("nodesWithEmission") instance=ExtResource("10_oimnh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.17931, 7.2411, 14.6678)
+nodesWithEmission = [NodePath("../CeilingLight/CSGCylinder3D4"), NodePath("../CeilingLight/CSGCylinder3D2")]
+
+[node name="CeilingLight2" parent="." node_paths=PackedStringArray("nodesWithEmission") instance=ExtResource("10_oimnh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.02331, 3.86406, 7.85929)
+nodesWithEmission = [NodePath("../CeilingLight/CSGCylinder3D4"), NodePath("../CeilingLight/CSGCylinder3D2")]
+
+[node name="Room_LivingRoom" type="Area3D" parent="." groups=["rooms"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.12401, 2.29476, 3.86213)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room_LivingRoom"]
+shape = SubResource("BoxShape3D_hvrpw")
+
+[node name="Room_Kitchen" type="Area3D" parent="." groups=["rooms"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.86228, 1.65744, 5.10476)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room_Kitchen"]
+shape = SubResource("BoxShape3D_b58na")

@@ -88,4 +88,9 @@ func explode():
 	$Sparks.emitting = true
 	deathFrame = 0;
 	isDead = true
+
+func turnOff():
+	await get_tree().create_timer(rng.randf_range(1,2)).timeout
+	deathFrame = 0;
+	isDead = true
 	

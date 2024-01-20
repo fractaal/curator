@@ -1,0 +1,118 @@
+[gd_scene load_steps=11 format=3 uid="uid://cbnyfileu33e7"]
+
+[ext_resource type="Script" path="res://Scenes/GameLight.gd" id="1_joy05"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_olj7d"]
+emission_enabled = true
+emission = Color(1, 1, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ct417"]
+emission_enabled = true
+emission = Color(1, 1, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_senht"]
+emission_enabled = true
+emission = Color(1, 1, 0.176471, 1)
+emission_energy_multiplier = 20.68
+
+[sub_resource type="Gradient" id="Gradient_6narq"]
+offsets = PackedFloat32Array(0, 0.795053, 1)
+colors = PackedColorArray(1, 1, 0.854902, 1, 0.976563, 0.909067, 0.6616, 1, 0.648371, 0.510475, 0, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_1hfgu"]
+gradient = SubResource("Gradient_6narq")
+use_hdr = true
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_ikhhi"]
+lifetime_randomness = 0.9
+direction = Vector3(0, -1, 0)
+initial_velocity_min = 5.0
+initial_velocity_max = 10.0
+angular_velocity_min = 250.0
+angular_velocity_max = 500.0
+angle_min = -720.0
+angle_max = 720.0
+color_ramp = SubResource("GradientTexture1D_1hfgu")
+turbulence_enabled = true
+turbulence_noise_scale = 0.01
+turbulence_influence_min = 0.01
+collision_mode = 1
+collision_friction = 0.0
+collision_bounce = 0.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ge6xl"]
+transparency = 2
+alpha_scissor_threshold = 0.5
+alpha_antialiasing_mode = 0
+blend_mode = 1
+depth_draw_mode = 2
+shading_mode = 0
+vertex_color_use_as_albedo = true
+
+[sub_resource type="BoxMesh" id="BoxMesh_8k1vn"]
+material = SubResource("StandardMaterial3D_ge6xl")
+size = Vector3(0.015, 0.015, 0.015)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_c2myf"]
+
+[node name="CeilingLight" type="Node3D" node_paths=PackedStringArray("nodesWithEmission") groups=["lights"]]
+script = ExtResource("1_joy05")
+nodesWithEmission = [NodePath("CSGCylinder3D4"), NodePath("CSGCylinder3D2")]
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.264038, 0)
+height = 0.233093
+sides = 16
+
+[node name="CSGCylinder3D2" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.000795424, 0.218891, 0.00335073)
+radius = 0.420702
+height = 0.321534
+sides = 16
+cone = true
+material = SubResource("StandardMaterial3D_olj7d")
+
+[node name="CSGCylinder3D4" type="CSGCylinder3D" parent="."]
+transform = Transform3D(-1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0, 0, 1, -0.000795424, -0.102809, 0.00335073)
+radius = 0.420702
+height = 0.321534
+sides = 16
+cone = true
+material = SubResource("StandardMaterial3D_ct417")
+
+[node name="CSGCylinder3D3" type="CSGCylinder3D" parent="CSGCylinder3D4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000795424, 0.0451472, -0.00335073)
+operation = 2
+height = 0.233093
+sides = 16
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.103799, 0)
+light_size = 0.1
+shadow_enabled = true
+omni_range = 20.0
+omni_attenuation = 1.75
+
+[node name="Sparks" type="GPUParticles3D" parent="."]
+transform = Transform3D(0.98889, 0, 0, 0, 0.98889, 0, 0, 0, 0.98889, 0.0106502, -0.141026, -0.0068078)
+material_overlay = SubResource("StandardMaterial3D_senht")
+cast_shadow = 0
+gi_mode = 0
+emitting = false
+amount = 256
+lifetime = 2.0
+one_shot = true
+explosiveness = 1.0
+randomness = 1.0
+fixed_fps = 0
+interpolate = false
+fract_delta = false
+visibility_aabb = AABB(-2.5, -3.91, -2.5, 5, 4.185, 5)
+trail_lifetime = 1.0
+process_material = SubResource("ParticleProcessMaterial_ikhhi")
+draw_pass_1 = SubResource("BoxMesh_8k1vn")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("BoxShape3D_c2myf")

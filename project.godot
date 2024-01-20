@@ -83,6 +83,8 @@ FocusCommandLine={
 [rendering]
 
 lights_and_shadows/directional_shadow/size=8192
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality=4
+lights_and_shadows/positional_shadow/soft_shadow_filter_quality=4
 global_illumination/gi/use_half_resolution=true
 scaling_3d/mode=1
 scaling_3d/fsr_sharpness=1.0
