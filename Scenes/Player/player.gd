@@ -50,7 +50,7 @@ func _physics_process(delta):
 		velocity.y = JUMP_VELOCITY
 	# Handle Shooting
 	if Input.is_action_pressed("Shoot") and not hasFocusOnGui:
-		shoot()
+		interact()
 		
 	if Input.is_action_pressed("Sprint") and not hasFocusOnGui:
 		SPEED = 7.5
@@ -121,13 +121,21 @@ func _input(event):
 		mouse_relative_x = clamp(event.relative.x, -50, 50)
 		mouse_relative_y = clamp(event.relative.y, -50, 10)
 
-func shoot():
+func interact():
 	if not gunRay.is_colliding():
 		return
-	var bulletInst = _bullet_scene.instantiate() as Node3D
-	bulletInst.set_as_top_level(true)
-	get_parent().add_child(bulletInst)
-	bulletInst.global_transform.origin = gunRay.get_collision_point() as Vector3
-	bulletInst.look_at((gunRay.get_collision_point()+gunRay.get_collision_normal()),Vector3.BACK)
-	print(gunRay.get_collision_point())
-	print(gunRay.get_collision_point()+gunRay.get_collision_normal())
+	
+	var object: Node3D = gunRay.get_collider()
+
+	if object.get_name().to_lower().contains('door'):
+		object.toggle()
+	else:
+		print("unknown object to interact with (name ", object.get_name(), ")")
+
+	# var bulletInst = _bullet_scene.instantiate() as Node3D
+	# bulletInst.set_as_top_level(true)
+	# get_parent().add_child(bulletInst)
+	# bulletInst.global_transform.origin = gunRay.get_collision_point() as Vector3
+	# bulletInst.look_at((gunRay.get_collision_point()+gunRay.get_collision_normal()),Vector3.BACK)
+	# print(gunRay.get_collision_point())
+	# print(gunRay.get_collision_point()+gunRay.get_collision_normal())
