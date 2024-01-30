@@ -12,7 +12,7 @@ config_version=5
 
 config/name="ReasoningEngine"
 run/main_scene="res://levels/node_3d.tscn"
-config/features=PackedStringArray("4.1", "C#", "Forward Plus")
+config/features=PackedStringArray("4.2", "C#", "Forward Plus")
 
 [autoload]
 
@@ -23,6 +23,7 @@ Curator="*res://Curator/Curator.tscn"
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
+window/size/mode=3
 
 [dotnet]
 
@@ -82,14 +83,14 @@ FocusCommandLine={
 
 [rendering]
 
-lights_and_shadows/directional_shadow/size=8192
-lights_and_shadows/directional_shadow/soft_shadow_filter_quality=4
-lights_and_shadows/positional_shadow/soft_shadow_filter_quality=4
+driver/threads/thread_model=2
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality=0
+lights_and_shadows/positional_shadow/soft_shadow_filter_quality=0
 global_illumination/gi/use_half_resolution=true
-scaling_3d/mode=1
-scaling_3d/fsr_sharpness=1.0
+anti_aliasing/screen_space_roughness_limiter/enabled=false
+scaling_3d/mode=2
+scaling_3d/scale=0.25
+scaling_3d/fsr_sharpness=0.5
 global_illumination/sdfgi/probe_ray_count=3
 global_illumination/sdfgi/frames_to_converge=3
-anti_aliasing/quality/screen_space_aa=1
-lights_and_shadows/positional_shadow/atlas_size=8192
 anti_aliasing/canvas_textures/default_texture_repeat=1
