@@ -21,8 +21,8 @@ var rng = RandomNumberGenerator.new()
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	noise = FastNoiseLite.new()
-	rng.seed = position.x+position.y+position.z
-	noise.seed = position.x+position.y+position.z
+	rng.seed = position.x + position.y + position.z
+	noise.seed = position.x + position.y + position.z
 	lights = find_children("*", "Light3D")
 
 	for light in lights:
@@ -30,33 +30,6 @@ func _ready():
 
 	for node in nodesWithEmission:
 		defaultIntensities[node.name] = node.material.emission_energy_multiplier
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	if isFlickering:
-		hasSetBackToDefault = false
-		setEnergy(clamp(noise.get_noise_1d(Time.get_ticks_msec())+0.5, 0, 1))
-	elif isDead:
-		hasSetBackToDefault = false
-		if (deathFrame < 100):
-			var noiseMult = clamp(noise.get_noise_1d(Time.get_ticks_msec()) + 0.5, 0, 1)
-			deathFrame += 0.25
-			setEnergy((5/pow(deathFrame,2))*noiseMult)
-	elif isReviving:
-		hasSetBackToDefault = false
-		if (reviveFrame < 25):
-			reviveFrame += 0.5
-			var noiseMult = clamp(noise.get_noise_1d(Time.get_ticks_msec()) + 0.5, 0, 1)
-			setEnergy((reviveFrame**2.0/500) * noiseMult)
-		else:
-			isReviving = false
-
-
-	else:
-		if not hasSetBackToDefault:
-			hasSetBackToDefault = true
-			setEnergiesToDefault()
 
 func setEnergiesToDefault():
 	for light in lights:
@@ -69,28 +42,63 @@ func setEnergy(num):
 		light.light_energy = defaultIntensities[light.name] * num
 	for node in nodesWithEmission:
 		node.material.emission_energy_multiplier = defaultIntensities[node.name] * num
+
 		
 func restore():
 	await get_tree().create_timer(rng.randf_range(1,2)).timeout
-	isFlickering = false
-	isDead = false
-	reviveFrame = 0
-	isReviving = true
+
+	var tween = create_tween()
+
+	isFlickering = false;
+	isDead = false;
+	isReviving = true;
+
+	await tween.tween_method(_restoreStep, 0.0, 1.0, 1.0).finished;
+
+	setEnergiesToDefault();
+
+	isReviving = false
+
+func _restoreStep(progress: float):
+	var noiseMult = clamp(noise.get_noise_1d(Time.get_ticks_msec()) + 0.5, 0, 1)
+	setEnergy(pow(progress, 2) * noiseMult)
 
 func flicker():
+	var tween = create_tween()
+
 	await get_tree().create_timer(rng.randf_range(1,2)).timeout
+
 	isFlickering = true
-	await get_tree().create_timer(1.0).timeout
+
+	await tween.tween_method(_flickerStep, 0.0, 1.0, 1.0).finished;
+
 	isFlickering = false
-	
+
+	setEnergiesToDefault();
+
+func _flickerStep():
+	setEnergy(clamp(noise.get_noise_1d(Time.get_ticks_msec())+0.5, 0, 1))
+
+
 func explode():
 	await get_tree().create_timer(rng.randf_range(1,2)).timeout
 	$Sparks.emitting = true
-	deathFrame = 0;
+
+	var tween = create_tween()
+	await tween.tween_method(_explodeStep, 0, 1, 1).finished
+
 	isDead = true
 
+func _explodeStep(progress: float):
+	var noiseMult = clamp(noise.get_noise_1d(Time.get_ticks_msec() + 0.5), 0, 1)
+	setEnergy((1 - pow(progress, 2)) * noiseMult)
+
 func turnOff():
-	await get_tree().create_timer(rng.randf_range(1,2)).timeout
-	deathFrame = 0;
+	await get_tree().create_timer(rng.randf_range(1,2)).timeout;
+
+	var tween = create_tween()
+
+	await tween.tween_method(_explodeStep, 0, 1, 1).finished
+	 
 	isDead = true
 	
