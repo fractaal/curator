@@ -83,14 +83,13 @@ FocusCommandLine={
 
 [rendering]
 
-driver/threads/thread_model=2
 lights_and_shadows/directional_shadow/soft_shadow_filter_quality=0
 lights_and_shadows/positional_shadow/soft_shadow_filter_quality=0
 global_illumination/gi/use_half_resolution=true
 anti_aliasing/screen_space_roughness_limiter/enabled=false
 scaling_3d/mode=2
-scaling_3d/scale=0.25
-scaling_3d/fsr_sharpness=0.5
+scaling_3d/scale=0.75
+scaling_3d/fsr_sharpness=1.0
 global_illumination/sdfgi/probe_ray_count=3
 global_illumination/sdfgi/frames_to_converge=3
 anti_aliasing/canvas_textures/default_texture_repeat=1
