@@ -53,7 +53,7 @@ func restore():
 	isDead = false;
 	isReviving = true;
 
-	await tween.tween_method(_restoreStep, 0.0, 1.0, 1.0).finished;
+	await tween.tween_method(_restoreStep, 0.0, 1.0, 2.0).finished;
 
 	setEnergiesToDefault();
 
@@ -61,23 +61,24 @@ func restore():
 
 func _restoreStep(progress: float):
 	var noiseMult = clamp(noise.get_noise_1d(Time.get_ticks_msec()) + 0.5, 0, 1)
-	setEnergy(pow(progress, 2) * noiseMult)
+	var cleanProgress = pow(progress, 2)
+	setEnergy((cleanProgress * noiseMult * 0.75) + (cleanProgress * 0.25))
 
 func flicker():
-	var tween = create_tween()
-
 	await get_tree().create_timer(rng.randf_range(1,2)).timeout
+
+	var tween = create_tween()
 
 	isFlickering = true
 
-	await tween.tween_method(_flickerStep, 0.0, 1.0, 1.0).finished;
+	await tween.tween_method(_flickerStep, 0.0, 1.0, 2.0).finished
 
 	isFlickering = false
 
 	setEnergiesToDefault();
 
 func _flickerStep():
-	setEnergy(clamp(noise.get_noise_1d(Time.get_ticks_msec())+0.5, 0, 1))
+	setEnergy(clamp(noise.get_noise_1d(Time.get_ticks_msec()), 0, 1))
 
 
 func explode():
@@ -85,20 +86,26 @@ func explode():
 	$Sparks.emitting = true
 
 	var tween = create_tween()
-	await tween.tween_method(_explodeStep, 0, 1, 1).finished
+	await tween.tween_method(_explodeStep, 0.0, 1.0, 2.0).finished
+
+	setEnergy(0.0)
 
 	isDead = true
 
 func _explodeStep(progress: float):
 	var noiseMult = clamp(noise.get_noise_1d(Time.get_ticks_msec() + 0.5), 0, 1)
-	setEnergy((1 - pow(progress, 2)) * noiseMult)
-
+	var cleanEnergy = 1 / pow(10 * progress, 2.5)
+	print(cleanEnergy)
+	setEnergy((cleanEnergy * noiseMult * 0.75) + (cleanEnergy * 0.25))
+ 
 func turnOff():
 	await get_tree().create_timer(rng.randf_range(1,2)).timeout;
 
 	var tween = create_tween()
 
-	await tween.tween_method(_explodeStep, 0, 1, 1).finished
+	await tween.tween_method(_explodeStep, 0.0, 1.0, 2.0).finished
+
+	setEnergy(0.0)
 	 
 	isDead = true
 	
