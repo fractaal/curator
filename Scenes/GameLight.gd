@@ -95,7 +95,6 @@ func explode():
 func _explodeStep(progress: float):
 	var noiseMult = clamp(noise.get_noise_1d(Time.get_ticks_msec() + 0.5), 0, 1)
 	var cleanEnergy = 1 / pow(10 * progress, 2.5)
-	print(cleanEnergy)
 	setEnergy((cleanEnergy * noiseMult * 0.75) + (cleanEnergy * 0.25))
  
 func turnOff():
