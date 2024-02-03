@@ -1,0 +1,26 @@
+[gd_scene load_steps=2 format=3 uid="uid://cqjjtoijg6ify"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qx8rl"]
+albedo_color = Color(0.254902, 0.254902, 0.254902, 1)
+
+[node name="Radio" type="Node3D"]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.154353, 0)
+size = Vector3(0.25, 0.3, 1)
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="CSGBox3D"]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0.017869, 0, 0.32206)
+radius = 0.103
+height = 0.278
+material = SubResource("StandardMaterial3D_qx8rl")
+
+[node name="CSGCylinder3D2" type="CSGCylinder3D" parent="CSGBox3D"]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0.017869, 0, -0.340775)
+radius = 0.103
+height = 0.278
+material = SubResource("StandardMaterial3D_qx8rl")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="CSGBox3D"]
+transform = Transform3D(1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, 0, 0.259275, 0)
+size = Vector3(0.1, 0.1, 1)
