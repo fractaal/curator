@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://ctahsvj88g1om"]
+[gd_scene load_steps=24 format=3 uid="uid://ctahsvj88g1om"]
 
 [ext_resource type="Script" path="res://levels/node_3d.gd" id="1_7plsp"]
 [ext_resource type="PackedScene" uid="uid://7gv6q50fuutj" path="res://Scenes/Player/player.tscn" id="1_eisjc"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://c5nn4hpuwrtes" path="res://Scenes/FloorLamp.tscn" id="8_50qpy"]
 [ext_resource type="PackedScene" uid="uid://bbhrmf5ph6a17" path="res://Scenes/Ghost.tscn" id="9_1ok4b"]
 [ext_resource type="PackedScene" uid="uid://cbnyfileu33e7" path="res://Scenes/CeilingLight.tscn" id="10_oimnh"]
+[ext_resource type="Script" path="res://DeclarativeGameInterface/LLMInterface.cs" id="12_pwmoc"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6g5uc"]
 sky_energy_multiplier = 0.76
@@ -474,3 +475,20 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.86228, 1.65744, 5.10476)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Room_Kitchen"]
 shape = SubResource("BoxShape3D_b58na")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -519.0
+offset_top = 18.0
+offset_right = -19.0
+offset_bottom = 718.0
+grow_horizontal = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
+layout_mode = 2
+
+[node name="LLMInterface" type="Node3D" parent="." node_paths=PackedStringArray("DebugUIContainer")]
+script = ExtResource("12_pwmoc")
+DebugUIContainer = NodePath("../ScrollContainer/VBoxContainer")
