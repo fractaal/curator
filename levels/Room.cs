@@ -3,7 +3,7 @@ using Godot;
 
 public partial class Room : Area3D
 {
-    private int i = 0;
+    private static int i = 0;
 
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
@@ -13,7 +13,17 @@ public partial class Room : Area3D
         {
             if (body.GetMeta("isPlayer").AsBool() == true)
             {
-                GD.Print("player now entered ", Name);
+                i++;
+                LogManager.UpdateLog("roomEvent" + i, "Player entered " + Name);
+            }
+        };
+
+        BodyExited += (body) =>
+        {
+            if (body.GetMeta("isPlayer").AsBool() == true)
+            {
+                i++;
+                LogManager.UpdateLog("roomEvent" + i, "Player exited " + Name);
             }
         };
     }
