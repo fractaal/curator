@@ -1,10 +1,10 @@
 extends Node3D
 
 var lights = []
-@export var nodesWithEmission : Array[Node3D] = []
+@export var nodesWithEmission: Array[Node3D] = []
 
 var defaultIntensities = {}
-var noise : FastNoiseLite
+var noise: FastNoiseLite
 
 # States of the light
 var hasSetBackToDefault = false
@@ -35,17 +35,16 @@ func setEnergiesToDefault():
 	for light in lights:
 		light.light_energy = defaultIntensities[light.name]
 	for node in nodesWithEmission:
-		node.material.emission_energy_multiplier = defaultIntensities[node.name] 
+		node.material.emission_energy_multiplier = defaultIntensities[node.name]
 
 func setEnergy(num):
 	for light in lights:
 		light.light_energy = defaultIntensities[light.name] * num
 	for node in nodesWithEmission:
 		node.material.emission_energy_multiplier = defaultIntensities[node.name] * num
-
 		
 func restore():
-	await get_tree().create_timer(rng.randf_range(1,2)).timeout
+	await get_tree().create_timer(rng.randf_range(1, 2)).timeout
 
 	var tween = create_tween()
 
@@ -65,24 +64,23 @@ func _restoreStep(progress: float):
 	setEnergy((cleanProgress * noiseMult * 0.75) + (cleanProgress * 0.25))
 
 func flicker():
-	await get_tree().create_timer(rng.randf_range(1,2)).timeout
+	await get_tree().create_timer(rng.randf_range(1, 2)).timeout
 
 	var tween = create_tween()
 
 	isFlickering = true
 
-	await tween.tween_method(_flickerStep, 0.0, 1.0, 2.0).finished
+	await tween.tween_method(_flickerStep, 0.0, 1.0, randf_range(0.75, 1.5)).finished
 
 	isFlickering = false
 
 	setEnergiesToDefault();
 
-func _flickerStep():
+func _flickerStep(_step: float):
 	setEnergy(clamp(noise.get_noise_1d(Time.get_ticks_msec()), 0, 1))
 
-
 func explode():
-	await get_tree().create_timer(rng.randf_range(1,2)).timeout
+	await get_tree().create_timer(rng.randf_range(1, 2)).timeout
 	$Sparks.emitting = true
 
 	var tween = create_tween()
@@ -98,7 +96,7 @@ func _explodeStep(progress: float):
 	setEnergy((cleanEnergy * noiseMult * 0.75) + (cleanEnergy * 0.25))
  
 func turnOff():
-	await get_tree().create_timer(rng.randf_range(1,2)).timeout;
+	await get_tree().create_timer(rng.randf_range(1, 2)).timeout;
 
 	var tween = create_tween()
 
@@ -107,4 +105,3 @@ func turnOff():
 	setEnergy(0.0)
 	 
 	isDead = true
-	
