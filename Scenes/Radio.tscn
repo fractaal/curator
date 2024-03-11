@@ -1,9 +1,13 @@
-[gd_scene load_steps=2 format=3 uid="uid://cqjjtoijg6ify"]
+[gd_scene load_steps=3 format=3 uid="uid://cqjjtoijg6ify"]
+
+[ext_resource type="Script" path="res://Scenes/Radio.gd" id="1_yfkqg"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qx8rl"]
 albedo_color = Color(0.254902, 0.254902, 0.254902, 1)
 
-[node name="Radio" type="Node3D"]
+[node name="Radio" type="Node3D" node_paths=PackedStringArray("statusLabel")]
+script = ExtResource("1_yfkqg")
+statusLabel = NodePath("Label3D")
 
 [node name="CSGBox3D" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.154353, 0)
@@ -24,3 +28,8 @@ material = SubResource("StandardMaterial3D_qx8rl")
 [node name="CSGBox3D" type="CSGBox3D" parent="CSGBox3D"]
 transform = Transform3D(1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, 0, 0.259275, 0)
 size = Vector3(0.1, 0.1, 1)
+
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.636404, 0)
+billboard = 1
+text = "[RADIO STATUS]"
