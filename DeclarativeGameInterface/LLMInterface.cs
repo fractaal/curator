@@ -18,14 +18,14 @@ public partial class LLMInterface : Node
     private readonly string API_KEY =
         "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";
 
-    private readonly string MODEL = "mistralai/mistral-medium";
+    private readonly string MODEL = "google/gemma-7b-it:free";
 
     // List to store the conversation context
     private List<object> _messages = new List<object>();
     private Dictionary<string, RichTextLabel> logs = new Dictionary<string, RichTextLabel>();
 
-    public event Action<string, string> LogUpdated;
-    public event Action<string> LLMResponseChunk;
+    public static event Action<string, string> LogUpdated;
+    public static event Action<string> LLMResponseChunk;
 
     private void _onLogUpdated(string id, string message)
     {
