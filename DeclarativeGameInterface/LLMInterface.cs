@@ -22,54 +22,26 @@ public partial class LLMInterface : Node
 
     // List to store the conversation context
     private List<object> _messages = new List<object>();
-    private Dictionary<string, RichTextLabel> logs = new Dictionary<string, RichTextLabel>();
 
     public static event Action<string, string> LogUpdated;
     public static event Action<string> LLMResponseChunk;
-
-    private void _onLogUpdated(string id, string message)
-    {
-        RichTextLabel label;
-
-        if (!logs.ContainsKey(id))
-        {
-            label = GetLogUIElement();
-            logs.Add(id, label);
-        }
-
-        label = logs[id];
-        label.Text = message;
-    }
 
     public LLMInterface()
     {
         _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + API_KEY);
         _client.DefaultRequestHeaders.Add("X-Title", "Curator");
 
-        LogUpdated += (id, message) =>
-        {
-            CallDeferred(nameof(_onLogUpdated), id, message);
-        };
-    }
-
-    private RichTextLabel GetLogUIElement()
-    {
-        var label = new RichTextLabel();
-
-        DebugUIContainer.AddChild(label);
-
-        label.CustomMinimumSize = new Vector2(500, 0);
-        label.BbcodeEnabled = true;
-        label.FitContent = true;
-
-        return label;
+        // LogUpdated += (id, message) =>
+        // {
+        //     CallDeferred(nameof(_onLogUpdated), id, message);
+        // };
     }
 
     private void _ready()
     {
         Send("Respond with the 'the quick brown fox' test message 5 times, if understood");
 
-        LogUpdated.Invoke("start", "[color=\"0000FF\"]Using model [b]" + MODEL + "[/b][/color]");
+        LogManager.UpdateLog("start", "[color=\"0000FF\"]Using model [b]" + MODEL + "[/b][/color]");
     }
 
     public void Send(string message)
@@ -88,9 +60,9 @@ public partial class LLMInterface : Node
     {
         var id = _messages.Count.ToString();
 
-        LogUpdated?.Invoke(id + "game", "[b]GAME:[/b] " + message);
+        LogManager.UpdateLog(id + "game", "[b]GAME:[/b] " + message);
 
-        LogUpdated?.Invoke(
+        LogManager.UpdateLog(
             id + "response",
             "[color=\"#FFA500\"]- WAITING FOR LLM RESPONSE -[/color]"
         );
@@ -118,7 +90,7 @@ public partial class LLMInterface : Node
                 {
                     string uiOut = "[color=\"00FF00\"][b]LLM RESPONSE:[/b][/color] ";
 
-                    LogUpdated?.Invoke(id + "response", uiOut);
+                    LogManager.UpdateLog(id + "response", uiOut);
 
                     while (!reader.EndOfStream)
                     {
@@ -164,12 +136,12 @@ public partial class LLMInterface : Node
                         }
 
                         LLMResponseChunk?.Invoke(chunk);
-                        LogUpdated?.Invoke(id + "response", uiOut);
+                        LogManager.UpdateLog(id + "response", uiOut);
                     }
 
                     // Add the response to the context
                     _messages.Add(new { role = "assistant", content = uiOut });
-                    LogUpdated?.Invoke(
+                    LogManager.UpdateLog(
                         id + "addedToContext",
                         "[b][color=\"#FF0000\"]<ADDED TO LOCAL CONTEXT.>[/color][/b] "
                     );
