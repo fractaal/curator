@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://ctahsvj88g1om"]
+[gd_scene load_steps=27 format=3 uid="uid://ctahsvj88g1om"]
 
 [ext_resource type="Script" path="res://levels/node_3d.gd" id="1_7plsp"]
 [ext_resource type="PackedScene" uid="uid://7gv6q50fuutj" path="res://Scenes/Player/player.tscn" id="1_eisjc"]
@@ -14,6 +14,7 @@
 [ext_resource type="Script" path="res://levels/Room.cs" id="12_kaqth"]
 [ext_resource type="Script" path="res://DeclarativeGameInterface/LLMInterface.cs" id="12_pwmoc"]
 [ext_resource type="PackedScene" uid="uid://cqjjtoijg6ify" path="res://Scenes/Radio.tscn" id="13_excoj"]
+[ext_resource type="Script" path="res://Scripts/LogManager.cs" id="15_lxp6w"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6g5uc"]
 sky_energy_multiplier = 0.76
@@ -496,3 +497,7 @@ DebugUIContainer = NodePath("../ScrollContainer/VBoxContainer")
 
 [node name="Radio" parent="." instance=ExtResource("13_excoj")]
 transform = Transform3D(-0.910749, 0, -0.412961, 0, 1, 0, 0.412961, 0, -0.910749, 6.38972, 1.67816, 4.11441)
+
+[node name="LogManager" type="Node" parent="." node_paths=PackedStringArray("LogUIContainer")]
+script = ExtResource("15_lxp6w")
+LogUIContainer = NodePath("../ScrollContainer/VBoxContainer")
