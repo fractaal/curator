@@ -2,7 +2,7 @@ extends CharacterBody3D
 
 @onready var gunRay = $Head/Camera3d/RayCast3d as RayCast3D
 @onready var Cam = $Head/Camera3d as Camera3D
-@export var _bullet_scene : PackedScene
+@export var _bullet_scene: PackedScene
 var mouseSensibility = 1200
 var mouse_relative_x = 0
 var mouse_relative_y = 0
@@ -34,7 +34,7 @@ var hasFocusOnGui = false
 func _ready():
 	#Captures mouse and stops rgun from hitting yourself
 	gunRay.add_exception(self)
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED	
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _physics_process(delta):
 	hasFocusOnGui = true if get_viewport().gui_get_focus_owner() != null else false
@@ -63,7 +63,6 @@ func _physics_process(delta):
 		isFlashlightOn = !isFlashlightOn
 		
 		$SpotLight3D.spot_range = 100 if isFlashlightOn else 0
-
 	
 	# Add the gravity.
 	if not is_on_floor():
@@ -79,14 +78,12 @@ func _physics_process(delta):
 	else:
 		target_velocity.x = move_toward(velocity.x, 0, 0.3)
 		target_velocity.z = move_toward(velocity.z, 0, 0.3)
-
 	
 	$Head/Camera3d.position.y = 0.845 + sin(Time.get_ticks_msec() * (0.015 if isRunning else 0.01)) * velocity.length() * 0.01
 	
-	
 	var targetHeadTiltUp = (-input_dir.y if is_on_floor() else 1) * velocity.length() * 0.015
 	var targetHeadTiltSide = -input_dir.x * velocity.length() * 0.025
-	var maxTilt = PI/6  # Maximum tilt angle in radians (30 degrees here)
+	var maxTilt = PI / 6 # Maximum tilt angle in radians (30 degrees here)
 
 	# Clamp the target tilt to the maximum allowed tilt
 	targetHeadTiltUp = clamp(targetHeadTiltUp, -maxTilt, maxTilt)
@@ -117,7 +114,7 @@ func _input(event):
 	if event is InputEventMouseMotion:
 		rotation.y -= event.relative.x / mouseSensibility
 		$Head/Camera3d.rotation.x -= event.relative.y / mouseSensibility
-		$Head/Camera3d.rotation.x = clamp($Head/Camera3d.rotation.x, deg_to_rad(-90), deg_to_rad(90) )
+		$Head/Camera3d.rotation.x = clamp($Head/Camera3d.rotation.x, deg_to_rad( - 90), deg_to_rad(90))
 		mouse_relative_x = clamp(event.relative.x, -50, 50)
 		mouse_relative_y = clamp(event.relative.y, -50, 10)
 
