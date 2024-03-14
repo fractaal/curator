@@ -5,6 +5,9 @@ public partial class Room : Area3D
 {
     private static int i = 0;
 
+    public static event Action<Room, Node3D> RoomEntered;
+    public static event Action<Room, Node3D> RoomExited;
+
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
@@ -14,7 +17,8 @@ public partial class Room : Area3D
             if (body.GetMeta("isPlayer").AsBool() == true)
             {
                 i++;
-                LogManager.UpdateLog("roomEvent" + i, "Player entered " + Name);
+                // LogManager.UpdateLog("roomEvent" + i, "Player entered " + Name);
+                RoomEntered?.Invoke(this, body);
             }
         };
 
@@ -23,7 +27,8 @@ public partial class Room : Area3D
             if (body.GetMeta("isPlayer").AsBool() == true)
             {
                 i++;
-                LogManager.UpdateLog("roomEvent" + i, "Player exited " + Name);
+                // LogManager.UpdateLog("roomEvent" + i, "Player exited " + Name);
+                RoomExited?.Invoke(this, body);
             }
         };
     }
