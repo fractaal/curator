@@ -39,9 +39,10 @@ public partial class Interpreter : Node
         {
             var recognizedCommands = new List<Command>();
 
-            foreach (string match in matches)
+            foreach (Match match in matches)
             {
-                var separatedString = match.Split("(");
+                var value = match.Value;
+                var separatedString = value.Split("(");
                 var verb = separatedString[0];
 
                 var argumentString = separatedString[1].Substring(0, separatedString[1].Length - 1);
@@ -66,10 +67,10 @@ public partial class Interpreter : Node
     {
         List<Command> commands = Parse(chunk);
 
+        GD.Print(commands.Count, " recognized from chunk ", chunk);
+
         foreach (Command command in commands)
         {
-            GD.Print(command.Verb);
-
             var searchSpace = getObjectSearchSpace(command.Arguments);
 
             string prefix = null;
@@ -79,9 +80,7 @@ public partial class Interpreter : Node
                 prefix = objectInteractionVerbPrefixes.First(prefix =>
                 {
                     var result = command.Verb.Contains(prefix);
-
                     GD.Print("Object interaction prefix detected (", command.Verb, ")");
-
                     return result;
                 });
             }
@@ -100,37 +99,6 @@ public partial class Interpreter : Node
                 }
             }
         }
-        // foreach (AbstractSyntaxTreeNode node in ast)
-        // {
-        //     GD.Print(node.verb);
-
-        //     var searchSpace = getObjectSearchSpace(node.arguments);
-
-        //     string prefix = null;
-
-        //     try
-        //     {
-        //         prefix = objectInteractionVerbPrefixes.First(p =>
-        //         {
-        //             var res = node.verb.Contains(p);
-        //             GD.Print(node.verb, " contains ", p, "? - ", res);
-        //             return res;
-        //         });
-        //     }
-        //     catch (Exception e)
-        //     {
-        //         GD.Print(node.verb, " did not have a valid object interaction verb prefix");
-        //     }
-
-        //     if (prefix != null)
-        //     {
-        //         GD.Print("was object interaction command!");
-        //         foreach (Node3D n in searchSpace)
-        //         {
-        //             n.Call(prefix);
-        //         }
-        //     }
-        // }
     }
 
     private List<Node3D> getObjectSearchSpace(List<string> arguments)
@@ -149,10 +117,8 @@ public partial class Interpreter : Node
         if (roomName == null)
         {
             List<Node3D> nodes = new();
-
             nodes.AddRange(lights);
             nodes.AddRange(tvs);
-
             return nodes;
         }
 
