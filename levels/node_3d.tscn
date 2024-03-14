@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://ctahsvj88g1om"]
+[gd_scene load_steps=28 format=3 uid="uid://ctahsvj88g1om"]
 
 [ext_resource type="Script" path="res://levels/node_3d.gd" id="1_7plsp"]
 [ext_resource type="PackedScene" uid="uid://7gv6q50fuutj" path="res://Scenes/Player/player.tscn" id="1_eisjc"]
@@ -15,6 +15,7 @@
 [ext_resource type="Script" path="res://DeclarativeGameInterface/LLMInterface.cs" id="12_pwmoc"]
 [ext_resource type="PackedScene" uid="uid://cqjjtoijg6ify" path="res://Scenes/Radio.tscn" id="13_excoj"]
 [ext_resource type="Script" path="res://Scripts/LogManager.cs" id="15_lxp6w"]
+[ext_resource type="Script" path="res://DeclarativeGameInterface/Sensors.cs" id="16_73gw5"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6g5uc"]
 sky_energy_multiplier = 0.76
@@ -478,7 +479,14 @@ script = ExtResource("12_kaqth")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Room_Kitchen"]
 shape = SubResource("BoxShape3D_b58na")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="."]
+[node name="SensorsDebug" type="RichTextLabel" parent="."]
+offset_left = 45.0
+offset_top = 101.0
+offset_right = 538.0
+offset_bottom = 1056.0
+bbcode_enabled = true
+
+[node name="GameLog" type="ScrollContainer" parent="."]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -488,16 +496,20 @@ offset_right = -19.0
 offset_bottom = 718.0
 grow_horizontal = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="GameLog"]
 layout_mode = 2
 
 [node name="LLMInterface" type="Node3D" parent="." node_paths=PackedStringArray("DebugUIContainer")]
 script = ExtResource("12_pwmoc")
-DebugUIContainer = NodePath("../ScrollContainer/VBoxContainer")
+DebugUIContainer = NodePath("../GameLog/VBoxContainer")
 
 [node name="Radio" parent="." instance=ExtResource("13_excoj")]
 transform = Transform3D(-0.910749, 0, -0.412961, 0, 1, 0, 0.412961, 0, -0.910749, 6.38972, 1.67816, 4.11441)
 
 [node name="LogManager" type="Node" parent="." node_paths=PackedStringArray("LogUIContainer")]
 script = ExtResource("15_lxp6w")
-LogUIContainer = NodePath("../ScrollContainer/VBoxContainer")
+LogUIContainer = NodePath("../GameLog/VBoxContainer")
+
+[node name="Sensors" type="Node" parent="." node_paths=PackedStringArray("DebugView")]
+script = ExtResource("16_73gw5")
+DebugView = NodePath("../SensorsDebug")
