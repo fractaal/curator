@@ -33,7 +33,16 @@ public partial class Interpreter : Node
         // Matches stuff like verb(), verb(arg1), verb(arg1, arg2)...
         var pattern = @"\w+\((\w+)?(,\s*\w+)?\)";
 
-        var matches = Regex.Matches(chunk, pattern);
+        var preMatches = Regex.Matches(accumulatedText, pattern);
+        if (preMatches.Count() > 0)
+        {
+            accumulatedText = accumulatedText.Substring(preMatches[0].Index + preMatches[0].Length);
+            accumulatedText = Regex.Replace(accumulatedText, pattern, "");
+        }
+
+        accumulatedText += chunk;
+
+        var matches = Regex.Matches(accumulatedText, pattern);
 
         if (matches.Count() > 0)
         {
@@ -58,16 +67,31 @@ public partial class Interpreter : Node
         }
         else
         {
-            accumulatedText += chunk;
             return new() { };
         }
     }
+
+    private int countRecognized = 0;
 
     public void Interpret(string chunk)
     {
         List<Command> commands = Parse(chunk);
 
-        GD.Print(commands.Count, " recognized from chunk ", chunk);
+        var pattern = @"\w+\((\w+)?(,\s*\w+)?\)";
+
+        var newlineToSpaceString = Regex.Replace(accumulatedText, @"(\r\n|\n)", " ");
+        var highlightedMatchesString = Regex.Replace(
+            newlineToSpaceString,
+            pattern,
+            match => $"[b][color=#00ff00]{match.Value}[/color][/b]"
+        );
+
+        LogManager.UpdateLog("recognized" + countRecognized, highlightedMatchesString);
+
+        if (commands.Count > 0)
+        {
+            countRecognized++;
+        }
 
         foreach (Command command in commands)
         {
