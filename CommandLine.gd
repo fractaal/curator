@@ -1,4 +1,4 @@
-extends LineEdit
+extends TextEdit
 
 var LogManager = load("res://Scripts/LogManager.cs");
 
