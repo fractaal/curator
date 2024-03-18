@@ -262,6 +262,14 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.49568, 0.5, -0.359735)
 [node name="Ghost" parent="." instance=ExtResource("9_1ok4b")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.0523, 0.5, 6.84054)
 
+[node name="TextEdit" type="TextEdit" parent="."]
+offset_left = 40.0
+offset_top = 103.0
+offset_right = 540.0
+offset_bottom = 219.0
+placeholder_text = "Command Here"
+script = ExtResource("6_l450q")
+
 [node name="LineEdit" type="LineEdit" parent="."]
 offset_left = 40.0
 offset_top = 40.0
@@ -271,7 +279,6 @@ theme_override_fonts/font = SubResource("SystemFont_mjdyf")
 theme_override_font_sizes/font_size = 24
 placeholder_text = "Command Here"
 caret_blink = true
-script = ExtResource("6_l450q")
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
 anchors_preset = 1
@@ -481,9 +488,9 @@ shape = SubResource("BoxShape3D_b58na")
 
 [node name="SensorsDebug" type="RichTextLabel" parent="."]
 offset_left = 45.0
-offset_top = 101.0
+offset_top = 248.0
 offset_right = 538.0
-offset_bottom = 1056.0
+offset_bottom = 1203.0
 bbcode_enabled = true
 
 [node name="GameLog" type="ScrollContainer" parent="."]
