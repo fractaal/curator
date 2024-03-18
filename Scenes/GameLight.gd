@@ -44,7 +44,6 @@ func setEnergy(num):
 		node.material.emission_energy_multiplier = defaultIntensities[node.name] * num
 		
 func restore():
-	await get_tree().create_timer(rng.randf_range(1, 2)).timeout
 
 	var tween = create_tween()
 
@@ -64,7 +63,7 @@ func _restoreStep(progress: float):
 	setEnergy((cleanProgress * noiseMult * 0.75) + (cleanProgress * 0.25))
 
 func flicker():
-	await get_tree().create_timer(rng.randf_range(1, 2)).timeout
+	# await get_tree().create_timer(rng.randf_range(1, 2)).timeout
 
 	var tween = create_tween()
 
@@ -80,7 +79,7 @@ func _flickerStep(_step: float):
 	setEnergy(clamp(noise.get_noise_1d(Time.get_ticks_msec()), 0, 1))
 
 func explode():
-	await get_tree().create_timer(rng.randf_range(1, 2)).timeout
+	# await get_tree().create_timer(rng.randf_range(1, 2)).timeout
 	$Sparks.emitting = true
 
 	var tween = create_tween()
@@ -96,7 +95,7 @@ func _explodeStep(progress: float):
 	setEnergy((cleanEnergy * noiseMult * 0.75) + (cleanEnergy * 0.25))
  
 func turnOff():
-	await get_tree().create_timer(rng.randf_range(1, 2)).timeout;
+	# await get_tree().create_timer(rng.randf_range(1, 2)).timeout;
 
 	var tween = create_tween()
 
