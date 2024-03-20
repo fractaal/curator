@@ -16,7 +16,6 @@ config/features=PackedStringArray("4.2", "C#", "Forward Plus")
 
 [autoload]
 
-Settings="res://Global/Settings.gd"
 Curator="*res://Curator/Curator.tscn"
 
 [display]
