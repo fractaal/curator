@@ -7,7 +7,7 @@ var SPEED = 3.252
 
 var last_location = Vector3()
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	
 	var current_location = global_transform.origin
 	var next_location = nav_agent.get_next_path_position()
