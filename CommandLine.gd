@@ -15,29 +15,26 @@ func _input(event):
 		release_focus()
 
 		for chunk in tokenized:
-			if (randf_range(0, 1) < 0.9):
-				await get_tree().create_timer(randf_range(0.025, 0.25)).timeout
-			else:
-				await get_tree().create_timer(randf_range(0.5, 1)).timeout
+			await get_tree().create_timer(randf_range(0.025, 0.25)).timeout
 
 			Curator.Interpret(chunk)
 
-func fakeTokenize(text):
+func fakeTokenize(_text):
 
 	var currentLength = 0
-	var maxLength = text.length()
+	var maxLength = _text.length()
 
 	var tokenized = []
 
 	while (currentLength < maxLength):
 		var interval = randi_range(2, 4)
 		var start = currentLength
-		tokenized.append(text.substr(start, interval))
+		tokenized.append(_text.substr(start, interval))
 		currentLength += interval
 	
 	return tokenized
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
+func _process(_delta):
 	if Input.is_action_just_pressed("FocusCommandLine"):
 		grab_focus()
