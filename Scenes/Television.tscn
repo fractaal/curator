@@ -27,13 +27,13 @@ use_hdr = true
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_5cusx"]
 lifetime_randomness = 0.9
+angle_min = -720.0
+angle_max = 720.0
 direction = Vector3(5, 2.08165e-12, 2.08165e-12)
 initial_velocity_min = 5.0
 initial_velocity_max = 15.0
 angular_velocity_min = 250.0
 angular_velocity_max = 500.0
-angle_min = -720.0
-angle_max = 720.0
 color_ramp = SubResource("GradientTexture1D_gb1wu")
 turbulence_enabled = true
 turbulence_noise_scale = 0.01
