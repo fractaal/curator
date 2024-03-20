@@ -31,7 +31,7 @@ public partial class Interpreter : Node
     public List<Command> Parse(string chunk)
     {
         // Matches stuff like verb(), verb(arg1), verb(arg1, arg2)...
-        var pattern = @"\w+\((\w+)?(,\s*\w+)?\)";
+        var pattern = @"\w+\([^)]*\)";
 
         var preMatches = Regex.Matches(accumulatedText, pattern);
         if (preMatches.Count() > 0)
@@ -77,7 +77,7 @@ public partial class Interpreter : Node
     {
         List<Command> commands = Parse(chunk);
 
-        var pattern = @"\w+\((\w+)?(,\s*\w+)?\)";
+        var pattern = @"\w+\([^)]*\)";
 
         var newlineToSpaceString = Regex.Replace(accumulatedText, @"(\r\n|\n)", " ");
         var highlightedMatchesString = Regex.Replace(
