@@ -14,7 +14,7 @@ public partial class Room : Area3D
         Monitoring = true;
         BodyEntered += (body) =>
         {
-            if (body.GetMeta("isPlayer").AsBool() == true)
+            if (body.HasMeta("isPlayer") && body.GetMeta("isPlayer").AsBool() == true)
             {
                 i++;
                 // LogManager.UpdateLog("roomEvent" + i, "Player entered " + Name);
@@ -24,12 +24,16 @@ public partial class Room : Area3D
 
         BodyExited += (body) =>
         {
-            if (body.GetMeta("isPlayer").AsBool() == true)
+            try
             {
-                i++;
-                // LogManager.UpdateLog("roomEvent" + i, "Player exited " + Name);
-                RoomExited?.Invoke(this, body);
+                if (body.HasMeta("isPlayer") && body.GetMeta("isPlayer").AsBool() == true)
+                {
+                    i++;
+                    // LogManager.UpdateLog("roomEvent" + i, "Player exited " + Name);
+                    RoomExited?.Invoke(this, body);
+                }
             }
+            catch (Exception) { }
         };
     }
 
