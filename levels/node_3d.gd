@@ -4,8 +4,8 @@ extends Node3D
 @onready var rng = RandomNumberGenerator.new()
 
 func _ready():
-
-	var lastCommand;
+	pass
+	# var lastCommand;
 
 	# while true:
 	# 	await get_tree().create_timer(rng.randf_range(2,5)).timeout
