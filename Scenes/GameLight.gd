@@ -18,6 +18,10 @@ var reviveFrame = 0
 
 var rng = RandomNumberGenerator.new()
 
+var room = "";
+
+var debugLabel: Label3D
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	noise = FastNoiseLite.new()
@@ -25,11 +29,41 @@ func _ready():
 	noise.seed = position.x + position.y + position.z
 	lights = find_children("*", "Light3D")
 
+	debugLabel = Label3D.new()
+	debugLabel.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	debugLabel.no_depth_test = true
+
+	get_tree().get_root().add_child.call_deferred(debugLabel)
+	debugLabel.position = global_position
+
 	for light in lights:
 		defaultIntensities[light.name] = light.light_energy
 
 	for node in nodesWithEmission:
 		defaultIntensities[node.name] = node.material.emission_energy_multiplier
+
+	var bodies = find_children("*", "CollisionObject3D", true)
+	var body: CollisionObject3D
+
+	if bodies.size() > 0:
+		body = bodies[0]
+	else:
+		debugLabel.text = "cannot determine room"
+		return
+
+	debugLabel.text = "not in a room"
+	
+	# Figure out what room I'm in
+	await get_tree().create_timer(1).timeout
+	var rooms = get_tree().get_nodes_in_group("rooms")
+	for _room in rooms:
+		var nodes = _room.get_overlapping_bodies()
+		for node in nodes:
+			print("i am ", body.name, " while they are ", node.name)
+			if node == body:
+				room = _room.name
+				print(body.name, " has found the room it's in (", room, ")")
+				debugLabel.text = _room.name
 
 func setEnergiesToDefault():
 	for light in lights:
@@ -44,17 +78,12 @@ func setEnergy(num):
 		node.material.emission_energy_multiplier = defaultIntensities[node.name] * num
 		
 func restore():
-
 	var tween = create_tween()
-
 	isFlickering = false;
 	isDead = false;
 	isReviving = true;
-
 	await tween.tween_method(_restoreStep, 0.0, 1.0, 2.0).finished;
-
 	setEnergiesToDefault();
-
 	isReviving = false
 
 func _restoreStep(progress: float):
@@ -63,30 +92,20 @@ func _restoreStep(progress: float):
 	setEnergy((cleanProgress * noiseMult * 0.75) + (cleanProgress * 0.25))
 
 func flicker():
-	# await get_tree().create_timer(rng.randf_range(1, 2)).timeout
-
 	var tween = create_tween()
-
 	isFlickering = true
-
 	await tween.tween_method(_flickerStep, 0.0, 1.0, randf_range(0.75, 1.5)).finished
-
 	isFlickering = false
-
 	setEnergiesToDefault();
 
 func _flickerStep(_step: float):
 	setEnergy(clamp(noise.get_noise_1d(Time.get_ticks_msec()), 0, 1))
 
 func explode():
-	# await get_tree().create_timer(rng.randf_range(1, 2)).timeout
 	$Sparks.emitting = true
-
 	var tween = create_tween()
 	await tween.tween_method(_explodeStep, 0.0, 1.0, 2.0).finished
-
 	setEnergy(0.0)
-
 	isDead = true
 
 func _explodeStep(progress: float):
@@ -95,12 +114,7 @@ func _explodeStep(progress: float):
 	setEnergy((cleanEnergy * noiseMult * 0.75) + (cleanEnergy * 0.25))
  
 func turnOff():
-	# await get_tree().create_timer(rng.randf_range(1, 2)).timeout;
-
 	var tween = create_tween()
-
 	await tween.tween_method(_explodeStep, 0.0, 1.0, 2.0).finished
-
 	setEnergy(0.0)
-	 
 	isDead = true
