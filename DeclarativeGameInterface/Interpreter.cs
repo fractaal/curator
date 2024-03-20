@@ -15,6 +15,13 @@ public partial class Interpreter : Node
     private Node3D player = null;
     private Node3D ghost = null;
 
+    [Signal]
+    public delegate void ObjectInteractionEventHandler(
+        string verb,
+        string objectType,
+        string target
+    );
+
     private void _ready()
     {
         player = (Node3D)GetTree().CurrentScene.FindChild("Player");
