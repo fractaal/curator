@@ -22,12 +22,32 @@ var room = "";
 
 var debugLabel: Label3D
 
+func _on_object_interact(verb: String, objectType: String, target: String):
+	
+	print("I, ", self.name, " have received event ", verb, " ", objectType, " ", target)
+
+	target = target.strip_edges()
+	var _room = room.to_lower()
+
+	if target.begins_with("in"):
+		var targetRoom = target.substr(3).to_lower().strip_edges()
+		if _room.contains(targetRoom):
+			self[verb].call()
+		else:
+			return
+	elif target == "all":
+		self[verb].call()
+	else:
+		push_warning("Invalid target declaration ", target)
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	noise = FastNoiseLite.new()
 	rng.seed = position.x + position.y + position.z
 	noise.seed = position.x + position.y + position.z
 	lights = find_children("*", "Light3D")
+
+	Curator.ObjectInteraction.connect(_on_object_interact);
 
 	debugLabel = Label3D.new()
 	debugLabel.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -48,10 +68,10 @@ func _ready():
 	if bodies.size() > 0:
 		body = bodies[0]
 	else:
-		debugLabel.text = "cannot determine room"
+		debugLabel.text = "Can't determine room"
 		return
 
-	debugLabel.text = "not in a room"
+	debugLabel.text = "Not in room"
 	
 	# Figure out what room I'm in
 	await get_tree().create_timer(1).timeout
@@ -59,11 +79,9 @@ func _ready():
 	for _room in rooms:
 		var nodes = _room.get_overlapping_bodies()
 		for node in nodes:
-			print("i am ", body.name, " while they are ", node.name)
 			if node == body:
-				room = _room.name
-				print(body.name, " has found the room it's in (", room, ")")
-				debugLabel.text = _room.name
+				room = _room.name.strip_edges()
+				debugLabel.text = _room.name.strip_edges()
 
 func setEnergiesToDefault():
 	for light in lights:

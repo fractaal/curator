@@ -102,33 +102,49 @@ public partial class Interpreter : Node
 
         foreach (Command command in commands)
         {
-            var searchSpace = getObjectSearchSpace(command.Arguments);
-
-            string prefix = null;
-
-            try
-            {
-                prefix = objectInteractionVerbPrefixes.First(prefix =>
+            string prefix = objectInteractionVerbPrefixes.FirstOrDefault(
+                prefix =>
                 {
                     var result = command.Verb.Contains(prefix);
-                    GD.Print("Object interaction prefix detected (", command.Verb, ")");
                     return result;
-                });
-            }
-            catch (Exception e)
-            {
-                GD.Print(command.Verb, " did not have a valid object interaction prefix");
-            }
+                },
+                null
+            );
+
+            string objectType = Regex.Replace(command.Verb, prefix, "").ToLower();
 
             if (prefix != null)
             {
-                GD.Print("Was object interaction command!");
-
-                foreach (Node3D node in searchSpace)
-                {
-                    node.Call(prefix); // Convention.
-                }
+                EmitSignal(SignalName.ObjectInteraction, prefix, objectType, command.Arguments[0]);
             }
+
+            //     var searchSpace = getObjectSearchSpace(command.Arguments);
+
+            //     string prefix = null;
+
+            //     try
+            //     {
+            //         prefix = objectInteractionVerbPrefixes.First(prefix =>
+            //         {
+            //             var result = command.Verb.Contains(prefix);
+            //             GD.Print("Object interaction prefix detected (", command.Verb, ")");
+            //             return result;
+            //         });
+            //     }
+            //     catch (Exception e)
+            //     {
+            //         GD.Print(command.Verb, " did not have a valid object interaction prefix");
+            //     }
+
+            //     if (prefix != null)
+            //     {
+            //         GD.Print("Was object interaction command!");
+
+            //         foreach (Node3D node in searchSpace)
+            //         {
+            //             node.Call(prefix); // Convention.
+            //         }
+            //     }
         }
     }
 
