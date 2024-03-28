@@ -1,6 +1,7 @@
-[gd_scene load_steps=11 format=3 uid="uid://b4y50lhr65yom"]
+[gd_scene load_steps=12 format=3 uid="uid://b4y50lhr65yom"]
 
 [ext_resource type="Script" path="res://Scenes/GameLight.gd" id="1_b56ph"]
+[ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="2_fb62t"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1mxpj"]
 albedo_color = Color(0, 0, 0, 1)
@@ -98,3 +99,6 @@ visibility_aabb = AABB(-2.5, -5, -2.5, 5, 10, 5)
 trail_lifetime = 1.0
 process_material = SubResource("ParticleProcessMaterial_5cusx")
 draw_pass_1 = SubResource("BoxMesh_egc8i")
+
+[node name="RoomLocator" type="Node" parent="."]
+script = ExtResource("2_fb62t")
