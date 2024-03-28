@@ -880,6 +880,8 @@ _data = {
 [node name="Ghost" type="Node3D" groups=["ghost"]]
 
 [node name="RootNode" type="CharacterBody3D" parent="." groups=["enemies"]]
+collision_layer = 2
+collision_mask = 0
 script = ExtResource("4_m1s54")
 
 [node name="Skeleton3D" type="Skeleton3D" parent="RootNode"]
