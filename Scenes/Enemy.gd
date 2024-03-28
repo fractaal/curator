@@ -7,6 +7,17 @@ var SPEED = 3.252
 
 var last_location = Vector3()
 
+func _ready():
+	EventBus.GhostAction.connect(_on_ghost_action)
+	
+func _on_ghost_action(verb, arguments):
+	verb = verb.to_lower()
+	
+	if verb == "move" or verb == "moveto":
+		var _position = TargetResolution.GetTargetPosition(arguments);
+
+		update_target_location(_position)
+
 func _physics_process(_delta):
 	
 	var current_location = global_transform.origin
