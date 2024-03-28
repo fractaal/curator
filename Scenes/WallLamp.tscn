@@ -1,8 +1,9 @@
-[gd_scene load_steps=24 format=3 uid="uid://cu4t280a3i24a"]
+[gd_scene load_steps=25 format=3 uid="uid://cu4t280a3i24a"]
 
 [ext_resource type="Script" path="res://Scenes/GameLight.gd" id="1_rr66r"]
 [ext_resource type="Texture2D" uid="uid://b5c821vgfv7s" path="res://models/wall_lamp_01_0.png" id="1_sqod2"]
 [ext_resource type="Texture2D" uid="uid://i14u4rcieiwl" path="res://textures/flashlight4.png" id="2_0io5v"]
+[ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="4_8yra2"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cvh77"]
 resource_name = "lambert6"
@@ -377,3 +378,6 @@ size = Vector3(337.59, 533.28, 79.12)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
 shape = SubResource("BoxShape3D_r3m1e")
+
+[node name="RoomLocator" type="Node" parent="."]
+script = ExtResource("4_8yra2")
