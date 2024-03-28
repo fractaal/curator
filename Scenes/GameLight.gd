@@ -18,16 +18,11 @@ var reviveFrame = 0
 
 var rng = RandomNumberGenerator.new()
 
-var room = "";
+@onready var locator = $RoomLocator
 
-var debugLabel: Label3D
-
-func _on_object_interact(verb: String, objectType: String, target: String):
-	
-	print("I, ", self.name, " have received event ", verb, " ", objectType, " ", target)
-
+func _on_object_interact(verb: String, __: String, target: String):
 	target = target.strip_edges()
-	var _room = room.to_lower()
+	var _room = locator.Room.to_lower()
 
 	if target.begins_with("in"):
 		var targetRoom = target.substr(3).to_lower().strip_edges()
@@ -47,41 +42,13 @@ func _ready():
 	noise.seed = position.x + position.y + position.z
 	lights = find_children("*", "Light3D")
 
-	Curator.ObjectInteraction.connect(_on_object_interact);
-
-	debugLabel = Label3D.new()
-	debugLabel.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	debugLabel.no_depth_test = true
-
-	get_tree().get_root().add_child.call_deferred(debugLabel)
-	debugLabel.position = global_position
+	EventBus.ObjectInteraction.connect(_on_object_interact)
 
 	for light in lights:
 		defaultIntensities[light.name] = light.light_energy
 
 	for node in nodesWithEmission:
 		defaultIntensities[node.name] = node.material.emission_energy_multiplier
-
-	var bodies = find_children("*", "CollisionObject3D", true)
-	var body: CollisionObject3D
-
-	if bodies.size() > 0:
-		body = bodies[0]
-	else:
-		debugLabel.text = "Can't determine room"
-		return
-
-	debugLabel.text = "Not in room"
-	
-	# Figure out what room I'm in
-	await get_tree().create_timer(1).timeout
-	var rooms = get_tree().get_nodes_in_group("rooms")
-	for _room in rooms:
-		var nodes = _room.get_overlapping_bodies()
-		for node in nodes:
-			if node == body:
-				room = _room.name.strip_edges()
-				debugLabel.text = _room.name.strip_edges()
 
 func setEnergiesToDefault():
 	for light in lights:
