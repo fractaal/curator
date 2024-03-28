@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 public partial class Room : Area3D
@@ -37,6 +39,10 @@ public partial class Room : Area3D
         };
     }
 
-    // Called every frame. 'delta' is the elapsed time since the previous frame.
-    public override void _Process(double delta) { }
+    public static List<Room> GetRooms()
+    {
+        // So using the EventBus is a bit of a stretch here
+        // but I need to access the GetTree method
+        return EventBus.Get().GetTree().GetNodesInGroup("rooms").OfType<Room>().ToList();
+    }
 }
