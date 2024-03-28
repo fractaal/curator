@@ -8,16 +8,20 @@ func _ready():
 
 func _input(event):
 	if (event.is_action_pressed("ui_text_completion_accept")&&has_focus()):
-		
 		var tokenized = fakeTokenize(text)
 		
 		clear()
 		release_focus()
+		
+		await get_tree().create_timer(randf_range(0.4, 1.2)).timeout
+
+		EventBus.emit_signal("LLMFirstResponseChunk", tokenized[0]);
 
 		for chunk in tokenized:
-			await get_tree().create_timer(randf_range(0.025, 0.25)).timeout
+			await get_tree().create_timer(randf_range(0.025, 0.1)).timeout
+			EventBus.emit_signal("LLMResponseChunk", chunk);
 
-			Curator.Interpret(chunk)
+		EventBus.emit_signal("LLMLastResponseChunk", tokenized[tokenized.size() - 1]);
 
 func fakeTokenize(_text):
 
