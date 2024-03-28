@@ -8,6 +8,12 @@ using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Godot;
 
+public struct Message
+{
+    public string role { get; set; }
+    public string content { get; set; }
+}
+
 public partial class LLMInterface : Node
 {
     [Export]
@@ -16,56 +22,69 @@ public partial class LLMInterface : Node
     private readonly System.Net.Http.HttpClient _client = new System.Net.Http.HttpClient();
     private readonly string url = "https://openrouter.ai/api/v1/chat/completions";
     private readonly string API_KEY =
-        "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";
+        "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";
 
-    private readonly string MODEL = "google/gemma-7b-it:free";
-
-    // List to store the conversation context
-    private List<object> _messages = new List<object>();
-
-    public static event Action<string, string> LogUpdated;
-    public static event Action<string> LLMResponseChunk;
+    private readonly string MODEL = "openai/gpt-3.5-turbo-0125";
 
     public LLMInterface()
     {
         _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + API_KEY);
         _client.DefaultRequestHeaders.Add("X-Title", "Curator");
-
-        // LogUpdated += (id, message) =>
-        // {
-        //     CallDeferred(nameof(_onLogUpdated), id, message);
-        // };
     }
 
-    private void _ready()
+    public override void _Ready()
     {
-        Send("Respond with the 'the quick brown fox' test message 5 times, if understood");
+        // Send("Respond with the 'the quick brown fox' test message 5 times, if understood");
 
-        LogManager.UpdateLog("start", "[color=\"0000FF\"]Using model [b]" + MODEL + "[/b][/color]");
+        LogManager.UpdateLog(
+            "llmModel",
+            "[color=\"0000FF\"]Using model [b]" + MODEL + "[/b][/color]"
+        );
     }
 
-    public void Send(string message)
+    public void _emitLLMResponseChunk(string chunk)
     {
-        _messages.Add(new { role = "user", content = message });
+        EventBus.Get().EmitSignal(EventBus.SignalName.LLMResponseChunk, chunk);
+    }
 
-        // Start the request in a background thread
-        var thread = new System.Threading.Thread(async () => await DoRequest(message))
+    public void _emitLLMFirstResponseChunk(string chunk)
+    {
+        EventBus.Get().EmitSignal(EventBus.SignalName.LLMFirstResponseChunk, chunk);
+    }
+
+    public void _emitLLMLastResponseChunk(string chunk)
+    {
+        EventBus.Get().EmitSignal(EventBus.SignalName.LLMLastResponseChunk, chunk);
+    }
+
+    public void EmitLLMResponseChunk(string chunk)
+    {
+        CallDeferred(nameof(_emitLLMResponseChunk), chunk);
+    }
+
+    public void EmitLLMFirstResponseChunk(string chunk)
+    {
+        CallDeferred(nameof(_emitLLMFirstResponseChunk), chunk);
+    }
+
+    public void EmitLLMLastResponseChunk(string chunk)
+    {
+        CallDeferred(nameof(_emitLLMLastResponseChunk), chunk);
+    }
+
+    public void Send(List<Message> messages)
+    {
+        var thread = new System.Threading.Thread(async () => await DoRequest(messages))
         {
             IsBackground = true
         };
+
         thread.Start();
     }
 
-    private async Task DoRequest(string message)
+    private async Task DoRequest(List<Message> messages)
     {
-        var id = _messages.Count.ToString();
-
-        LogManager.UpdateLog(id + "game", "[b]GAME:[/b] " + message);
-
-        LogManager.UpdateLog(
-            id + "response",
-            "[color=\"#FFA500\"]- WAITING FOR LLM RESPONSE -[/color]"
-        );
+        EventBus bus = EventBus.Get();
 
         try
         {
@@ -76,9 +95,19 @@ public partial class LLMInterface : Node
                     {
                         stream = true,
                         model = MODEL,
-                        messages = _messages.ToArray()
+                        messages = messages.ToArray()
                     }
                 );
+
+                request
+                    .Content
+                    .ReadAsStringAsync()
+                    .ContinueWith(
+                        (task) =>
+                        {
+                            GD.Print("Request content: " + task.Result);
+                        }
+                    );
 
                 var response = await _client
                     .SendAsync(request, HttpCompletionOption.ResponseHeadersRead)
@@ -86,65 +115,69 @@ public partial class LLMInterface : Node
                 response.EnsureSuccessStatusCode();
 
                 var stream = await response.Content.ReadAsStreamAsync();
+
+                bool hasFirstResponse = false;
+
                 using (var reader = new StreamReader(stream))
                 {
                     string uiOut = "[color=\"00FF00\"][b]LLM RESPONSE:[/b][/color] ";
-
-                    LogManager.UpdateLog(id + "response", uiOut);
+                    string lastChunk = "";
 
                     while (!reader.EndOfStream)
                     {
-                        var chunk = await reader.ReadLineAsync();
+                        var rawChunk = await reader.ReadLineAsync();
+                        var chunk = "";
                         // Safely call back to the main thread to handle the line
 
-                        GD.Print(chunk);
-
                         // Take out the first 6 characters "data: "
-                        if (chunk.StartsWith("data: [DONE]"))
+                        if (rawChunk.StartsWith("data: [DONE]"))
                         {
-                            uiOut += "\n[color=\"#00FF00\"]- LLM PROCESSING DONE -[/color]";
+                            // uiOut += "\n[color=\"#00FF00\"]- LLM PROCESSING DONE -[/color]";
                         }
-                        else if (chunk.StartsWith("data: "))
+                        else if (rawChunk.StartsWith("data: "))
                         {
-                            chunk = chunk.Substring(6);
+                            rawChunk = rawChunk.Substring(6);
                             try
                             {
-                                JsonObject json = JsonNode.Parse(chunk).AsObject();
+                                JsonObject json = JsonNode.Parse(rawChunk).AsObject();
                                 // {"choices": [{"index": 0, "delta": {"role": "assistant", "content": <TARGET>}}]}
                                 JsonArray choices = json["choices"].AsArray();
                                 JsonObject delta = choices[0]["delta"].AsObject();
                                 string target = delta["content"].AsValue().ToString();
 
+                                chunk = target;
                                 uiOut += target;
                             }
                             catch (Exception e)
                             {
-                                uiOut +=
-                                    "\n[b][color=\"#FF0000\"]<ERROR PARSING JSON DATA:[/color][/b] "
-                                    + e.Message
-                                    + "\n";
+                                // uiOut +=
+                                //     "\n[b][color=\"#FF0000\"]<ERROR PARSING JSON DATA:[/color][/b] "
+                                //     + e.Message
+                                //     + "\n";
                             }
                         }
-                        else if (chunk.Contains("OPENROUTER PROCESSING"))
+                        else if (rawChunk.Contains("OPENROUTER PROCESSING"))
                         {
-                            uiOut += "\n[color=\"#FFA500\"]- LLM PROCESSING... -[/color]";
+                            // uiOut += "\n[color=\"#FFA500\"]- LLM PROCESSING... -[/color]";
                         }
-                        else if (chunk.Contains("[DONE]")) { }
+                        else if (rawChunk.Contains("[DONE]")) { }
                         else
                         {
-                            uiOut += chunk;
+                            uiOut += rawChunk;
                         }
 
-                        LLMResponseChunk?.Invoke(chunk);
-                        LogManager.UpdateLog(id + "response", uiOut);
+                        if (!hasFirstResponse)
+                        {
+                            hasFirstResponse = true;
+                            EmitLLMFirstResponseChunk(chunk);
+                        }
+
+                        lastChunk = chunk;
+
+                        EmitLLMResponseChunk(chunk);
                     }
 
-                    // Add the response to the context
-                    _messages.Add(new { role = "assistant", content = uiOut });
-                    LogManager.UpdateLog(
-                        id + "addedToContext",
-                        "[b][color=\"#FF0000\"]<ADDED TO LOCAL CONTEXT.>[/color][/b] "
-                    );
+                    EmitLLMLastResponseChunk(lastChunk);
                 }
             }
         }
