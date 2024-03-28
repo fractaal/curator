@@ -1,7 +1,8 @@
-[gd_scene load_steps=11 format=3 uid="uid://c5nn4hpuwrtes"]
+[gd_scene load_steps=12 format=3 uid="uid://c5nn4hpuwrtes"]
 
 [ext_resource type="Script" path="res://Scenes/GameLight.gd" id="1_txb8k"]
 [ext_resource type="Texture2D" uid="uid://i14u4rcieiwl" path="res://textures/flashlight4.png" id="2_dlu7o"]
+[ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="3_u7flv"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gba8v"]
 emission_enabled = true
@@ -134,3 +135,6 @@ draw_pass_1 = SubResource("BoxMesh_2k75j")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0057373, 1.40556, 0.003479)
 shape = SubResource("BoxShape3D_qmrnn")
+
+[node name="RoomLocator" type="Node" parent="."]
+script = ExtResource("3_u7flv")
