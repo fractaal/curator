@@ -1,6 +1,7 @@
-[gd_scene load_steps=11 format=3 uid="uid://cbnyfileu33e7"]
+[gd_scene load_steps=12 format=3 uid="uid://cbnyfileu33e7"]
 
 [ext_resource type="Script" path="res://Scenes/GameLight.gd" id="1_joy05"]
+[ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="2_coido"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_olj7d"]
 emission_enabled = true
@@ -116,3 +117,6 @@ draw_pass_1 = SubResource("BoxMesh_8k1vn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
 shape = SubResource("BoxShape3D_c2myf")
+
+[node name="RoomLocator" type="Node" parent="."]
+script = ExtResource("2_coido")
