@@ -5,7 +5,14 @@ using Godot;
 public partial class LogManager : Node
 {
     [Export]
-    public Control LogUIContainer;
+    public RichTextLabel LatencyStatisticsUI;
+
+    [Export]
+    public RichTextLabel LLMResponseUI;
+
+    [Export]
+    public RichTextLabel LLMModelUI;
+
     public static event Action<string, string> LogUpdated;
     private Dictionary<string, RichTextLabel> logs = new Dictionary<string, RichTextLabel>();
 
@@ -22,31 +29,42 @@ public partial class LogManager : Node
         _instance.CallDeferred(nameof(_updateLog), id, message);
     }
 
-    private void _updateLog(string id, string message)
+    public static void UpdateLog(string message)
     {
-        RichTextLabel label;
-
-        if (!logs.ContainsKey(id))
-        {
-            label = _getLogUIElement();
-            logs.Add(id, label);
-        }
-
-        label = logs[id];
-        label.Text = message;
+        UpdateLog(Guid.NewGuid().ToString(), message);
     }
 
-    private RichTextLabel _getLogUIElement()
+    private void _updateLog(string id, string message)
     {
-        var label = new RichTextLabel();
+        // RichTextLabel label;
 
-        LogUIContainer.AddChild(label);
+        // if (!logs.ContainsKey(id))
+        // {
+        //     label = _getLogUIElement();
+        //     logs.Add(id, label);
+        // }
 
-        label.CustomMinimumSize = new Vector2(500, 0);
-        label.BbcodeEnabled = true;
-        label.FitContent = true;
+        // label = logs[id];
+        // label.Text = message;
 
-        return label;
+        // ((ScrollContainer)LogUIContainer).ScrollVertical = 9999999;
+
+        if (id == "latencyStatistics")
+        {
+            LatencyStatisticsUI.Text = message;
+        }
+        else if (id == "llmResponse")
+        {
+            LLMResponseUI.Text = message;
+        }
+        else if (id == "llmModel")
+        {
+            LLMModelUI.Text = message;
+        }
+        else
+        {
+            GD.PushWarning("Unknown log id: " + id + " with message: " + message);
+        }
     }
 
     // Called when the node enters the scene tree for the first time.
