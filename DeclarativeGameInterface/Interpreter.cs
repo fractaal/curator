@@ -15,25 +15,48 @@ public partial class Interpreter : Node
     private Node3D player = null;
     private Node3D ghost = null;
 
-    [Signal]
-    public delegate void ObjectInteractionEventHandler(
-        string verb,
-        string objectType,
-        string target
-    );
-
-    private void _ready()
+    public override void _Ready()
     {
+        LogManager.UpdateLog("llmResponse", "");
+
         player = (Node3D)GetTree().CurrentScene.FindChild("Player");
         ghost = (Node3D)GetTree().CurrentScene.FindChild("Ghost");
 
         GD.Print("Initialized interpreter with values player: ", player, " ghost: ", ghost);
+
+        EventBus.Get().LLMFirstResponseChunk += (chunk) =>
+        {
+            GD.Print("reset llm response");
+            _fullLLMResponse = "";
+            LogManager.UpdateLog("llmResponse", "");
+        };
+
+        EventBus.Get().LLMResponseChunk += (chunk) =>
+        {
+            Interpret(chunk);
+        };
     }
 
     private List<string> objectInteractionVerbPrefixes =
         new() { "flicker", "explode", "restore", "turnOff" };
 
+    private List<string> ghostActionVerbs =
+        new()
+        {
+            "move",
+            "moveTo",
+            "speakAsGhost",
+            "speakAsSpiritBox",
+            "manifest",
+            "appear",
+            "disappear"
+        };
+
     private string accumulatedText = "";
+
+    private string _fullLLMResponse = "";
+
+    private int countRecognized = 0;
 
     public List<Command> Parse(string chunk)
     {
@@ -57,6 +80,10 @@ public partial class Interpreter : Node
 
             foreach (Match match in matches)
             {
+                EventBus
+                    .Get()
+                    .EmitSignal(EventBus.SignalName.InterpreterCommandRecognized, match.Value);
+
                 var value = match.Value;
                 var separatedString = value.Split("(");
                 var verb = separatedString[0];
@@ -78,13 +105,22 @@ public partial class Interpreter : Node
         }
     }
 
-    private int countRecognized = 0;
-
     public void Interpret(string chunk)
     {
-        List<Command> commands = Parse(chunk);
+        EventBus bus = EventBus.Get();
 
         var pattern = @"\w+\([^)]*\)";
+
+        _fullLLMResponse += chunk;
+        _fullLLMResponse = Regex.Replace(
+            _fullLLMResponse,
+            pattern,
+            match => $"[b][color=#00ff00]{match.Value}[/color][/b]"
+        );
+
+        LogManager.UpdateLog("llmResponse", _fullLLMResponse);
+
+        List<Command> commands = Parse(chunk);
 
         var newlineToSpaceString = Regex.Replace(accumulatedText, @"(\r\n|\n)", " ");
         var highlightedMatchesString = Regex.Replace(
@@ -92,8 +128,6 @@ public partial class Interpreter : Node
             pattern,
             match => $"[b][color=#00ff00]{match.Value}[/color][/b]"
         );
-
-        LogManager.UpdateLog("recognized" + countRecognized, highlightedMatchesString);
 
         if (commands.Count > 0)
         {
@@ -111,107 +145,40 @@ public partial class Interpreter : Node
                 null
             );
 
-            string objectType = Regex.Replace(command.Verb, prefix, "").ToLower();
-
             if (prefix != null)
             {
-                EmitSignal(SignalName.ObjectInteraction, prefix, objectType, command.Arguments[0]);
+                string objectType = Regex.Replace(command.Verb, prefix, "").ToLower();
+
+                bus.EmitSignal(
+                    EventBus.SignalName.ObjectInteraction,
+                    prefix,
+                    objectType,
+                    command.Arguments[0]
+                );
+
+                bus.EmitSignal(
+                    EventBus.SignalName.NotableEventOccurred,
+                    $"AI interacted - {prefix} {objectType} - {command.Arguments[0]}"
+                );
+
+                return;
             }
 
-            //     var searchSpace = getObjectSearchSpace(command.Arguments);
-
-            //     string prefix = null;
-
-            //     try
-            //     {
-            //         prefix = objectInteractionVerbPrefixes.First(prefix =>
-            //         {
-            //             var result = command.Verb.Contains(prefix);
-            //             GD.Print("Object interaction prefix detected (", command.Verb, ")");
-            //             return result;
-            //         });
-            //     }
-            //     catch (Exception e)
-            //     {
-            //         GD.Print(command.Verb, " did not have a valid object interaction prefix");
-            //     }
-
-            //     if (prefix != null)
-            //     {
-            //         GD.Print("Was object interaction command!");
-
-            //         foreach (Node3D node in searchSpace)
-            //         {
-            //             node.Call(prefix); // Convention.
-            //         }
-            //     }
-        }
-    }
-
-    private List<Node3D> getObjectSearchSpace(List<string> arguments)
-    {
-        int inKeywordIndex = arguments.IndexOf("in");
-        string roomName = null;
-
-        var lights = GetTree().GetNodesInGroup("lights").Cast<Node3D>().ToList();
-        var tvs = GetTree().GetNodesInGroup("tvs").Cast<Node3D>().ToList();
-
-        if (inKeywordIndex != -1)
-        {
-            roomName = arguments[inKeywordIndex + 1];
-        }
-
-        if (roomName == null)
-        {
-            List<Node3D> nodes = new();
-            nodes.AddRange(lights);
-            nodes.AddRange(tvs);
-            return nodes;
-        }
-
-        var rooms = GetTree().GetNodesInGroup("rooms");
-
-        Area3D selectedRoom = null;
-
-        for (int i = 0; i < rooms.Count; i++)
-        {
-            if (rooms[i].Name.ToString().ToLower().Contains(roomName.ToLower()))
+            if (ghostActionVerbs.Contains(command.Verb))
             {
-                selectedRoom = (Area3D)rooms[i];
-                break;
+                bus.EmitSignal(
+                    EventBus.SignalName.GhostAction,
+                    command.Verb,
+                    command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ")
+                );
+
+                bus.EmitSignal(
+                    EventBus.SignalName.NotableEventOccurred,
+                    $"AI acted as the Ghost - {command.Verb} - {command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ")}"
+                );
+
+                return;
             }
         }
-
-        if (selectedRoom == null)
-        {
-            GD.Print(roomName, " apparently does not exist. Defaulting to all");
-            List<Node3D> nodes = new();
-
-            nodes.AddRange(lights);
-            nodes.AddRange(tvs);
-            return nodes;
-        }
-
-        var roomNodes = selectedRoom.GetOverlappingBodies().ToList();
-
-        List<Node3D> validNodes = new();
-
-        foreach (Node3D roomNode in roomNodes)
-        {
-            Node currentNode = roomNode;
-
-            while (currentNode.GetParent() != null)
-            {
-                if (currentNode.IsInGroup("lights") || currentNode.IsInGroup("tvs"))
-                {
-                    validNodes.Add((Node3D)currentNode);
-                }
-                currentNode = currentNode.GetParent();
-            }
-        }
-
-        validNodes.ForEach(n => GD.Print(n.Name));
-
-        return validNodes;
     }
 }
