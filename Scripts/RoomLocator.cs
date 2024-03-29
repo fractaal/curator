@@ -1,8 +1,25 @@
+using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 public partial class RoomLocator : Node
 {
     public string Room { get; private set; }
+
+    public List<string> Rooms { get; private set; } = new();
+
+    public bool IsInRoom(string room)
+    {
+        foreach (string compareRoom in Rooms)
+        {
+            if (compareRoom.ToLower().Contains(room.ToLower()))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private void deferredReady()
     {
@@ -12,13 +29,14 @@ public partial class RoomLocator : Node
         {
             Billboard = BaseMaterial3D.BillboardModeEnum.Enabled,
             NoDepthTest = true,
-            Visible = true
+            Visible = false
         };
 
         // GetTree().CurrentScene.CallDeferred(nameof(AddChild), debugLabel);
         parent.AddChild(debugLabel);
 
         debugLabel.GlobalPosition = parent.GlobalPosition;
+        debugLabel.Scale = debugLabel.Scale / parent.Scale;
 
         var bodies = parent.FindChildren("*", "CollisionObject3D", true);
         CollisionObject3D referenceBody;
@@ -42,12 +60,11 @@ public partial class RoomLocator : Node
 
             foreach (Node body in roomBodies)
             {
-                GD.Print(body.Name, referenceBody.Name);
                 if (body == referenceBody)
                 {
                     Room = room.Name;
+                    Rooms.Add(Room);
                     debugLabel.Text = "Room: " + Room;
-                    break;
                 }
             }
         }
