@@ -10,6 +10,13 @@ public partial class EventBus : Node
     );
 
     [Signal]
+    public delegate void ObjectInteractionAcknowledgedEventHandler(
+        string verb,
+        string objectType,
+        string target
+    );
+
+    [Signal]
     public delegate void GhostActionEventHandler(string verb, string arguments);
 
     [Signal]
@@ -35,6 +42,9 @@ public partial class EventBus : Node
 
     [Signal]
     public delegate void NotableEventOccurredEventHandler(string message);
+
+    [Signal]
+    public delegate void SystemFeedbackEventHandler(string message);
 
     private static EventBus instance;
 
