@@ -20,6 +20,8 @@ public partial class Sensors : Node
 
     private List<string> NotableEvents = new();
 
+    private List<string> SystemFeedback = new();
+
     private string PlayerCurrentRoom = "";
 
     private EventBus bus;
@@ -54,6 +56,14 @@ public partial class Sensors : Node
             NotableEvents.Add($"{time}s: " + message);
             NotableEvents = NotableEvents.TakeLast(30).ToList();
             // PokePrompter();
+        };
+
+        bus.SystemFeedback += (message) =>
+        {
+            float time = Time.GetTicksMsec() / 1000;
+
+            SystemFeedback.Add($"{time}s: " + message);
+            SystemFeedback = SystemFeedback.TakeLast(5).ToList();
         };
 
         bus.LLMLastResponseChunk += (chunk) =>
@@ -99,6 +109,7 @@ public partial class Sensors : Node
         if (sensorReadElapsed >= sensorReadInterval)
         {
             sensorReadElapsed = 0;
+            // return;
             if (!loopCompleted)
             {
                 GD.Print("Loop not completed yet, skipping sensor read.");
@@ -110,23 +121,23 @@ public partial class Sensors : Node
         }
     }
 
+    public string GetAllRoomInformation()
+    {
+        string info = "";
+
+        foreach (var room in Room.GetRooms())
+        {
+            info += room.GetInformation() + "\n\n";
+        }
+
+        return info;
+    }
+
     public string GetGameInformationAndHistory()
     {
         float time = Time.GetTicksMsec() / 1000;
 
-        string mainInfo =
-            $@"Time: {time}s
--- GHOST INFORMATION
-Ghost Name: {ghostName}
-Type: {ghostType}
-Age: {ghostAge}
-
--- AVAILABLE ROOMS: {Room.GetRooms().Aggregate("", (acc, room) => acc + room.Name + ", ")}
-
--- PLAYER INFORMATION --
-Current Room: {PlayerCurrentRoom}";
-
-        string events = "\n-- NOTABLE EVENTS: \n";
+        string events = "";
 
         foreach (var e in NotableEvents)
         {
@@ -138,6 +149,34 @@ Current Room: {PlayerCurrentRoom}";
             events += "No notable events yet.";
         }
 
-        return mainInfo + "\n" + events;
+        string systemFeedback = "";
+
+        foreach (var f in SystemFeedback)
+        {
+            systemFeedback += f + "\n";
+        }
+
+        if (SystemFeedback.Count == 0)
+        {
+            systemFeedback += "You haven't done anything wrong (yet!)";
+        }
+
+        return $@"Time: {time}s
+-- GHOST INFORMATION
+Ghost Name: {ghostName}
+Type: {ghostType}
+Age: {ghostAge}
+
+-- NOTABLE EVENTS --
+{events}
+
+-- ROOM INFORMATION --
+{GetAllRoomInformation()}
+
+-- PLAYER INFORMATION --
+Current Room: {PlayerCurrentRoom}
+
+-- SYSTEM FEEDBACK (AMEND ANY ISSUES YOU SEE HERE) --
+{systemFeedback}";
     }
 }
