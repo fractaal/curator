@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://b4y50lhr65yom"]
+[gd_scene load_steps=13 format=3 uid="uid://b4y50lhr65yom"]
 
 [ext_resource type="Script" path="res://Scenes/GameLight.gd" id="1_b56ph"]
 [ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="2_fb62t"]
@@ -56,9 +56,10 @@ vertex_color_use_as_albedo = true
 material = SubResource("StandardMaterial3D_xruf8")
 size = Vector3(0.015, 0.015, 0.015)
 
-[node name="Television" type="Node3D" node_paths=PackedStringArray("nodesWithEmission") groups=["tvs"]]
-script = ExtResource("1_b56ph")
-nodesWithEmission = [NodePath("CSGCombiner3D/Screen")]
+[sub_resource type="BoxShape3D" id="BoxShape3D_jkyy2"]
+size = Vector3(0.271851, 1.18115, 1.95483)
+
+[node name="Television" type="Node3D" groups=["interactables", "tvs"]]
 
 [node name="CSGCombiner3D" type="CSGCombiner3D" parent="."]
 
@@ -102,3 +103,15 @@ draw_pass_1 = SubResource("BoxMesh_egc8i")
 
 [node name="RoomLocator" type="Node" parent="."]
 script = ExtResource("2_fb62t")
+
+[node name="Interactable" type="Node" parent="." node_paths=PackedStringArray("nodesWithEmission", "locator", "Sparks")]
+script = ExtResource("1_b56ph")
+nodesWithEmission = [NodePath("../CSGCombiner3D/Screen")]
+locator = NodePath("../RoomLocator")
+Sparks = NodePath("../Sparks")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0149536, 0.468401, 0.000610352)
+shape = SubResource("BoxShape3D_jkyy2")

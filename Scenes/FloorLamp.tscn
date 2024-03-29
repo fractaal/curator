@@ -55,9 +55,7 @@ size = Vector3(0.015, 0.015, 0.015)
 [sub_resource type="BoxShape3D" id="BoxShape3D_qmrnn"]
 size = Vector3(0.333252, 2.88196, 0.359497)
 
-[node name="FloorLamp" type="Node3D" node_paths=PackedStringArray("nodesWithEmission") groups=["lights"]]
-script = ExtResource("1_txb8k")
-nodesWithEmission = [NodePath("CSGCylinder3D2")]
+[node name="FloorLamp" type="Node3D" groups=["lights"]]
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
 transform = Transform3D(1.98895, 0, 0, 0, 1, 0, 0, 0, 1.98895, 0, 0.0521736, 0)
@@ -138,3 +136,9 @@ shape = SubResource("BoxShape3D_qmrnn")
 
 [node name="RoomLocator" type="Node" parent="."]
 script = ExtResource("3_u7flv")
+
+[node name="Interactable" type="Node" parent="." node_paths=PackedStringArray("nodesWithEmission", "locator", "Sparks") groups=["interactables"]]
+script = ExtResource("1_txb8k")
+nodesWithEmission = [NodePath("../CSGCylinder3D2")]
+locator = NodePath("../RoomLocator")
+Sparks = NodePath("../Sparks")
