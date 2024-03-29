@@ -15,6 +15,8 @@ public partial class Interpreter : Node
     private Node3D player = null;
     private Node3D ghost = null;
 
+    private HashSet<string> AcknowledgedCommandsSet = new();
+
     public override void _Ready()
     {
         LogManager.UpdateLog("llmResponse", "");
@@ -24,21 +26,66 @@ public partial class Interpreter : Node
 
         GD.Print("Initialized interpreter with values player: ", player, " ghost: ", ghost);
 
-        EventBus.Get().LLMFirstResponseChunk += (chunk) =>
+        EventBus bus = EventBus.Get();
+
+        bus.LLMFirstResponseChunk += (chunk) =>
         {
-            GD.Print("reset llm response");
             _fullLLMResponse = "";
             LogManager.UpdateLog("llmResponse", "");
         };
 
-        EventBus.Get().LLMResponseChunk += (chunk) =>
+        bus.LLMResponseChunk += (chunk) =>
         {
             Interpret(chunk);
+        };
+
+        bus.ObjectInteractionAcknowledged += (verb, objectType, target) =>
+        {
+            if (AcknowledgedCommandsSet.Contains(verb + "/" + objectType + "/" + target)) // This is a hack to prevent double logging
+            {
+                bus.EmitSignal(
+                    EventBus.SignalName.NotableEventOccurred,
+                    $"Ghost interacted - {verb} {objectType} - {target}"
+                );
+            }
+
+            AcknowledgedCommandsSet.Remove(verb + "/" + objectType + "/" + target);
+        };
+
+        bus.LLMLastResponseChunk += (_chunk) =>
+        {
+            foreach (string acknowledgedCommand in AcknowledgedCommandsSet)
+            {
+                var split = acknowledgedCommand.Split("/");
+                var verb = split[0];
+                var objectType = split[1];
+                var target = split[2];
+
+                bus.EmitSignal(
+                    EventBus.SignalName.SystemFeedback,
+                    $"Trying to {verb} {objectType} in/at {target} FAILED.\nMaybe the object doesn't exist in the room or the target was invalid.\nRefer to the available objects per room in ROOM INFORMATION, or try a different target. Remember target syntax is 'in <ROOM NAME>' or 'all'!."
+                );
+            }
+
+            AcknowledgedCommandsSet.Clear();
         };
     }
 
     private List<string> objectInteractionVerbPrefixes =
-        new() { "flicker", "explode", "restore", "turnOff" };
+        new()
+        {
+            "flicker",
+            "explode",
+            "restore",
+            "turnOff",
+            "turnOn",
+            "playFreakyMusicOn",
+            "stop",
+            "open",
+            "close",
+            "unlock",
+            "lock",
+        };
 
     private List<string> ghostActionVerbs =
         new()
@@ -114,7 +161,7 @@ public partial class Interpreter : Node
         _fullLLMResponse += chunk;
         _fullLLMResponse = Regex.Replace(
             _fullLLMResponse,
-            pattern,
+            @"(?<!\])\w+\([^)]*\)(?!\[)",
             match => $"[b][color=#00ff00]{match.Value}[/color][/b]"
         );
 
@@ -149,16 +196,13 @@ public partial class Interpreter : Node
             {
                 string objectType = Regex.Replace(command.Verb, prefix, "").ToLower();
 
+                AcknowledgedCommandsSet.Add(prefix + "/" + objectType + "/" + command.Arguments[0]);
+
                 bus.EmitSignal(
                     EventBus.SignalName.ObjectInteraction,
                     prefix,
                     objectType,
                     command.Arguments[0]
-                );
-
-                bus.EmitSignal(
-                    EventBus.SignalName.NotableEventOccurred,
-                    $"AI interacted - {prefix} {objectType} - {command.Arguments[0]}"
                 );
 
                 return;
