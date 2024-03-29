@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://ctahsvj88g1om"]
+[gd_scene load_steps=33 format=3 uid="uid://ctahsvj88g1om"]
 
 [ext_resource type="Script" path="res://levels/node_3d.gd" id="1_7plsp"]
 [ext_resource type="PackedScene" uid="uid://7gv6q50fuutj" path="res://Scenes/Player/player.tscn" id="1_eisjc"]
@@ -17,6 +17,9 @@
 [ext_resource type="PackedScene" uid="uid://cqjjtoijg6ify" path="res://Scenes/Radio.tscn" id="13_excoj"]
 [ext_resource type="Script" path="res://Scripts/LogManager.cs" id="15_lxp6w"]
 [ext_resource type="Script" path="res://DeclarativeGameInterface/Sensors.cs" id="16_73gw5"]
+[ext_resource type="Texture2D" uid="uid://dt6ddv83pfcrt" path="res://textures/Crosshair.png" id="16_rq5qd"]
+[ext_resource type="PackedScene" uid="uid://dmqtmjciqgj0h" path="res://Scenes/Switch.tscn" id="18_1u6af"]
+[ext_resource type="AudioStream" uid="uid://do277nhq6h5yv" path="res://Audio/GameAmbiance.wav" id="20_dpm6p"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6g5uc"]
 sky_energy_multiplier = 0.76
@@ -36,7 +39,7 @@ sky_rotation = Vector3(3.48787e-16, 3.48787e-16, 3.48787e-16)
 ambient_light_color = Color(0.890196, 0.890196, 0.890196, 1)
 tonemap_mode = 2
 sdfgi_enabled = true
-sdfgi_cascades = 5
+sdfgi_cascades = 6
 sdfgi_min_cell_size = 0.19
 glow_enabled = true
 glow_intensity = 1.0
@@ -181,8 +184,17 @@ shadow_bias = 0.0
 [node name="Door" parent="." instance=ExtResource("4_b4bgh")]
 transform = Transform3D(0.955687, 0, 0, 0, 0.955687, 0, 0, 0, 0.955687, -3.32682, 1.59722, 4.60326)
 
+[node name="Door2" parent="." instance=ExtResource("4_b4bgh")]
+transform = Transform3D(-0.955687, 0, -8.35488e-08, 0, 0.955687, 0, 8.35488e-08, 0, -0.955687, 2.43551, 1.83477, 20.5003)
+
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
 navigation_mesh = SubResource("NavigationMesh_c10g4")
+
+[node name="Switch" parent="NavigationRegion3D" instance=ExtResource("18_1u6af")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.221685, 2.54659, -1.7792)
+
+[node name="Switch2" parent="NavigationRegion3D" instance=ExtResource("18_1u6af")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 11.0061, 2.44191, 9.43798)
 
 [node name="BasicBlock15" parent="NavigationRegion3D" instance=ExtResource("1_ujgwk")]
 transform = Transform3D(9.10803, 0, 0, 0, 1, 0, 0, 0, 9, 6.49497, 2.07954, -31.5179)
@@ -328,6 +340,9 @@ transform = Transform3D(-1.31134e-10, 0, -0.003, 0, 0.003, 0, 0.003, 0, -1.31134
 [node name="wall_lamp_02" parent="NavigationRegion3D/Room" instance=ExtResource("5_2hejl")]
 transform = Transform3D(-0.003, 0, 2.62268e-10, 0, 0.003, 0, -2.62268e-10, 0, -0.003, -13.3671, 2.50351, 23.633)
 
+[node name="wall_lamp_03" parent="NavigationRegion3D/Room" instance=ExtResource("5_2hejl")]
+transform = Transform3D(-1.31134e-10, 0, -0.003, 0, 0.003, 0, 0.003, 0, -1.31134e-10, -12.2029, 2.50351, 18.8907)
+
 [node name="wall_lamp_06" parent="NavigationRegion3D/Room" instance=ExtResource("5_2hejl")]
 transform = Transform3D(-0.003, 0, 2.62268e-10, 0, 0.003, 0, -2.62268e-10, 0, -0.003, -14.4086, 6.11058, 23.5987)
 
@@ -413,19 +428,16 @@ use_collision = true
 size = Vector3(4.98519, 4.34341, 0.491351)
 
 [node name="CeilingLight" parent="NavigationRegion3D" instance=ExtResource("10_oimnh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.35122, 3.86406, 20.0274)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.35122, 3.68162, 20.0274)
 
-[node name="CeilingLight4" parent="NavigationRegion3D" node_paths=PackedStringArray("nodesWithEmission") instance=ExtResource("10_oimnh")]
+[node name="CeilingLight4" parent="NavigationRegion3D" instance=ExtResource("10_oimnh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.24824, 7.2411, 20.1396)
-nodesWithEmission = [NodePath("../CeilingLight/CSGCylinder3D4"), NodePath("../CeilingLight/CSGCylinder3D2")]
 
-[node name="CeilingLight5" parent="NavigationRegion3D" node_paths=PackedStringArray("nodesWithEmission") instance=ExtResource("10_oimnh")]
+[node name="CeilingLight5" parent="NavigationRegion3D" instance=ExtResource("10_oimnh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.17931, 7.2411, 14.6678)
-nodesWithEmission = [NodePath("../CeilingLight/CSGCylinder3D4"), NodePath("../CeilingLight/CSGCylinder3D2")]
 
-[node name="CeilingLight2" parent="NavigationRegion3D" node_paths=PackedStringArray("nodesWithEmission") instance=ExtResource("10_oimnh")]
+[node name="CeilingLight2" parent="NavigationRegion3D" instance=ExtResource("10_oimnh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.02331, 3.86406, 7.85929)
-nodesWithEmission = [NodePath("../CeilingLight/CSGCylinder3D4"), NodePath("../CeilingLight/CSGCylinder3D2")]
 
 [node name="CSGBox3D4" type="CSGBox3D" parent="NavigationRegion3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.05479, 0.9731, 10.8418)
@@ -447,6 +459,7 @@ transform = Transform3D(-0.910749, 0, -0.412961, 0, 1, 0, 0.412961, 0, -0.910749
 
 [node name="Ghost" parent="." instance=ExtResource("9_1ok4b")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.0523, 0.5, 6.84054)
+visible = false
 
 [node name="SaySomething" type="TextEdit" parent="."]
 anchors_preset = 2
@@ -467,6 +480,22 @@ offset_right = 540.0
 offset_bottom = 143.0
 placeholder_text = "Command Here"
 script = ExtResource("6_l450q")
+
+[node name="PromptDebug" type="RichTextLabel" parent="."]
+visible = false
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -1088.0
+offset_top = 26.0
+offset_right = -535.0
+offset_bottom = 972.0
+grow_horizontal = 0
+theme_override_font_sizes/normal_font_size = 8
+theme_override_font_sizes/bold_font_size = 8
+bbcode_enabled = true
+text = "..."
+fit_content = true
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
 anchors_preset = 1
@@ -500,9 +529,14 @@ script = ExtResource("13_bc6nn")
 
 [node name="SensorsDebug" type="RichTextLabel" parent="."]
 offset_left = 45.0
-offset_top = 238.0
+offset_top = 157.0
 offset_right = 538.0
-offset_bottom = 1005.0
+offset_bottom = 924.0
+theme_override_font_sizes/normal_font_size = 12
+theme_override_font_sizes/bold_font_size = 12
+theme_override_font_sizes/italics_font_size = 12
+theme_override_font_sizes/bold_italics_font_size = 12
+theme_override_font_sizes/mono_font_size = 12
 bbcode_enabled = true
 
 [node name="LatencyStatistics" type="RichTextLabel" parent="."]
@@ -514,6 +548,11 @@ offset_top = 92.0
 offset_right = -23.0
 offset_bottom = 392.0
 grow_horizontal = 0
+theme_override_font_sizes/normal_font_size = 12
+theme_override_font_sizes/bold_font_size = 12
+theme_override_font_sizes/italics_font_size = 12
+theme_override_font_sizes/bold_italics_font_size = 12
+theme_override_font_sizes/mono_font_size = 12
 bbcode_enabled = true
 text = "Loop Start at											0ms
 Game Data Read									0ms
@@ -536,34 +575,28 @@ offset_top = 73.0
 offset_right = -23.0
 offset_bottom = 98.0
 grow_horizontal = 0
+theme_override_font_sizes/normal_font_size = 12
+theme_override_font_sizes/bold_font_size = 12
+theme_override_font_sizes/italics_font_size = 12
+theme_override_font_sizes/bold_italics_font_size = 12
+theme_override_font_sizes/mono_font_size = 12
 bbcode_enabled = true
 text = "[b]-- Latency Statistics --[/b]"
-
-[node name="PromptDebug" type="RichTextLabel" parent="."]
-visible = false
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -1088.0
-offset_top = 26.0
-offset_right = -535.0
-offset_bottom = 972.0
-grow_horizontal = 0
-theme_override_font_sizes/normal_font_size = 8
-theme_override_font_sizes/bold_font_size = 8
-bbcode_enabled = true
-text = "..."
-fit_content = true
 
 [node name="LLMResponse" type="RichTextLabel" parent="."]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -517.0
-offset_top = 424.0
+offset_top = 354.0
 offset_right = -23.0
-offset_bottom = 1089.0
+offset_bottom = 1019.0
 grow_horizontal = 0
+theme_override_font_sizes/normal_font_size = 12
+theme_override_font_sizes/bold_font_size = 12
+theme_override_font_sizes/italics_font_size = 12
+theme_override_font_sizes/bold_italics_font_size = 12
+theme_override_font_sizes/mono_font_size = 12
 bbcode_enabled = true
 text = "..."
 
@@ -572,10 +605,15 @@ anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -517.0
-offset_top = 399.0
+offset_top = 341.0
 offset_right = -23.0
-offset_bottom = 424.0
+offset_bottom = 366.0
 grow_horizontal = 0
+theme_override_font_sizes/normal_font_size = 12
+theme_override_font_sizes/bold_font_size = 12
+theme_override_font_sizes/italics_font_size = 12
+theme_override_font_sizes/bold_italics_font_size = 12
+theme_override_font_sizes/mono_font_size = 12
 bbcode_enabled = true
 text = "[b]-- LLM Response --[/b]"
 
@@ -584,12 +622,31 @@ anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -517.0
-offset_top = 369.0
+offset_top = 311.0
 offset_right = -23.0
-offset_bottom = 394.0
+offset_bottom = 336.0
 grow_horizontal = 0
+theme_override_font_sizes/normal_font_size = 12
+theme_override_font_sizes/bold_font_size = 12
+theme_override_font_sizes/italics_font_size = 12
+theme_override_font_sizes/bold_italics_font_size = 12
+theme_override_font_sizes/mono_font_size = 12
 bbcode_enabled = true
 text = "Model: ???"
+
+[node name="Crosshair" type="TextureRect" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("16_rq5qd")
 
 [node name="Room_LivingRoom" type="Area3D" parent="." groups=["rooms"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.990161, 2.3409, 3.89744)
@@ -630,3 +687,14 @@ LLMModelUI = NodePath("../LLMModel")
 [node name="Sensors" type="Node" parent="." node_paths=PackedStringArray("DebugView")]
 script = ExtResource("16_73gw5")
 DebugView = NodePath("../SensorsDebug")
+
+[node name="Ambiance" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("20_dpm6p")
+volume_db = -5.0
+autoplay = true
+
+[node name="Switch" parent="." instance=ExtResource("18_1u6af")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.405895, 2.6398, 18.035)
+
+[node name="Switch2" parent="." instance=ExtResource("18_1u6af")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 5.17071, 2.61703, 19.6763)
