@@ -49,8 +49,11 @@ func _physics_process(delta):
 	if Input.is_action_pressed("Jump") and is_on_floor() and not hasFocusOnGui:
 		velocity.y = JUMP_VELOCITY
 	# Handle Shooting
-	if Input.is_action_pressed("Shoot") and not hasFocusOnGui:
+	if Input.is_action_just_pressed("Shoot") and not hasFocusOnGui:
 		interact()
+
+	if Input.is_action_just_pressed("SecondaryInteract") and not hasFocusOnGui:
+		secondaryInteract()
 		
 	if Input.is_action_pressed("Sprint") and not hasFocusOnGui:
 		SPEED = 7.5
@@ -118,21 +121,36 @@ func _input(event):
 		mouse_relative_x = clamp(event.relative.x, -50, 50)
 		mouse_relative_y = clamp(event.relative.y, -50, 10)
 
+func find_interactable(object: Node3D) -> Node3D:
+	var parent = object.get_parent()
+	while parent:
+		if parent.is_in_group("interactables"):
+			if parent.has_node("Interactable"):
+				return parent.get_node("Interactable");
+			else:
+				push_error("Interactable object does not have an Interactable script attached to it.")
+		parent = parent.get_parent()
+
+	return null
+
 func interact():
 	if not gunRay.is_colliding():
 		return
 	
 	var object: Node3D = gunRay.get_collider()
 
-	if object.get_name().to_lower().contains('door'):
-		object.toggle()
-	else:
-		print("unknown object to interact with (name ", object.get_name(), ")")
+	var interactable = find_interactable(object)
 
-	# var bulletInst = _bullet_scene.instantiate() as Node3D
-	# bulletInst.set_as_top_level(true)
-	# get_parent().add_child(bulletInst)
-	# bulletInst.global_transform.origin = gunRay.get_collision_point() as Vector3
-	# bulletInst.look_at((gunRay.get_collision_point()+gunRay.get_collision_normal()),Vector3.BACK)
-	# print(gunRay.get_collision_point())
-	# print(gunRay.get_collision_point()+gunRay.get_collision_normal())
+	if interactable:
+		interactable.interact()
+
+func secondaryInteract():
+	if not gunRay.is_colliding():
+		return
+	
+	var object: Node3D = gunRay.get_collider()
+
+	var interactable = find_interactable(object)
+
+	if interactable:
+		interactable.secondaryInteract()
