@@ -40,7 +40,7 @@ public partial class TargetResolution : Node
             }
         }
 
-        throw new System.Exception("Target not found: " + target);
+        return null;
     }
 
     public static Vector3 GetTargetPosition(string target)
