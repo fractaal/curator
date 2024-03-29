@@ -14,7 +14,11 @@ func _on_ghost_action(verb, arguments):
 	verb = verb.to_lower()
 	
 	if verb == "move" or verb == "moveto":
+		
 		var _position = TargetResolution.GetTargetPosition(arguments);
+
+		if _position == Vector3.ZERO:
+			return
 
 		update_target_location(_position)
 
@@ -22,7 +26,7 @@ func _physics_process(_delta):
 	
 	var current_location = global_transform.origin
 	var next_location = nav_agent.get_next_path_position()
-	var new_velocity = (next_location - current_location).normalized() * SPEED
+	var new_velocity = (next_location - current_location).normalized() * SPEED 
 
 	if (current_location - next_location).length() < 0.1:
 		return
