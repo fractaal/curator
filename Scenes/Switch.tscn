@@ -1,0 +1,47 @@
+[gd_scene load_steps=7 format=3 uid="uid://dmqtmjciqgj0h"]
+
+[ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="1_ifrks"]
+[ext_resource type="Script" path="res://Scenes/Switch.gd" id="2_uppyb"]
+[ext_resource type="AudioStream" uid="uid://cg1cen26lapox" path="res://Audio/switch.wav" id="3_ohecm"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_f6hp1"]
+albedo_color = Color(0.113725, 0.113725, 0.113725, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_aqkbi"]
+size = Vector3(0.103027, 0.19873, 0.0445862)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_el6cl"]
+roughness = 0.0
+
+[node name="Switch" type="Node3D" groups=["interactables"]]
+
+[node name="RoomLocator" type="Node" parent="."]
+script = ExtResource("1_ifrks")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+size = Vector3(0.1, 0.2, 0.01)
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.00381348)
+size = Vector3(0.125, 0.225, 0.013)
+material = SubResource("StandardMaterial3D_f6hp1")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000244141, 0.00170898, -0.00840759)
+shape = SubResource("BoxShape3D_aqkbi")
+
+[node name="Switch" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 6.51032e-05, 0.000497378, -0.0234094)
+material_override = SubResource("StandardMaterial3D_el6cl")
+size = Vector3(0.025, 0.1, 0.1)
+
+[node name="Interactable" type="Node" parent="." node_paths=PackedStringArray("switch", "locator", "sfx")]
+script = ExtResource("2_uppyb")
+switch = NodePath("../Switch")
+locator = NodePath("../RoomLocator")
+sfx = NodePath("../SFX")
+
+[node name="SFX" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("3_ohecm")
