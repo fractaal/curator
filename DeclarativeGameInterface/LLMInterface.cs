@@ -26,6 +26,10 @@ public partial class LLMInterface : Node
 
     private readonly string MODEL = "openai/gpt-3.5-turbo-0125";
 
+    // private readonly string MODEL = "google/gemini-pro";
+    // private readonly string MODEL = "cohere/command-r";
+    // private readonly string MODEL = "lizpreciatior/lzlv-70b-fp16-hf";
+
     public LLMInterface()
     {
         _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + API_KEY);
@@ -98,16 +102,6 @@ public partial class LLMInterface : Node
                         messages = messages.ToArray()
                     }
                 );
-
-                request
-                    .Content
-                    .ReadAsStringAsync()
-                    .ContinueWith(
-                        (task) =>
-                        {
-                            GD.Print("Request content: " + task.Result);
-                        }
-                    );
 
                 var response = await _client
                     .SendAsync(request, HttpCompletionOption.ResponseHeadersRead)
