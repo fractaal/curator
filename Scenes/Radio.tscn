@@ -1,13 +1,27 @@
-[gd_scene load_steps=3 format=3 uid="uid://cqjjtoijg6ify"]
+[gd_scene load_steps=10 format=3 uid="uid://cqjjtoijg6ify"]
 
 [ext_resource type="Script" path="res://Scenes/Radio.gd" id="1_yfkqg"]
+[ext_resource type="AudioStream" uid="uid://c3fpxci4q7gcx" path="res://Audio/radio-static.wav" id="2_pst66"]
+[ext_resource type="AudioStream" uid="uid://bptaefgrpa4kw" path="res://Audio/song2.wav" id="2_so25n"]
+[ext_resource type="AudioStream" uid="uid://cg1cen26lapox" path="res://Audio/switch.wav" id="3_5vqwb"]
+[ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="5_qrjla"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qx8rl"]
 albedo_color = Color(0.254902, 0.254902, 0.254902, 1)
 
-[node name="Radio" type="Node3D" node_paths=PackedStringArray("statusLabel")]
-script = ExtResource("1_yfkqg")
-statusLabel = NodePath("Label3D")
+[sub_resource type="BoxShape3D" id="BoxShape3D_iw4qt"]
+size = Vector3(0.262329, 0.493652, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_l7prk"]
+albedo_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vd013"]
+albedo_color = Color(0, 0, 0, 1)
+emission_enabled = true
+emission = Color(1, 0, 0, 1)
+emission_energy_multiplier = 5.0
+
+[node name="Radio" type="Node3D" groups=["interactables"]]
 
 [node name="CSGBox3D" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.154353, 0)
@@ -30,6 +44,56 @@ transform = Transform3D(1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, 0, 0.25927
 size = Vector3(0.1, 0.1, 1)
 
 [node name="Label3D" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.636404, 0)
-billboard = 1
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0.137369, 0.19223, 0)
+pixel_size = 0.0025
 text = "[RADIO STATUS]"
+
+[node name="Static" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+stream = ExtResource("2_pst66")
+volume_db = -25.0
+autoplay = true
+panning_strength = 2.0
+emission_angle_degrees = 60.0
+
+[node name="Song" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+stream = ExtResource("2_so25n")
+volume_db = -20.0
+pitch_scale = 0.8
+panning_strength = 2.0
+emission_angle_degrees = 60.0
+
+[node name="Switch" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.636404, 0)
+stream = ExtResource("3_5vqwb")
+volume_db = 10.0
+panning_strength = 2.0
+
+[node name="Interactable" type="Node" parent="." node_paths=PackedStringArray("statusLabel", "switch", "staticSound", "song", "locator", "indicator")]
+script = ExtResource("1_yfkqg")
+statusLabel = NodePath("../Label3D")
+switch = NodePath("../Switch")
+staticSound = NodePath("../Static")
+song = NodePath("../Song")
+locator = NodePath("../RoomLocator")
+indicator = NodePath("../CSGBox3D3")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000671387, 0.253174, 0)
+shape = SubResource("BoxShape3D_iw4qt")
+
+[node name="RoomLocator" type="Node" parent="."]
+script = ExtResource("5_qrjla")
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0189514, 0.186931, -0.016449)
+material_override = SubResource("StandardMaterial3D_l7prk")
+size = Vector3(0.233337, 0.13385, 0.415466)
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.110126, 0.279152, -0.000473678)
+material_override = SubResource("StandardMaterial3D_vd013")
+size = Vector3(0.05, 0.01, 0.25)
