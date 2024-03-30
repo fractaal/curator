@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Godot;
@@ -14,6 +15,8 @@ public partial class Interpreter : Node
 {
     private Node3D player = null;
     private Node3D ghost = null;
+
+    private TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
 
     private HashSet<string> AcknowledgedCommandsSet = new();
 
@@ -45,7 +48,7 @@ public partial class Interpreter : Node
             {
                 bus.EmitSignal(
                     EventBus.SignalName.NotableEventOccurred,
-                    $"Ghost interacted - {verb} {objectType} - {target}"
+                    $"Ghost interacted - {verb}{textInfo.ToTitleCase(objectType)}({target})"
                 );
             }
 
@@ -63,7 +66,7 @@ public partial class Interpreter : Node
 
                 bus.EmitSignal(
                     EventBus.SignalName.SystemFeedback,
-                    $"Trying to {verb} {objectType} in/at {target} FAILED.\nMaybe the object doesn't exist in the room or the target was invalid.\nRefer to the available objects per room in ROOM INFORMATION, or try a different target. Remember target syntax is 'in <ROOM NAME>' or 'all'!."
+                    $"ERROR: Trying to {verb} {objectType} in/at {target} FAILED.\nThe object doesn't exist in the room.\nRefer to the available objects per room in ROOM INFORMATION."
                 );
             }
 
@@ -90,8 +93,8 @@ public partial class Interpreter : Node
     private List<string> ghostActionVerbs =
         new()
         {
-            "move",
-            "moveTo",
+            "moveAsGhost",
+            "moveToAsGhost",
             "speakAsGhost",
             "speakAsSpiritBox",
             "manifest",
@@ -110,16 +113,15 @@ public partial class Interpreter : Node
         // Matches stuff like verb(), verb(arg1), verb(arg1, arg2)...
         var pattern = @"\w+\([^)]*\)";
 
-        var preMatches = Regex.Matches(accumulatedText, pattern);
-        if (preMatches.Count() > 0)
-        {
-            accumulatedText = accumulatedText.Substring(preMatches[0].Index + preMatches[0].Length);
-            accumulatedText = Regex.Replace(accumulatedText, pattern, "");
-        }
-
         accumulatedText += chunk;
 
         var matches = Regex.Matches(accumulatedText, pattern);
+
+        accumulatedText = Regex.Replace(
+            accumulatedText,
+            @"(?<!\])\w+\([^)]*\)(?!\[)",
+            match => $""
+        );
 
         if (matches.Count() > 0)
         {
@@ -169,13 +171,6 @@ public partial class Interpreter : Node
 
         List<Command> commands = Parse(chunk);
 
-        var newlineToSpaceString = Regex.Replace(accumulatedText, @"(\r\n|\n)", " ");
-        var highlightedMatchesString = Regex.Replace(
-            newlineToSpaceString,
-            pattern,
-            match => $"[b][color=#00ff00]{match.Value}[/color][/b]"
-        );
-
         if (commands.Count > 0)
         {
             countRecognized++;
@@ -196,20 +191,25 @@ public partial class Interpreter : Node
             {
                 string objectType = Regex.Replace(command.Verb, prefix, "").ToLower();
 
-                AcknowledgedCommandsSet.Add(prefix + "/" + objectType + "/" + command.Arguments[0]);
+                var target = TargetResolution.NormalizeTargetString(command.Arguments[0]);
 
-                bus.EmitSignal(
-                    EventBus.SignalName.ObjectInteraction,
-                    prefix,
-                    objectType,
-                    command.Arguments[0]
-                );
+                AcknowledgedCommandsSet.Add(prefix + "/" + objectType + "/" + target);
+
+                bus.EmitSignal(EventBus.SignalName.ObjectInteraction, prefix, objectType, target);
 
                 return;
             }
 
             if (ghostActionVerbs.Contains(command.Verb))
             {
+                if (command.Verb == "moveAsGhost" || command.Verb == "moveToAsGhost")
+                {
+                    var target = TargetResolution.NormalizeTargetString(command.Arguments[0]);
+
+                    bus.EmitSignal(EventBus.SignalName.GhostAction, command.Verb, target);
+                    return;
+                }
+
                 bus.EmitSignal(
                     EventBus.SignalName.GhostAction,
                     command.Verb,
@@ -218,7 +218,7 @@ public partial class Interpreter : Node
 
                 bus.EmitSignal(
                     EventBus.SignalName.NotableEventOccurred,
-                    $"AI acted as the Ghost - {command.Verb} - {command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ")}"
+                    $"Ghost action - {command.Verb}({command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ")})"
                 );
 
                 return;
