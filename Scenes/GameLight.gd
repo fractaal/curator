@@ -35,18 +35,18 @@ func _on_object_interact(verb: String, type: String, target: String):
 
 	target = target.strip_edges()
 
-	if target.begins_with("in"):
-		var targetRoom = target.substr(3).to_lower().strip_edges()
+	if target == "all":
+		self[verb].call()
+		EventBus.emit_signal("ObjectInteractionAcknowledged", verb, type, target)
+	else:
+		var targetRoom = target
+		if targetRoom.begins_with("in"):
+			targetRoom = targetRoom.substr(2)
 		if locator.IsInRoom(targetRoom):
 			self[verb].call()
 			EventBus.emit_signal("ObjectInteractionAcknowledged", verb, type, target)
 		else:
 			return
-	elif target == "all":
-		self[verb].call()
-		EventBus.emit_signal("ObjectInteractionAcknowledged", verb, type, target)
-	else:
-		push_warning("Invalid target declaration ", target)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -112,6 +112,9 @@ func setEnergy(num):
 		light.light_energy = defaultIntensities[light.name] * num
 	for node in nodesWithEmission:
 		node.material.emission_energy_multiplier = defaultIntensities[node.name] * num
+
+func turnOn():
+	restore()
 		
 func restore():
 	RestoreSFX.pitch_scale = randf_range(0.85, 1.3)
@@ -201,7 +204,7 @@ func turnOnInstant(): # Only the player should be able to do this
 	isDead = false
 
 func getStatus():
-	return "Light (" + get_parent().name + ") Status - " + ("Off" if isDead else "On") + (" " if interactable else " (NOT INTERACTABLE)")
+	return "Light Status - " + ("Off" if isDead else "On") + (" " if interactable else " (**Player can't interact**)")
 
 func interact():
 	pass

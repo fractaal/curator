@@ -19,24 +19,23 @@ func generate_random_red():
 	return Color(r, g, b)
 
 func _on_object_interact(verb: String, type: String, target: String):
-
 	if not type.to_lower().contains("radio"):
 		return
 
 	target = target.strip_edges()
 
-	if target.begins_with("in"):
-		var targetRoom = target.substr(3).to_lower().strip_edges()
+	if target == "all":
+		self[verb].call()
+		EventBus.emit_signal("ObjectInteractionAcknowledged", verb, type, target)
+	else:
+		var targetRoom = target
+		if targetRoom.begins_with("in"):
+			targetRoom = targetRoom.substr(2)
 		if locator.IsInRoom(targetRoom):
 			self[verb].call()
 			EventBus.emit_signal("ObjectInteractionAcknowledged", verb, type, target)
 		else:
 			return
-	elif target == "all":
-		self[verb].call()
-		EventBus.emit_signal("ObjectInteractionAcknowledged", verb, type, target)
-	else:
-		push_warning("Invalid target declaration ", target)
 
 var material: StandardMaterial3D
 

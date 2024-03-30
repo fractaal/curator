@@ -16,24 +16,22 @@ var isAnimating = false
 @export var locator: Node
 
 func _on_object_interact(verb: String, type: String, target: String):
-
 	if not type.to_lower().contains("door"):
 		return
 
 	target = target.strip_edges()
 
-	if target.begins_with("in"):
-		var targetRoom = target.substr(3).to_lower().strip_edges()
-		if locator.IsInRoom(targetRoom):
-			EventBus.emit_signal("ObjectInteractionAcknowledged", verb, type, target)
+	if target == "all":
+		self[verb].call()
+		EventBus.emit_signal("ObjectInteractionAcknowledged", verb, type, target)
+	else:
+		if target.begins_with("in"):
+			target = target.substr(2)
+		if locator.IsInRoom(target):
 			self[verb].call()
+			EventBus.emit_signal("ObjectInteractionAcknowledged", verb, type, target)
 		else:
 			return
-	elif target == "all":
-		EventBus.emit_signal("ObjectInteractionAcknowledged", verb, type, target)
-		self[verb].call()
-	else:
-		push_warning("Invalid target declaration ", target)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
