@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 public partial class TargetResolution : Node
@@ -7,6 +9,43 @@ public partial class TargetResolution : Node
     public override void _Ready()
     {
         instance = this;
+    }
+
+    private static readonly List<string> delimiters = new() { ":", "=" };
+
+    private static readonly List<string> prepositions =
+        new() { "on ", "at ", "near ", "around ", "nearby " };
+
+    public static string NormalizeTargetString(string target)
+    {
+        target = target.Trim().ToLower();
+
+        target = prepositions.Aggregate(
+            target,
+            (current, preposition) => current.Replace(preposition, "")
+        );
+
+        if (target == "all")
+        {
+            return target;
+        }
+
+        if (target == "player")
+        {
+            return target;
+        }
+
+        if (target.StartsWith("in"))
+        {
+            target = target.Substring(2).Trim();
+        }
+        var split = delimiters.FirstOrDefault(delimiter => target.Contains(delimiter), "NONE");
+
+        if (split != "NONE")
+        {
+            target = target.Split(split)[1].Trim();
+        }
+        return target.Trim();
     }
 
     public static Node GetTarget(string target)
@@ -53,6 +92,14 @@ public partial class TargetResolution : Node
         }
         else
         {
+            EventBus
+                .Get()
+                .EmitSignal(
+                    EventBus.SignalName.SystemFeedback,
+                    "Target '"
+                        + target
+                        + "' is invalid. Please remember valid targets are only 'all', 'in <ROOM NAME>'"
+                );
             return new Vector3();
         }
     }
