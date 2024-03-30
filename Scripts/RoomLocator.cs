@@ -12,7 +12,7 @@ public partial class RoomLocator : Node
     {
         foreach (string compareRoom in Rooms)
         {
-            if (compareRoom.ToLower().Contains(room.ToLower()))
+            if (compareRoom.Trim().ToLower().Contains(room.Trim().ToLower()))
             {
                 return true;
             }
