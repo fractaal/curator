@@ -104,6 +104,11 @@ public partial class Room : Area3D
                 {
                     string line = interactable.Call("getStatus").AsString();
 
+                    if (info.Contains(line)) // Reduce redundancy
+                    {
+                        continue;
+                    }
+
                     if (line == "")
                     {
                         continue;
