@@ -158,25 +158,26 @@ public partial class Sensors : Node
 
         if (SystemFeedback.Count == 0)
         {
-            systemFeedback += "You haven't done anything wrong (yet!)";
+            systemFeedback += "No feedback yet.";
         }
 
-        return $@"Time: {time}s
+        return $@"CURRENT TIME: {time}s
+
 -- GHOST INFORMATION
 Ghost Name: {ghostName}
 Type: {ghostType}
 Age: {ghostAge}
 
--- NOTABLE EVENTS --
-{events}
-
 -- ROOM INFORMATION --
 {GetAllRoomInformation()}
+
+-- NOTABLE EVENTS --
+{events}
 
 -- PLAYER INFORMATION --
 Current Room: {PlayerCurrentRoom}
 
--- SYSTEM FEEDBACK (AMEND ANY ISSUES YOU SEE HERE) --
+-- SYSTEM FEEDBACK (AMEND ANY ISSUES YOU SEE HERE IN THE FUTURE) --
 {systemFeedback}";
     }
 }
