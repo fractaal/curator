@@ -31,7 +31,7 @@ public partial class Prompter : Node
         bus = GetNode<EventBus>("/root/EventBus");
         llmInterface = GetNode<LLMInterface>("/root/LLMInterface");
 
-        promptDebugUI = GetNode<RichTextLabel>("/root/Node3d/PromptDebug");
+        promptDebugUI = GetNode<RichTextLabel>("/root/Node3d/DebugUI/PromptDebug");
 
         bus.GameDataRead += (data) =>
         {
@@ -51,15 +51,16 @@ public partial class Prompter : Node
 
             List<Message> messages = new List<Message>
             {
-                new Message { role = "user", content = SYSTEM_PROMPT },
-                new Message
-                {
-                    role = "user",
-                    content =
-                        prompt
-                        + "\n\n[Reminder to maintain strict syntax for the actions you want to perform -- they won't be recognized otherwise!]\n\n"
-                }
+                new Message { role = "system", content = SYSTEM_PROMPT },
             };
+
+            messages.AddRange(
+                llmResponses
+                    .TakeLast(5)
+                    .Select(response => new Message { role = "assistant", content = response })
+            );
+
+            messages.Add(new Message { role = "user", content = prompt });
 
             promptDebugUI.Text = messages.Aggregate(
                 "",
@@ -82,8 +83,13 @@ public partial class Prompter : Node
 
         bus.LLMLastResponseChunk += (chunk) =>
         {
-            llmResponses.Add(accumulatedLLMResponse);
+            bus.EmitSignal(EventBus.SignalName.LLMFullResponse, accumulatedLLMResponse);
             accumulatedLLMResponse = "";
+        };
+
+        bus.LLMFullResponse += (response) =>
+        {
+            llmResponses.Add(accumulatedLLMResponse);
         };
     }
 }
