@@ -38,6 +38,9 @@ public partial class EventBus : Node
     public delegate void LLMLastResponseChunkEventHandler(string chunk);
 
     [Signal]
+    public delegate void LLMFullResponseEventHandler(string response);
+
+    [Signal]
     public delegate void InterpreterCommandRecognizedEventHandler(string command);
 
     [Signal]
