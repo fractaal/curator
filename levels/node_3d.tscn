@@ -459,7 +459,6 @@ transform = Transform3D(-0.910749, 0, -0.412961, 0, 1, 0, 0.412961, 0, -0.910749
 
 [node name="Ghost" parent="." instance=ExtResource("9_1ok4b")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.0523, 0.5, 6.84054)
-visible = false
 
 [node name="SaySomething" type="TextEdit" parent="."]
 anchors_preset = 2
@@ -473,23 +472,33 @@ grow_vertical = 0
 placeholder_text = "Say something..."
 script = ExtResource("9_klx4h")
 
-[node name="CommandLine" type="TextEdit" parent="."]
-offset_left = 40.0
-offset_top = 27.0
-offset_right = 540.0
-offset_bottom = 143.0
+[node name="DebugUI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CommandLine" type="TextEdit" parent="DebugUI"]
+layout_mode = 1
+offset_left = 28.0
+offset_top = 28.0
+offset_right = 528.0
+offset_bottom = 144.0
 placeholder_text = "Command Here"
 script = ExtResource("6_l450q")
 
-[node name="PromptDebug" type="RichTextLabel" parent="."]
+[node name="PromptDebug" type="RichTextLabel" parent="DebugUI"]
 visible = false
+layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -1088.0
-offset_top = 26.0
-offset_right = -535.0
-offset_bottom = 972.0
+offset_left = -131.0
+offset_top = -285.0
+offset_right = 422.0
+offset_bottom = 661.0
 grow_horizontal = 0
 theme_override_font_sizes/normal_font_size = 8
 theme_override_font_sizes/bold_font_size = 8
@@ -497,25 +506,27 @@ bbcode_enabled = true
 text = "..."
 fit_content = true
 
-[node name="RichTextLabel" type="RichTextLabel" parent="."]
+[node name="RichTextLabel" type="RichTextLabel" parent="DebugUI"]
+layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -520.0
-offset_top = 25.0
-offset_right = -20.0
-offset_bottom = 525.0
+offset_left = 437.0
+offset_top = -286.0
+offset_right = 937.0
+offset_bottom = 214.0
 grow_horizontal = 0
 theme_override_font_sizes/normal_font_size = 24
 
-[node name="ModeReadout" type="RichTextLabel" parent="."]
+[node name="ModeReadout" type="RichTextLabel" parent="DebugUI"]
+layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -291.0
-offset_top = 24.0
-offset_right = -36.0
-offset_bottom = 79.0
+offset_left = -270.0
+offset_top = 11.0
+offset_right = -15.0
+offset_bottom = 66.0
 grow_horizontal = 0
 theme_override_font_sizes/normal_font_size = 32
 theme_override_font_sizes/bold_font_size = 32
@@ -527,11 +538,12 @@ text = "- READ MODE"
 text_direction = 2
 script = ExtResource("13_bc6nn")
 
-[node name="SensorsDebug" type="RichTextLabel" parent="."]
-offset_left = 45.0
-offset_top = 157.0
-offset_right = 538.0
-offset_bottom = 924.0
+[node name="SensorsDebug" type="RichTextLabel" parent="DebugUI"]
+layout_mode = 1
+offset_left = 31.0
+offset_top = 158.0
+offset_right = 524.0
+offset_bottom = 701.0
 theme_override_font_sizes/normal_font_size = 12
 theme_override_font_sizes/bold_font_size = 12
 theme_override_font_sizes/italics_font_size = 12
@@ -539,14 +551,15 @@ theme_override_font_sizes/bold_italics_font_size = 12
 theme_override_font_sizes/mono_font_size = 12
 bbcode_enabled = true
 
-[node name="LatencyStatistics" type="RichTextLabel" parent="."]
+[node name="LatencyStatistics" type="RichTextLabel" parent="DebugUI"]
+layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -517.0
-offset_top = 92.0
-offset_right = -23.0
-offset_bottom = 392.0
+offset_left = -337.0
+offset_top = 52.0
+offset_right = -21.0
+offset_bottom = 352.0
 grow_horizontal = 0
 theme_override_font_sizes/normal_font_size = 12
 theme_override_font_sizes/bold_font_size = 12
@@ -566,14 +579,15 @@ Last Command Recognized				0ms
 Command Recognized Count			0ms
 Command Density								0ms"
 
-[node name="LatencyStatisticsTitle" type="RichTextLabel" parent="."]
+[node name="LatencyStatisticsTitle" type="RichTextLabel" parent="DebugUI"]
+layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -516.0
-offset_top = 73.0
-offset_right = -23.0
-offset_bottom = 98.0
+offset_left = -39.0
+offset_top = -238.0
+offset_right = 454.0
+offset_bottom = -213.0
 grow_horizontal = 0
 theme_override_font_sizes/normal_font_size = 12
 theme_override_font_sizes/bold_font_size = 12
@@ -583,14 +597,15 @@ theme_override_font_sizes/mono_font_size = 12
 bbcode_enabled = true
 text = "[b]-- Latency Statistics --[/b]"
 
-[node name="LLMResponse" type="RichTextLabel" parent="."]
+[node name="LLMResponse" type="RichTextLabel" parent="DebugUI"]
+layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -517.0
-offset_top = 354.0
-offset_right = -23.0
-offset_bottom = 1019.0
+offset_left = -337.0
+offset_top = 298.0
+offset_right = -18.0
+offset_bottom = 784.0
 grow_horizontal = 0
 theme_override_font_sizes/normal_font_size = 12
 theme_override_font_sizes/bold_font_size = 12
@@ -600,14 +615,15 @@ theme_override_font_sizes/mono_font_size = 12
 bbcode_enabled = true
 text = "..."
 
-[node name="LLMResponseTitle" type="RichTextLabel" parent="."]
+[node name="LLMResponseTitle" type="RichTextLabel" parent="DebugUI"]
+layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -517.0
-offset_top = 341.0
-offset_right = -23.0
-offset_bottom = 366.0
+offset_left = -334.0
+offset_top = 268.0
+offset_right = -2.0
+offset_bottom = 293.0
 grow_horizontal = 0
 theme_override_font_sizes/normal_font_size = 12
 theme_override_font_sizes/bold_font_size = 12
@@ -617,14 +633,14 @@ theme_override_font_sizes/mono_font_size = 12
 bbcode_enabled = true
 text = "[b]-- LLM Response --[/b]"
 
-[node name="LLMModel" type="RichTextLabel" parent="."]
+[node name="LLMModel" type="RichTextLabel" parent="DebugUI"]
+layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -517.0
-offset_top = 311.0
-offset_right = -23.0
-offset_bottom = 336.0
+offset_left = -336.0
+offset_top = 243.0
+offset_bottom = 268.0
 grow_horizontal = 0
 theme_override_font_sizes/normal_font_size = 12
 theme_override_font_sizes/bold_font_size = 12
@@ -680,13 +696,13 @@ shape = SubResource("BoxShape3D_b58na")
 
 [node name="LogManager" type="Node" parent="." node_paths=PackedStringArray("LatencyStatisticsUI", "LLMResponseUI", "LLMModelUI")]
 script = ExtResource("15_lxp6w")
-LatencyStatisticsUI = NodePath("../LatencyStatistics")
-LLMResponseUI = NodePath("../LLMResponse")
-LLMModelUI = NodePath("../LLMModel")
+LatencyStatisticsUI = NodePath("../DebugUI/LatencyStatistics")
+LLMResponseUI = NodePath("../DebugUI/LLMResponse")
+LLMModelUI = NodePath("../DebugUI/LLMModel")
 
 [node name="Sensors" type="Node" parent="." node_paths=PackedStringArray("DebugView")]
 script = ExtResource("16_73gw5")
-DebugView = NodePath("../SensorsDebug")
+DebugView = NodePath("../DebugUI/SensorsDebug")
 
 [node name="Ambiance" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("20_dpm6p")
