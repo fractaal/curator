@@ -1,0 +1,87 @@
+[gd_scene load_steps=8 format=3 uid="uid://byg6wn7sspnbk"]
+
+[ext_resource type="Script" path="res://Scenes/Tools/EMFReader.cs" id="1_baf20"]
+[ext_resource type="AudioStream" uid="uid://cg1cen26lapox" path="res://Audio/switch.wav" id="2_b7qax"]
+[ext_resource type="AudioStream" uid="uid://catg8owgou2hf" path="res://Audio/ToolBeep.wav" id="3_4f8of"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u0h5p"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5syxn"]
+albedo_color = Color(0, 0, 0, 1)
+roughness = 0.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o12bk"]
+albedo_color = Color(0.792157, 0.188235, 0, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cbufo"]
+margin = 0.0
+size = Vector3(0.206747, 0.0988802, 0.268738)
+
+[node name="EmfReader" type="RigidBody3D" groups=["interactables"]]
+collision_layer = 16
+mass = 0.1
+continuous_cd = true
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+material_override = SubResource("StandardMaterial3D_u0h5p")
+size = Vector3(0.114807, 0.0291748, 0.237305)
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="CSGBox3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0157301, -0.0549622)
+operation = 2
+size = Vector3(0.114807, 0.0291748, 0.141418)
+
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(-1, 0, 8.74228e-08, 8.74228e-08, -4.37114e-08, 1, 3.82137e-15, 1, 4.37114e-08, -0.000236511, 0.0148017, 0.0994759)
+pixel_size = 0.0005
+shaded = true
+modulate = Color(0, 0, 0, 1)
+text = "EMSIGHT"
+outline_size = 0
+
+[node name="Label3D3" type="Label3D" parent="."]
+transform = Transform3D(-1, 0, 8.74228e-08, 8.74228e-08, -4.37114e-08, 1, 3.82137e-15, 1, 4.37114e-08, 0.0467083, 0.00124361, -0.0118523)
+pixel_size = 0.0002
+shaded = true
+modulate = Color(0, 0, 0, 1)
+text = "<E> to toggle power in hand.
+<RIGHT CLICK> to toggle power
+when not holding it.
+
+Enjoy ghost hunting! Don't die"
+outline_size = 0
+horizontal_alignment = 0
+
+[node name="Label3D2" type="Label3D" parent="."]
+transform = Transform3D(-1, 0, 8.74228e-08, 8.74228e-08, -4.37114e-08, 1, 3.82137e-15, 1, 4.37114e-08, -0.000236511, 0.0155174, 0.0525942)
+pixel_size = 0.0005
+text = "EMF 5"
+outline_size = 0
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.000236511, 0.000267029, 0.0512832)
+material_override = SubResource("StandardMaterial3D_5syxn")
+size = Vector3(0.104996, 0.0297089, 0.0521088)
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.65476e-06, -0.00320244, -0.0964065)
+material_override = SubResource("StandardMaterial3D_o12bk")
+size = Vector3(0.100038, 0.0147514, 0.0187302)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00216389, 0.0176457, 0.0070496)
+shape = SubResource("BoxShape3D_cbufo")
+
+[node name="Interactable" type="Node" parent="." node_paths=PackedStringArray("display", "PowerSound", "TickSound")]
+script = ExtResource("1_baf20")
+display = NodePath("../Label3D2")
+PowerSound = NodePath("../Switch")
+TickSound = NodePath("../Beep")
+
+[node name="Switch" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("2_b7qax")
+
+[node name="Beep" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("3_4f8of")
+volume_db = -20.0
+max_db = -15.0
