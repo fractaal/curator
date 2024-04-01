@@ -18,6 +18,8 @@ var speed = 2.5
 	
 @export var blackTexture: TextureRect
 
+@export var evidenceDepositor: Node
+
 var player: Node3D
 
 var last_location = Vector3()
@@ -70,6 +72,10 @@ func _on_ghost_action(verb, arguments):
 
 	if verb == "ghostappear":
 		appear()
+	
+	if verb == "ghostdepositevidence":
+		if evidenceDepositor:
+			evidenceDepositor.DepositEvidence(GhostType)
 
 func appear():
 	if chasing:

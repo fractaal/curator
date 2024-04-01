@@ -145,6 +145,7 @@ public partial class Interpreter : Node
             "chasePlayerAsGhost",
             "speakAsGhost",
             "ghostAppear",
+            "ghostDepositEvidence"
         };
 
     private string accumulatedText = "";

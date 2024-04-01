@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://cnuoki3eh88l3"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_c2d4k"]
+size = Vector3(0.561523, 0.385254, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bcluq"]
+size = Vector3(0.66, 0.395, 1.01)
+
+[node name="Evidence" type="RigidBody3D"]
+mass = 0.5
+
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -0.0405273, 0.0383301, 0)
+billboard = 1
+no_depth_test = true
+text = "BIG EVIDENCE"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0405273, 0.0383301, 0)
+shape = SubResource("BoxShape3D_c2d4k")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0401604, 0)
+mesh = SubResource("BoxMesh_bcluq")

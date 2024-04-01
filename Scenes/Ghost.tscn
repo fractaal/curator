@@ -1,7 +1,9 @@
-[gd_scene load_steps=27 format=3 uid="uid://bbhrmf5ph6a17"]
+[gd_scene load_steps=29 format=3 uid="uid://bbhrmf5ph6a17"]
 
 [ext_resource type="Texture2D" uid="uid://shc2f632i4e" path="res://models/Walking-3e31920b44c6b00154392f6ae2735c79_zombie_body_diffuse.png" id="1_dwbvp"]
+[ext_resource type="Script" path="res://Scenes/Ghost/EvidenceDepositor.cs" id="2_6rpkm"]
 [ext_resource type="Texture2D" uid="uid://dv1bbkv5bqnuv" path="res://models/Walking-3e31920b44c6b00154392f6ae2735c79_zombie_normal.png" id="2_v8axk"]
+[ext_resource type="PackedScene" uid="uid://cnuoki3eh88l3" path="res://Scenes/Evidences/EMFLevel5.tscn" id="3_hmu3i"]
 [ext_resource type="Texture2D" uid="uid://dfw4f0pu6617e" path="res://models/Walking-3e31920b44c6b00154392f6ae2735c79_zombie_diffuse.png" id="3_ivqix"]
 [ext_resource type="Script" path="res://Scenes/Enemy.gd" id="4_m1s54"]
 [ext_resource type="Script" path="res://Scenes/BasicIKPlayer.gd" id="5_fsmaf"]
@@ -1237,7 +1239,7 @@ _data = {
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_05ybm"]
 
-[node name="RootNode" type="CharacterBody3D" node_paths=PackedStringArray("Locator", "huntStartSFX", "heartbeatSFX", "huntTensionSFX", "jumpscareSFX", "appearSFX", "disappearSFX", "huntGracePeriodSFX", "blackTexture") groups=["enemies"]]
+[node name="RootNode" type="CharacterBody3D" node_paths=PackedStringArray("Locator", "huntStartSFX", "heartbeatSFX", "huntTensionSFX", "jumpscareSFX", "appearSFX", "disappearSFX", "huntGracePeriodSFX", "blackTexture", "evidenceDepositor") groups=["enemies"]]
 collision_layer = 4
 collision_mask = 3
 script = ExtResource("4_m1s54")
@@ -1250,6 +1252,18 @@ appearSFX = NodePath("Appear")
 disappearSFX = NodePath("Disappear")
 huntGracePeriodSFX = NodePath("HuntGracePeriod")
 blackTexture = NodePath("Black")
+evidenceDepositor = NodePath("EvidenceDepositor")
+
+[node name="EvidenceDepositor" type="Node" parent="." node_paths=PackedStringArray("Locator")]
+script = ExtResource("2_6rpkm")
+GhostWritingPrefab = ExtResource("3_hmu3i")
+EMFLevel5Prefab = ExtResource("3_hmu3i")
+DisembodiedFootstepsPrefab = ExtResource("3_hmu3i")
+FreezingTemperaturesPrefab = ExtResource("3_hmu3i")
+ToxicResiduePrefab = ExtResource("3_hmu3i")
+FingerprintsPrefab = ExtResource("3_hmu3i")
+ShadowMovementPrefab = ExtResource("3_hmu3i")
+Locator = NodePath("../RoomLocator")
 
 [node name="Skeleton3D" type="Skeleton3D" parent="."]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0.05, 0)
