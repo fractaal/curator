@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://ctahsvj88g1om"]
+[gd_scene load_steps=36 format=3 uid="uid://ctahsvj88g1om"]
 
 [ext_resource type="Script" path="res://levels/node_3d.gd" id="1_7plsp"]
 [ext_resource type="PackedScene" uid="uid://7gv6q50fuutj" path="res://Scenes/Player/player.tscn" id="1_eisjc"]
@@ -22,6 +22,7 @@
 [ext_resource type="AudioStream" uid="uid://do277nhq6h5yv" path="res://Audio/GameAmbiance.wav" id="20_dpm6p"]
 [ext_resource type="PackedScene" uid="uid://cc1v1twvevriu" path="res://Scenes/Tools/TemperatureReader.tscn" id="22_06xlt"]
 [ext_resource type="PackedScene" uid="uid://byg6wn7sspnbk" path="res://Scenes/Tools/EMFReader2.tscn" id="23_5fppm"]
+[ext_resource type="PackedScene" uid="uid://c8wpx70gwa0dr" path="res://Scenes/Evidences/ShadowMovement.tscn" id="23_npqc5"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6g5uc"]
 sky_energy_multiplier = 0.76
@@ -55,6 +56,7 @@ glow_bloom = 1.0
 volumetric_fog_density = 0.1
 volumetric_fog_anisotropy = 0.71
 volumetric_fog_detail_spread = 1.0
+adjustment_enabled = true
 
 [sub_resource type="Animation" id="Animation_c420g"]
 length = 0.001
@@ -150,6 +152,7 @@ agent_height = 1.0
 agent_max_climb = 0.1
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2gtf0"]
+albedo_color = Color(0.137255, 0.133333, 0, 1)
 albedo_texture = ExtResource("3_m1rsk")
 uv1_scale = Vector3(3, 3, 3)
 uv1_triplanar = true
@@ -551,11 +554,11 @@ offset_left = 31.0
 offset_top = 158.0
 offset_right = 524.0
 offset_bottom = 1016.0
-theme_override_font_sizes/normal_font_size = 12
-theme_override_font_sizes/bold_font_size = 12
-theme_override_font_sizes/italics_font_size = 12
-theme_override_font_sizes/bold_italics_font_size = 12
-theme_override_font_sizes/mono_font_size = 12
+theme_override_font_sizes/normal_font_size = 8
+theme_override_font_sizes/bold_font_size = 8
+theme_override_font_sizes/italics_font_size = 8
+theme_override_font_sizes/bold_italics_font_size = 8
+theme_override_font_sizes/mono_font_size = 8
 bbcode_enabled = true
 
 [node name="LatencyStatistics" type="RichTextLabel" parent="DebugUI"]
@@ -685,7 +688,7 @@ collision_mask = 15
 script = ExtResource("12_kaqth")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="1stFloorCorridor"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.202057, 0.0709839, 3.31522)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.276172, 0.0419176, 3.29246)
 shape = SubResource("BoxShape3D_56o5n")
 
 [node name="Pantry" type="Area3D" parent="." groups=["rooms"]]
@@ -731,3 +734,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.74047, 1.84372, 8.19513)
 
 [node name="EmfReader2" parent="." instance=ExtResource("22_06xlt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.14861, 2.06625, 7.58353)
+
+[node name="RootNode" parent="." instance=ExtResource("23_npqc5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.32339, 0.5, 5.82101)
