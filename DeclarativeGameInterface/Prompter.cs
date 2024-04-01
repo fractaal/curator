@@ -56,7 +56,7 @@ public partial class Prompter : Node
 
             messages.AddRange(
                 llmResponses
-                    .TakeLast(5)
+                    .TakeLast(3)
                     .Select(response => new Message { role = "assistant", content = response })
             );
 
