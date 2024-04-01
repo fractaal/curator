@@ -5,15 +5,6 @@ using Godot;
 
 public partial class Sensors : Node
 {
-    private readonly List<string> _firstNames =
-        new() { "John", "Jennifer", "Madison", "Mark", "Abrahm", "Dominic", "Kimi", };
-
-    private readonly List<string> _lastNames =
-        new() { "Black", "Brown", "Jackson", "Peralta", "Walker", "Carpenter", "Pedo" };
-
-    private readonly List<string> _ghostTypes =
-        new() { "Demon", "Wraith", "Phantom", "Shade", "Banshee" };
-
     private string ghostName = "";
     private string ghostType = "";
     private int ghostAge = 0;
@@ -33,14 +24,6 @@ public partial class Sensors : Node
     public override void _Ready()
     {
         bus = EventBus.Get();
-
-        var random = new Random();
-        ghostName =
-            _firstNames[random.Next(0, _firstNames.Count)]
-            + " "
-            + _lastNames[random.Next(0, _lastNames.Count)];
-        ghostType = _ghostTypes[random.Next(0, _ghostTypes.Count)];
-        ghostAge = random.Next(20, 1000);
 
         // Attaching various object events to sensors
         Room.RoomEntered += (room, body) =>
@@ -109,7 +92,7 @@ public partial class Sensors : Node
         if (sensorReadElapsed >= sensorReadInterval)
         {
             sensorReadElapsed = 0;
-            // return;
+            return;
             if (!loopCompleted)
             {
                 GD.Print("Loop not completed yet, skipping sensor read.");
@@ -161,12 +144,21 @@ public partial class Sensors : Node
             systemFeedback += "No feedback yet.";
         }
 
+        string ghostStatus = "";
+
+        try
+        {
+            ghostStatus = GetTree().CurrentScene.GetNode("Ghost").Call("getStatus").ToString();
+        }
+        catch (Exception e)
+        {
+            GD.Print("Error getting ghost status: ", e.Message);
+        }
+
         return $@"CURRENT TIME: {time}s
 
 -- GHOST INFORMATION
-Ghost Name: {ghostName}
-Type: {ghostType}
-Age: {ghostAge}
+{ghostStatus}
 
 -- ROOM INFORMATION --
 {GetAllRoomInformation()}
