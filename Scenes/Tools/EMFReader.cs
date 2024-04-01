@@ -6,6 +6,9 @@ public partial class EMFReader : Holdable
     [Export]
     private Label3D display;
 
+    [Export]
+    private Label3D tick;
+
     private Node3D Ghost;
 
     [Export]
@@ -56,6 +59,11 @@ public partial class EMFReader : Holdable
     private double ElapsedForSound;
     private double UpdateInterval = 1f;
 
+    private int tickIndicator = 0;
+
+    private Color tickColor = Color.FromHtml("#00ff00");
+    private Color white = Color.FromHtml("#ffffff");
+
     public override void _Process(double delta)
     {
         base._Process(delta);
@@ -70,14 +78,23 @@ public partial class EMFReader : Holdable
         var emf = GetEMF();
         UpdateInterval = 1f - (emf / 6);
 
-        if (Elapsed >= UpdateInterval)
+        if (Elapsed >= (UpdateInterval / 2))
         {
             Elapsed = 0;
             if (!Power)
                 return;
 
-            TickSound.PitchScale = (float)(0.75 + (emf / 10));
-            TickSound.Play(0);
+            tickIndicator = (tickIndicator + 1) % 2;
+            tick.Modulate = tickIndicator == 0 ? tickColor : white;
+            string beat = tickIndicator == 0 ? "TICK -" : "TICK";
+            tick.Text = beat;
+
+            if (tickIndicator == 0)
+            {
+                TickSound.PitchScale = (float)(0.75 + (emf / 10));
+                TickSound.Play(0);
+            }
+
             display.Modulate = Color.FromHtml("#ffffff").Lerp(Color.FromHtml("#ff0000"), emf / 6);
             display.Text = "EMF: " + emf.ToString("0.00");
         }
