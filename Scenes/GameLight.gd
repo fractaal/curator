@@ -75,9 +75,9 @@ func _ready():
 	HumSFX.panning_strength = 3
 	
 	ExplodeSFX.volume_db = -7
-	FlickerSFX.volume_db = -12
+	FlickerSFX.volume_db = -15
 	RestoreSFX.volume_db = -7
-	HumSFX.volume_db = -15
+	HumSFX.volume_db = -25
 
 	HumSFX.pitch_scale = randf_range(0.95, 1.05)
 
