@@ -35,14 +35,19 @@ var dead = false
 
 var ghostHead: Node3D
 
+var worldEnvironment: WorldEnvironment
+
 func kill():
 	dead = true
 
 	var tween = create_tween()
 
+	EventBus.emit_signal("ObjectInteraction", "explode", "lights", "all")
+
 	$Head/Camera3d.position.y += 0.15
-	$Head/Camera3d.fov = 100
-	tween.tween_property($Head/Camera3d, "fov", 60, 2.25)
+	$Head/Camera3d.fov = 120
+	
+	tween.tween_property($Head/Camera3d, "fov", 20, 0.25).set_delay(1.75)
 	tween.play()
 
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -53,6 +58,8 @@ func _ready():
 	gunRay.set_collision_mask_value(4, true) # collide with doors
 	gunRay.set_collision_mask_value(5, true) # collide with items
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+	worldEnvironment = get_tree().current_scene.get_node("WorldEnvironment") as WorldEnvironment
 	
 	ghostHead = get_tree().current_scene.get_node("Ghost/Head")
 
@@ -66,7 +73,15 @@ func _physics_process(delta):
 	velocity.z += force.z * delta
 
 	if dead:
-		$Head/Camera3d.look_at(ghostHead.global_transform.origin, Vector3.UP)
+		var noise = Vector3(
+			noise_x_high.get_noise_1d(Time.get_ticks_msec() * 2 + 9999),
+			noise_x_high.get_noise_1d(Time.get_ticks_msec() * 2 - 9999),
+			noise_x_high.get_noise_1d(Time.get_ticks_msec() * 2 + 19999),
+		) * 0.01
+
+		$Head/Camera3d.look_at(ghostHead.global_transform.origin + noise, Vector3.UP)
+
+		worldEnvironment.environment.adjustment_brightness = noise_y_high.get_noise_1d(Time.get_ticks_msec() + 9999) + 1
 
 	if not dead:
 		# Handle Jump.
