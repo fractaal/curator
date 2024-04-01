@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Godot;
 
@@ -27,14 +28,19 @@ public partial class EvidenceDepositor : Node
     private PackedScene ShadowMovementPrefab;
 
     [Export]
+    private PackedScene BloodstainsPrefab;
+
+    [Export]
     private RoomLocator Locator;
+
+    private Random random = new Random();
 
     public Dictionary<string, List<string>> GhostToEvidences =
         new()
         {
             {
                 "Demon",
-                new() { "Ghost Writing", "EMF Level 5", "Disembodied Footsteps" }
+                new() { "Bloodstains", "EMF Level 5", "Disembodied Footsteps" }
             },
             {
                 "Wraith",
@@ -50,7 +56,7 @@ public partial class EvidenceDepositor : Node
             },
             {
                 "Poltergeist",
-                new() { "EMF Level 5", "Fingerprints", "Toxic Residue" }
+                new() { "EMF Level 5", "Fingerprints", "Bloodstains" }
             },
             {
                 "Banshee",
@@ -66,9 +72,14 @@ public partial class EvidenceDepositor : Node
 
         string chosenEvidence = "";
 
+        if (DepositedEvidences.Count == evidences.Count)
+        {
+            DepositedEvidences.Clear();
+        }
+
         while (true)
         {
-            chosenEvidence = evidences[0];
+            chosenEvidence = evidences[random.Next() % evidences.Count];
 
             if (!DepositedEvidences.Contains(chosenEvidence))
             {
@@ -93,8 +104,8 @@ public partial class EvidenceDepositor : Node
         if (evidencePrefab != null)
         {
             var evidence = evidencePrefab.Instantiate<Node3D>();
+            GetTree().Root.AddChild(evidence);
             evidence.GlobalPosition = Locator.RoomObject?.GetRandomPosition() ?? Vector3.Zero;
-            // GetTree().Root.AddChild(evidence);
         }
     }
 }
