@@ -9,11 +9,13 @@ extends Node
 
 @export var indicator: CSGBox3D
 
+var lastSongPosition = 0
+
 var isOn = true;
 var isPlaying = false;
 
 func generate_random_red():
-	var r = randf_range(0.2, 1) # Full red
+	var r = randf_range(0.0, 1) # Full red
 	var g = randf_range(0.0, 0.2) # Random green, up to 0.2 intensity
 	var b = randf_range(0.0, 0.2) # Random blue, up to 0.2 intensity
 	return Color(r, g, b)
@@ -52,7 +54,8 @@ var elapsed = 0
 func _process(delta):
 	elapsed += delta
 
-	if (elapsed > 0.05):
+	if (elapsed > 0.075):
+		elapsed = 0
 		_updateStatusLabel()
 	
 func _updateStatusLabel():
@@ -64,6 +67,16 @@ func _updateStatusLabel():
 		out += str(round(randf_range(87.5, 108.0) * 100) / 100)
 		indicator.material_override.emission_energy_multiplier = 10.0 * randf()
 		indicator.material_override.emission = color
+		song.pitch_scale = randf_range(0.8, 0.85)
+
+		if randf() > 0.99:
+			song.seek(song.get_playback_position() - randf_range(0.05, 0.25))
+			await get_tree().create_timer(0.2).timeout
+			song.seek(song.get_playback_position() - randf_range(0.05, 0.25))
+			await get_tree().create_timer(0.2).timeout
+			song.seek(song.get_playback_position() - randf_range(0.05, 0.25))
+			await get_tree().create_timer(0.2).timeout
+		
 	else:
 		indicator.material_override.emission_energy_multiplier = 5.0
 		indicator.material_override.emission = Color.WHITE
@@ -104,7 +117,7 @@ func playFreakyMusicOn():
 		turnOn()
 
 	staticSound.stop()
-	song.play()
+	song.play(lastSongPosition)
 	isPlaying = true
 
 	_updateStatusLabel()
@@ -112,6 +125,8 @@ func playFreakyMusicOn():
 func stop():
 	switch.seek(0)
 	switch.play()
+
+	lastSongPosition = song.get_playback_position()
 
 	if not isOn:
 		turnOn()

@@ -1,8 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://cqjjtoijg6ify"]
+[gd_scene load_steps=11 format=3 uid="uid://cqjjtoijg6ify"]
 
 [ext_resource type="Script" path="res://Scenes/Radio.gd" id="1_yfkqg"]
 [ext_resource type="AudioStream" uid="uid://c3fpxci4q7gcx" path="res://Audio/radio-static.wav" id="2_pst66"]
 [ext_resource type="AudioStream" uid="uid://bptaefgrpa4kw" path="res://Audio/song2.wav" id="2_so25n"]
+[ext_resource type="AudioStream" uid="uid://bwl2fc6cna2rn" path="res://Audio/song.wav" id="3_5aglx"]
 [ext_resource type="AudioStream" uid="uid://cg1cen26lapox" path="res://Audio/switch.wav" id="3_5vqwb"]
 [ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="5_qrjla"]
 
@@ -51,7 +52,7 @@ text = "[RADIO STATUS]"
 [node name="Static" type="AudioStreamPlayer3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
 stream = ExtResource("2_pst66")
-volume_db = -25.0
+volume_db = -35.0
 autoplay = true
 panning_strength = 2.0
 emission_angle_degrees = 60.0
@@ -59,6 +60,14 @@ emission_angle_degrees = 60.0
 [node name="Song" type="AudioStreamPlayer3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
 stream = ExtResource("2_so25n")
+volume_db = -20.0
+pitch_scale = 0.8
+panning_strength = 2.0
+emission_angle_degrees = 60.0
+
+[node name="Song2" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+stream = ExtResource("3_5aglx")
 volume_db = -20.0
 pitch_scale = 0.8
 panning_strength = 2.0
