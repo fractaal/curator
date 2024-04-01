@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -7,6 +8,12 @@ public partial class RoomLocator : Node
     public string Room { get; private set; }
 
     public List<string> Rooms { get; private set; } = new();
+
+    public Room RoomObject { get; private set; }
+    public List<Room> RoomObjects { get; private set; } = new();
+
+    private CollisionObject3D ReferenceBody;
+    private Label3D DebugLabel;
 
     public bool IsInRoom(string room)
     {
@@ -25,7 +32,7 @@ public partial class RoomLocator : Node
     {
         var parent = GetParent<Node3D>();
 
-        var debugLabel = new Label3D
+        DebugLabel = new Label3D
         {
             Billboard = BaseMaterial3D.BillboardModeEnum.Enabled,
             NoDepthTest = true,
@@ -33,45 +40,69 @@ public partial class RoomLocator : Node
         };
 
         // GetTree().CurrentScene.CallDeferred(nameof(AddChild), debugLabel);
-        parent.AddChild(debugLabel);
+        parent.AddChild(DebugLabel);
 
-        debugLabel.GlobalPosition = parent.GlobalPosition;
-        debugLabel.Scale = debugLabel.Scale / parent.Scale;
+        DebugLabel.GlobalPosition = parent.GlobalPosition;
+        DebugLabel.Scale = DebugLabel.Scale / parent.Scale;
 
-        var bodies = parent.FindChildren("*", "CollisionObject3D", true);
-        CollisionObject3D referenceBody;
+        Godot.Collections.Array<Node> bodies;
+
+        if (parent is CollisionObject3D)
+        {
+            bodies = new Godot.Collections.Array<Node> { parent };
+        }
+        else
+        {
+            bodies = parent.FindChildren("*", "CollisionObject3D", true);
+        }
 
         if (bodies.Count == 0)
         {
             GD.PushWarning("RoomLocator has no CollisionObject3D children");
-            debugLabel.Text = "Can't detect room (No CollisionObject3D available)";
+            DebugLabel.Text = "Can't detect room (No CollisionObject3D available)";
             return;
         }
         else
         {
-            referenceBody = bodies[0] as CollisionObject3D;
+            ReferenceBody = bodies[0] as CollisionObject3D;
+            FindRoom();
         }
+    }
 
+    private void FindRoom()
+    {
+        Rooms.Clear();
+        Room = "None";
         var rooms = GetTree().GetNodesInGroup("rooms");
-
         foreach (Area3D room in rooms)
         {
             var roomBodies = room.GetOverlappingBodies();
 
-            foreach (Node body in roomBodies)
+            for (int i = 0; i < roomBodies.Count; i++)
             {
-                if (body == referenceBody)
+                try
                 {
-                    Room = room.Name;
-                    Rooms.Add(Room);
-                    debugLabel.Text = "Room: " + Room;
+                    var body = roomBodies[i];
+                    if (body == ReferenceBody)
+                    {
+                        RoomObjects.Add(room as Room);
+                        RoomObject = room as Room;
+
+                        Room = room.Name;
+                        Rooms.Add(Room);
+                        DebugLabel.Text = "Room: " + Room;
+                    }
+                }
+                catch (Exception)
+                {
+                    GD.Print("Skipping body - can't cast");
                 }
             }
         }
 
-        if (Room == "")
+        if (Room == "None")
         {
-            debugLabel.Text = "Can't detect room (No overlapping room)";
+            DebugLabel.Text = "Can't detect room (No overlapping room)";
         }
     }
 
@@ -79,7 +110,7 @@ public partial class RoomLocator : Node
     {
         base._Ready();
 
-        Room = "";
+        Room = "None";
 
         if (GetParent() is not Node3D)
         {
