@@ -19,6 +19,7 @@ public partial class Interpreter : Node
     private TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
 
     private HashSet<string> AcknowledgedCommandsSet = new();
+    private List<string> RecentCommands = new();
 
     public override void _Ready()
     {
@@ -50,6 +51,8 @@ public partial class Interpreter : Node
                     EventBus.SignalName.NotableEventOccurred,
                     $"Ghost interacted - {verb}{textInfo.ToTitleCase(objectType)}({target})"
                 );
+
+                AddToRecentCommands($"{verb}{textInfo.ToTitleCase(objectType)}({target})");
             }
 
             AcknowledgedCommandsSet.Remove(verb + "/" + objectType + "/" + target);
@@ -70,8 +73,52 @@ public partial class Interpreter : Node
                 );
             }
 
+            var commandFrequencies = GetCommandFrequencies();
+
+            if (commandFrequencies.Count > 0)
+            {
+                var mostFrequentCommand = commandFrequencies.Aggregate(
+                    (l, r) => l.Value > r.Value ? l : r
+                );
+
+                if (mostFrequentCommand.Value > 2)
+                {
+                    bus.EmitSignal(
+                        EventBus.SignalName.SystemFeedback,
+                        $"WARNING: You are using {mostFrequentCommand.Key} too often ({mostFrequentCommand.Value} times recently). You are becoming predictable - BAD. VARY your commands."
+                    );
+
+                    RecentCommands.RemoveAll(match => match.Contains(mostFrequentCommand.Key));
+                }
+            }
+
             AcknowledgedCommandsSet.Clear();
         };
+    }
+
+    private void AddToRecentCommands(string fullCommand)
+    {
+        RecentCommands.Add(fullCommand);
+        RecentCommands = RecentCommands.TakeLast(10).ToList();
+    }
+
+    private Dictionary<string, int> GetCommandFrequencies()
+    {
+        var commandCounts = new Dictionary<string, int>();
+
+        foreach (string command in RecentCommands)
+        {
+            if (commandCounts.ContainsKey(command))
+            {
+                commandCounts[command]++;
+            }
+            else
+            {
+                commandCounts[command] = 1;
+            }
+        }
+
+        return commandCounts;
     }
 
     private List<string> objectInteractionVerbPrefixes =
@@ -95,11 +142,9 @@ public partial class Interpreter : Node
         {
             "moveAsGhost",
             "moveToAsGhost",
+            "chasePlayerAsGhost",
             "speakAsGhost",
-            "speakAsSpiritBox",
-            "manifest",
-            "appear",
-            "disappear"
+            "ghostAppear",
         };
 
     private string accumulatedText = "";
@@ -207,22 +252,39 @@ public partial class Interpreter : Node
                     var target = TargetResolution.NormalizeTargetString(command.Arguments[0]);
 
                     bus.EmitSignal(EventBus.SignalName.GhostAction, command.Verb, target);
+                    bus.EmitSignal(
+                        EventBus.SignalName.NotableEventOccurred,
+                        $"Ghost action - {command.Verb}({command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()})"
+                    );
+                    AddToRecentCommands(
+                        $"{command.Verb}({command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()})"
+                    );
+
                     return;
                 }
 
                 bus.EmitSignal(
                     EventBus.SignalName.GhostAction,
                     command.Verb,
-                    command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ")
+                    command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()
                 );
 
                 bus.EmitSignal(
                     EventBus.SignalName.NotableEventOccurred,
-                    $"Ghost action - {command.Verb}({command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ")})"
+                    $"Ghost action - {command.Verb}({command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()})"
+                );
+
+                AddToRecentCommands(
+                    $"{command.Verb}({command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()})"
                 );
 
                 return;
             }
+
+            bus.EmitSignal(
+                EventBus.SignalName.SystemFeedback,
+                $"ERROR: Command {command.Verb}({command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()}) does NOT exist. PLEASE refer to the previously stated commands available at your disposal.\nFurther errors could result in TERMINATION of the game."
+            );
         }
     }
 }
