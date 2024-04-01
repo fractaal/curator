@@ -49,6 +49,16 @@ public partial class EventBus : Node
     [Signal]
     public delegate void SystemFeedbackEventHandler(string message);
 
+    // Some game-specific signals
+    [Signal]
+    public delegate void PlayerHPChangedEventHandler(int hp);
+
+    [Signal]
+    public delegate void ChaseStartedEventHandler();
+
+    [Signal]
+    public delegate void ChaseEndedEventHandler();
+
     private static EventBus instance;
 
     public override void _Ready()
