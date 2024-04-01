@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=3 uid="uid://c8wpx70gwa0dr"]
+
+[ext_resource type="Script" path="res://Scenes/Evidences/ShadowMovement.gd" id="1_jnog2"]
+[ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="11_fjd40"]
+[ext_resource type="Texture2D" uid="uid://cxq1s8os4v31i" path="res://textures/Black.png" id="16_k2k2s"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_4r2yh"]
+radius = 0.4
+
+[node name="RootNode" type="CharacterBody3D" node_paths=PackedStringArray("Locator") groups=["enemies"]]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_jnog2")
+Locator = NodePath("RoomLocator")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9359, 0)
+shape = SubResource("CapsuleShape3D_4r2yh")
+
+[node name="Sprite3D" type="Sprite3D" parent="CollisionShape3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00025475, -0.00196046, 0.0008412)
+billboard = 1
+texture = ExtResource("16_k2k2s")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+
+[node name="ShadowMovement" type="Label3D" parent="."]
+billboard = 1
+no_depth_test = true
+text = "ShadowMovement"
+
+[node name="RoomLocator" type="Node" parent="."]
+script = ExtResource("11_fjd40")
