@@ -28,6 +28,8 @@ var lastLocationForRoomCheck: Vector3
 var chasing = false
 var chaseSpeed = "slow"
 
+var chasing_EntireSequence = false
+
 var FirstNames = ["John", "Jennifer", "Madison", "Mark", "Abrahm", "Dominic", "Kimi"]
 var LastNames = ["Black", "Brown", "Jackson", "Peralta", "Walker", "Carpenter"]
 var GhostTypes = ["Demon", "Wraith", "Phantom", "Shade", "Banshee", "Poltergeist"]
@@ -52,7 +54,7 @@ func _ready():
 	while true:
 		await get_tree().create_timer(randf_range(5, 10)).timeout
 
-		if not chasing:
+		if not chasing_EntireSequence:
 			if Locator.RoomObject:
 				update_target_location(Locator.RoomObject.GetRandomPosition())
 	
@@ -94,6 +96,7 @@ func chase(arguments):
 	if chasing:
 		return
 
+	chasing_EntireSequence = true
 	chasing = true
 	skeleton.visible = true
 	huntGracePeriodSFX.play(0)
@@ -126,10 +129,12 @@ func chase(arguments):
 	if player.dead:
 		var tween = create_tween()
 
-		tween.tween_property(blackTexture, "modulate", Color(0, 0, 0, 1), 1).set_trans(Tween.TRANS_EXPO).set_delay(1)
+		tween.tween_property(blackTexture, "modulate", Color(0, 0, 0, 1), 0.25).set_trans(Tween.TRANS_EXPO).set_delay(1.75)
 		tween.play()
 
 		await tween.finished
+
+	chasing_EntireSequence = false
 
 func _physics_process(delta):
 	var current_location = global_transform.origin
@@ -150,6 +155,8 @@ func _physics_process(delta):
 	last_location = current_location
 
 	if chasing:
+		$Skeleton3D/OmniLight3D.light_energy = randf_range(0.5, 1.5)
+
 		var distance = (player.global_transform.origin - global_transform.origin).length()
 
 		heartbeatSFX.volume_db = (-(distance * 2)) + 5
