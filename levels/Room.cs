@@ -90,6 +90,51 @@ public partial class Room : Area3D
         }
     }
 
+    public Vector3 GetRandomPosition()
+    {
+        var possibleCollisionShapes = FindChildren("*", "CollisionShape3D");
+
+        if (possibleCollisionShapes.Count > 0)
+        {
+            var collisionShape = (CollisionShape3D)possibleCollisionShapes[0];
+            var shape = collisionShape.Shape;
+
+            if (shape is BoxShape3D)
+            {
+                var extents = ((BoxShape3D)shape).Size;
+                var center = GlobalTransform.Origin;
+
+                var randomX = (float)GD.RandRange(-extents.X / 2, extents.X / 2) + center.X;
+                var randomY = (float)GD.RandRange(-extents.Y / 2, extents.Y / 2) + center.Y;
+                var randomZ = (float)GD.RandRange(-extents.Z / 2, extents.Z / 2) + center.Z;
+
+                return new Vector3(randomX, randomY, randomZ);
+            }
+            else
+            {
+                GD.PushWarning("Using an approximation - shape isn't a box");
+                // Use an approximation
+                return GlobalTransform.Origin
+                    + new Vector3(
+                        (float)GD.RandRange(-10, 10),
+                        (float)GD.RandRange(-10, 10),
+                        (float)GD.RandRange(-10, 10)
+                    );
+            }
+        }
+        else
+        {
+            GD.PushWarning("Using an approximation - no collision shapes found");
+            // Use an approximation
+            return GlobalTransform.Origin
+                + new Vector3(
+                    (float)GD.RandRange(-10, 10),
+                    (float)GD.RandRange(-10, 10),
+                    (float)GD.RandRange(-10, 10)
+                );
+        }
+    }
+
     public string GetInformation()
     {
         string info = "";
