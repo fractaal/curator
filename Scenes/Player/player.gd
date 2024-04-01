@@ -31,10 +31,30 @@ const zeroVector2 = Vector2()
 
 var hasFocusOnGui = false
 
+var dead = false
+
+var ghostHead: Node3D
+
+func kill():
+	dead = true
+
+	var tween = create_tween()
+
+	$Head/Camera3d.position.y += 0.15
+	$Head/Camera3d.fov = 100
+	tween.tween_property($Head/Camera3d, "fov", 60, 2.25)
+	tween.play()
+
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
 func _ready():
 	#Captures mouse and stops rgun from hitting yourself
 	gunRay.add_exception(self)
+	gunRay.set_collision_mask_value(4, true) # collide with doors
+	gunRay.set_collision_mask_value(5, true) # collide with items
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	
+	ghostHead = get_tree().current_scene.get_node("Ghost/Head")
 
 func _physics_process(delta):
 	hasFocusOnGui = true if get_viewport().gui_get_focus_owner() != null else false
@@ -45,27 +65,31 @@ func _physics_process(delta):
 	velocity.x += force.x * delta
 	velocity.z += force.z * delta
 
-	# Handle Jump.
-	if Input.is_action_pressed("Jump") and is_on_floor() and not hasFocusOnGui:
-		velocity.y = JUMP_VELOCITY
-	# Handle Shooting
-	if Input.is_action_just_pressed("Shoot") and not hasFocusOnGui:
-		interact()
+	if dead:
+		$Head/Camera3d.look_at(ghostHead.global_transform.origin, Vector3.UP)
 
-	if Input.is_action_just_pressed("SecondaryInteract") and not hasFocusOnGui:
-		secondaryInteract()
-		
-	if Input.is_action_pressed("Sprint") and not hasFocusOnGui:
-		SPEED = 7.5
-		isRunning = true
-	else:
-		SPEED = 4
-		isRunning = false
-		
-	if Input.is_action_just_pressed("ToggleFlashlight") and not hasFocusOnGui:
-		isFlashlightOn = !isFlashlightOn
-		
-		$SpotLight3D.spot_range = 100 if isFlashlightOn else 0
+	if not dead:
+		# Handle Jump.
+		if Input.is_action_pressed("Jump") and is_on_floor() and not hasFocusOnGui:
+			velocity.y = JUMP_VELOCITY
+		# Handle Shooting
+		if Input.is_action_just_pressed("Shoot") and not hasFocusOnGui:
+			interact()
+
+		if Input.is_action_just_pressed("SecondaryInteract") and not hasFocusOnGui:
+			secondaryInteract()
+			
+		if Input.is_action_pressed("Sprint") and not hasFocusOnGui:
+			SPEED = 7.5
+			isRunning = true
+		else:
+			SPEED = 4
+			isRunning = false
+			
+		if Input.is_action_just_pressed("ToggleFlashlight") and not hasFocusOnGui:
+			isFlashlightOn = !isFlashlightOn
+			
+			$SpotLight3D.spot_range = 100 if isFlashlightOn else 0
 	
 	# Add the gravity.
 	if not is_on_floor():
@@ -75,14 +99,17 @@ func _physics_process(delta):
 	var input_dir = Input.get_vector("moveLeft", "moveRight", "moveUp", "moveDown") if not hasFocusOnGui else zeroVector2
 	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
-	if direction:
+	if direction and not dead:
 		target_velocity.x = direction.x * SPEED
 		target_velocity.z = direction.z * SPEED
 	else:
 		target_velocity.x = move_toward(velocity.x, 0, 0.3)
 		target_velocity.z = move_toward(velocity.z, 0, 0.3)
 	
-	$Head/Camera3d.position.y = 0.845 + sin(Time.get_ticks_msec() * (0.015 if isRunning else 0.01)) * velocity.length() * 0.01
+	if not dead:
+		$Head/Camera3d.position.y = 0.845 + sin(Time.get_ticks_msec() * (0.015 if isRunning else 0.01)) * velocity.length() * 0.01
+
+	$Head/Camera3d/ItemAttachmentPoint.position.y = -0.145 - sin(Time.get_ticks_msec() * 0.007) * velocity.length() * 0.0025
 	
 	var targetHeadTiltUp = (-input_dir.y if is_on_floor() else 1) * velocity.length() * 0.015
 	var targetHeadTiltSide = -input_dir.x * velocity.length() * 0.025
@@ -114,7 +141,7 @@ func _physics_process(delta):
 	$SpotLight3D.light_energy = clampedIntensityNoise
 
 func _input(event):
-	if event is InputEventMouseMotion:
+	if event is InputEventMouseMotion and not dead:
 		rotation.y -= event.relative.x / mouseSensibility
 		$Head/Camera3d.rotation.x -= event.relative.y / mouseSensibility
 		$Head/Camera3d.rotation.x = clamp($Head/Camera3d.rotation.x, deg_to_rad( - 90), deg_to_rad(90))
@@ -122,7 +149,7 @@ func _input(event):
 		mouse_relative_y = clamp(event.relative.y, -50, 10)
 
 func find_interactable(object: Node3D) -> Node3D:
-	var parent = object.get_parent()
+	var parent = object
 	while parent:
 		if parent.is_in_group("interactables"):
 			if parent.has_node("Interactable"):
