@@ -1,10 +1,11 @@
-[gd_scene load_steps=29 format=3 uid="uid://bbhrmf5ph6a17"]
+[gd_scene load_steps=30 format=3 uid="uid://bbhrmf5ph6a17"]
 
 [ext_resource type="Texture2D" uid="uid://shc2f632i4e" path="res://models/Walking-3e31920b44c6b00154392f6ae2735c79_zombie_body_diffuse.png" id="1_dwbvp"]
 [ext_resource type="Script" path="res://Scenes/Ghost/EvidenceDepositor.cs" id="2_6rpkm"]
 [ext_resource type="Texture2D" uid="uid://dv1bbkv5bqnuv" path="res://models/Walking-3e31920b44c6b00154392f6ae2735c79_zombie_normal.png" id="2_v8axk"]
-[ext_resource type="PackedScene" uid="uid://cnuoki3eh88l3" path="res://Scenes/Evidences/EMFLevel5.tscn" id="3_hmu3i"]
+[ext_resource type="PackedScene" uid="uid://d02jtvmmus5bb" path="res://Scenes/Evidences/Bloodstains.tscn" id="3_2xs4e"]
 [ext_resource type="Texture2D" uid="uid://dfw4f0pu6617e" path="res://models/Walking-3e31920b44c6b00154392f6ae2735c79_zombie_diffuse.png" id="3_ivqix"]
+[ext_resource type="PackedScene" uid="uid://bl4kxg1opy1ur" path="res://Scenes/Evidences/Handprints.tscn" id="3_wu0du"]
 [ext_resource type="Script" path="res://Scenes/Enemy.gd" id="4_m1s54"]
 [ext_resource type="Script" path="res://Scenes/BasicIKPlayer.gd" id="5_fsmaf"]
 [ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="6_fp6hn"]
@@ -1256,13 +1257,14 @@ evidenceDepositor = NodePath("EvidenceDepositor")
 
 [node name="EvidenceDepositor" type="Node" parent="." node_paths=PackedStringArray("Locator")]
 script = ExtResource("2_6rpkm")
-GhostWritingPrefab = ExtResource("3_hmu3i")
-EMFLevel5Prefab = ExtResource("3_hmu3i")
-DisembodiedFootstepsPrefab = ExtResource("3_hmu3i")
-FreezingTemperaturesPrefab = ExtResource("3_hmu3i")
-ToxicResiduePrefab = ExtResource("3_hmu3i")
-FingerprintsPrefab = ExtResource("3_hmu3i")
-ShadowMovementPrefab = ExtResource("3_hmu3i")
+GhostWritingPrefab = ExtResource("3_wu0du")
+EMFLevel5Prefab = ExtResource("3_wu0du")
+DisembodiedFootstepsPrefab = ExtResource("3_wu0du")
+FreezingTemperaturesPrefab = ExtResource("3_wu0du")
+ToxicResiduePrefab = ExtResource("3_wu0du")
+FingerprintsPrefab = ExtResource("3_wu0du")
+ShadowMovementPrefab = ExtResource("3_wu0du")
+BloodstainsPrefab = ExtResource("3_2xs4e")
 Locator = NodePath("../RoomLocator")
 
 [node name="Skeleton3D" type="Skeleton3D" parent="."]
@@ -1777,6 +1779,12 @@ transform = Transform3D(0.959607, -0.218611, -0.177098, 0.17136, 0.953391, -0.24
 
 [node name="SpineTarget" type="Node3D" parent="Skeleton3D"]
 transform = Transform3D(1, -4.54543e-08, 1.27458e-08, 4.54543e-08, 0.854205, -0.519937, 1.27458e-08, 0.519937, 0.854205, -0.0433234, 1.59457, 0.0752125)
+
+[node name="OmniLight3D" type="OmniLight3D" parent="Skeleton3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.71328e-08, 1.77962, 0.424749)
+light_color = Color(1, 0, 0, 1)
+shadow_enabled = true
+shadow_bias = 2.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9359, 0)
