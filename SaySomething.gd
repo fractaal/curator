@@ -7,7 +7,9 @@ func _ready():
 	pass # Replace with function body.
 
 func _input(event):
-	if (event.is_action_pressed("ui_text_completion_accept")&&has_focus()):
+	if (event.is_action_pressed("FocusSaySomething") and get_viewport().gui_get_focus_owner() == null):
+		grab_focus()
+	elif (event.is_action_pressed("ui_text_completion_accept")&&has_focus()):
 
 		EventBus.emit_signal("NotableEventOccurred", "Player said: \"" + text + "\"");
 		
@@ -28,8 +30,3 @@ func fakeTokenize(_text):
 		currentLength += interval
 	
 	return tokenized
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta):
-	if Input.is_action_just_pressed("FocusSaySomething"):
-		grab_focus()
