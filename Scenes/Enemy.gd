@@ -20,6 +20,8 @@ var speed = 2.5
 
 @export var evidenceDepositor: Node
 
+@export var endRevealText: Label
+
 var player: Node3D
 
 var last_location = Vector3()
@@ -38,6 +40,9 @@ var FirstName
 var LastName
 var GhostType
 var GhostAge
+var FavoriteRoom
+
+var manifesting = false
 
 func _ready():
 	# Set up name and type
@@ -45,23 +50,47 @@ func _ready():
 	LastName = LastNames[randi() % LastNames.size()]
 	GhostType = GhostTypes[randi() % GhostTypes.size()]
 	GhostAge = randi_range(10, 1000)
+	FavoriteRoom = "None Yet..."
 
 	EventBus.GhostAction.connect(_on_ghost_action)
 	lastLocationForRoomCheck = global_transform.origin
 
 	player = get_tree().current_scene.get_node("Player");
 
+	var rooms = get_tree().get_nodes_in_group("rooms")
+	FavoriteRoom = rooms[randi() % rooms.size()].name
+
+	_on_ghost_action("movetoasghost", FavoriteRoom)
+
+	print("Ghost favorite room is " + FavoriteRoom + " starting to path there")
+
+	while moveFlag:
+		await get_tree().create_timer(0.1).timeout
+
+	print("Ghost is now in " + FavoriteRoom)
+
 	while true:
 		await get_tree().create_timer(randf_range(5, 10)).timeout
 
-		if not chasing_EntireSequence:
+		if not chasing_EntireSequence and not manifesting and not chasing and not moveFlag:
 			if Locator.RoomObject:
 				update_target_location(Locator.RoomObject.GetRandomPosition())
 	
+var moveFlag = false
+
 func _on_ghost_action(verb, arguments):
 	verb = verb.to_lower()
 	
 	if verb == "moveasghost" or verb == "movetoasghost":
+		# if moveFlag:
+		# 	print("Ghost was going to path to " + arguments + " but is already pathing to something else");
+		# 	return
+
+		print("Ghost now pathing to " + arguments)
+			
+		moveFlag = true
+		if manifesting:
+			return
 		var _position = TargetResolution.GetTargetPosition(arguments);
 
 		if _position == Vector3.ZERO:
@@ -71,23 +100,26 @@ func _on_ghost_action(verb, arguments):
 
 	if verb == "chaseplayerasghost":
 		chase(arguments)
+		pass
 
-	if verb == "ghostappear":
+	if verb == "appearasghost":
 		appear()
 	
-	if verb == "ghostdepositevidence":
+	if verb == "depositevidenceasghost":
 		if evidenceDepositor:
 			evidenceDepositor.DepositEvidence(GhostType)
 
 func appear():
 	if chasing:
 		return
+	manifesting = true
 	appearSFX.pitch_scale = randf_range(0.75, 0.85)
 	appearSFX.play(0)
 	skeleton.visible = true
 	await get_tree().create_timer(randf_range(3, 7)).timeout
 	disappearSFX.play(0)
 	await get_tree().create_timer(0.5).timeout
+	manifesting = false
 	if chasing:
 		return
 	skeleton.visible = false
@@ -129,30 +161,56 @@ func chase(arguments):
 	if player.dead:
 		var tween = create_tween()
 
+		endRevealText.text = "THE GHOST WAS A " + GhostType.to_upper();
+
 		tween.tween_property(blackTexture, "modulate", Color(0, 0, 0, 1), 0.25).set_trans(Tween.TRANS_EXPO).set_delay(1.75)
+		tween.tween_property(endRevealText, "modulate", Color(1, 1, 1, 1), 1).set_delay(3)
+
 		tween.play()
 
 		await tween.finished
 
 	chasing_EntireSequence = false
 
+var sameLocationCheckInterval = 0.5
+var sameLocationCheckElapsed = 0
+var sameLocationCheckLast = Vector3.ZERO
+
 func _physics_process(delta):
 	var current_location = global_transform.origin
 	var next_location = nav_agent.get_next_path_position()
 	var new_velocity = (next_location - current_location).normalized() * speed
 
-	if (current_location - next_location).length() < 0.1:
-		return
+	# if (current_location - next_location).length() > 0.1:
+	# 	return
 	
 	velocity = new_velocity
 	
-	var direction = (next_location - current_location).normalized()
-	rotation.y = lerp_angle(rotation.y, atan2( - direction.x, -direction.z), delta * 5)
+	if (current_location - next_location).length() > 0.1 and not chasing and not manifesting:
+		var direction = (next_location - current_location).normalized()
+		rotation.y = lerp_angle(rotation.y, atan2( - direction.x, -direction.z), delta * 5)
+	
+	if manifesting or chasing:
+		$Skeleton3D/OmniLight3D.light_energy = randf_range(0.01, 0.05)
+		var direction = (player.global_transform.origin - global_transform.origin).normalized()
+		rotation.y = lerp_angle(rotation.y, atan2( - direction.x, -direction.z), delta * 5)
 	
 	# _animator.play("mixamocom", -1, (last_location - current_location).normalized().length())
 	move_and_slide()
 	
 	last_location = current_location
+
+	sameLocationCheckElapsed += delta
+
+	if sameLocationCheckElapsed > sameLocationCheckInterval:
+		sameLocationCheckElapsed = 0
+
+		var length = (current_location - sameLocationCheckLast).length()
+		if (length) < 0.25 and moveFlag:
+			moveFlag = false
+			print("Ghost done pathing")
+
+		sameLocationCheckLast = current_location
 
 	if chasing:
 		$Skeleton3D/OmniLight3D.light_energy = randf_range(0.5, 1.5)
@@ -187,9 +245,10 @@ func getStatus():
 	var out = "Name: " + FirstName + " " + LastName + "\n"
 	out += "Type: " + GhostType + "\n"
 	out += "Age: " + str(GhostAge) + "\n"
-	out += "\n"
-	out += "Current Room:" + Locator.Room + "\n"
-	out += "CHASING PLAYER?: " + ("YES" if chasing else "No") + "\n"
+	out += "Favorite Room: " + FavoriteRoom + "\n"
+	out += "Current Room: " + Locator.Room + "\n"
+	out += "---"
+	out += "CHASING PLAYER?: " + ("YES - GO CRAZY!" if chasing else "No") + "\n"
 	out += "VISIBLE?: " + ("Yes" if skeleton.visible else "No") + "\n"
 
 	return out
