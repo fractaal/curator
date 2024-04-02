@@ -1,13 +1,19 @@
-[gd_scene load_steps=30 format=3 uid="uid://bbhrmf5ph6a17"]
+[gd_scene load_steps=36 format=3 uid="uid://bbhrmf5ph6a17"]
 
 [ext_resource type="Texture2D" uid="uid://shc2f632i4e" path="res://models/Walking-3e31920b44c6b00154392f6ae2735c79_zombie_body_diffuse.png" id="1_dwbvp"]
 [ext_resource type="Script" path="res://Scenes/Ghost/EvidenceDepositor.cs" id="2_6rpkm"]
 [ext_resource type="Texture2D" uid="uid://dv1bbkv5bqnuv" path="res://models/Walking-3e31920b44c6b00154392f6ae2735c79_zombie_normal.png" id="2_v8axk"]
 [ext_resource type="PackedScene" uid="uid://d02jtvmmus5bb" path="res://Scenes/Evidences/Bloodstains.tscn" id="3_2xs4e"]
 [ext_resource type="Texture2D" uid="uid://dfw4f0pu6617e" path="res://models/Walking-3e31920b44c6b00154392f6ae2735c79_zombie_diffuse.png" id="3_ivqix"]
+[ext_resource type="PackedScene" uid="uid://f4vwcex4nl5v" path="res://Scenes/Evidences/GhostWriting.tscn" id="3_u6c70"]
 [ext_resource type="PackedScene" uid="uid://bl4kxg1opy1ur" path="res://Scenes/Evidences/Handprints.tscn" id="3_wu0du"]
+[ext_resource type="PackedScene" uid="uid://cnuoki3eh88l3" path="res://Scenes/Evidences/EMFLevel5.tscn" id="4_7duqt"]
+[ext_resource type="PackedScene" uid="uid://8176bbfh7jn8" path="res://Scenes/Evidences/ToxicSludge.tscn" id="4_8cfe6"]
 [ext_resource type="Script" path="res://Scenes/Enemy.gd" id="4_m1s54"]
 [ext_resource type="Script" path="res://Scenes/BasicIKPlayer.gd" id="5_fsmaf"]
+[ext_resource type="PackedScene" uid="uid://b2ajjx4jshu0c" path="res://Scenes/Evidences/DisembodiedFootsteps.tscn" id="5_fxnde"]
+[ext_resource type="PackedScene" uid="uid://c8wpx70gwa0dr" path="res://Scenes/Evidences/ShadowMovement.tscn" id="5_rhk5u"]
+[ext_resource type="PackedScene" uid="uid://tiv2f7j8vguo" path="res://Scenes/Evidences/FreezingTemperatures.tscn" id="6_03h80"]
 [ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="6_fp6hn"]
 [ext_resource type="AudioStream" uid="uid://ch5h2ihqxtvro" path="res://Audio/Heartbeat.wav" id="7_6jmrm"]
 [ext_resource type="AudioStream" uid="uid://btw58lr0h8gpv" path="res://Audio/GhostDisappear.wav" id="7_7xtxq"]
@@ -15,8 +21,8 @@
 [ext_resource type="AudioStream" uid="uid://dtc068n1xelto" path="res://Audio/HuntTension.wav" id="9_ndn7o"]
 [ext_resource type="AudioStream" uid="uid://dag3ws4xcpkrq" path="res://Audio/Jumpscare.wav" id="9_s742j"]
 [ext_resource type="Texture2D" uid="uid://cxq1s8os4v31i" path="res://textures/Black.png" id="11_12dif"]
-[ext_resource type="AudioStream" uid="uid://dpl0dfov8xo0k" path="res://Audio/GhostAppear.wav" id="12_31naj"]
 [ext_resource type="AudioStream" uid="uid://by7nioypx7l46" path="res://Audio/HuntGracePeriod.wav" id="14_ha30a"]
+[ext_resource type="AudioStream" uid="uid://dt0noc8tlhd4p" path="res://Audio/PianoHit.wav" id="15_s42hg"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bla45"]
 resource_name = "ZombieGirl_body_Material"
@@ -1240,9 +1246,9 @@ _data = {
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_05ybm"]
 
-[node name="RootNode" type="CharacterBody3D" node_paths=PackedStringArray("Locator", "huntStartSFX", "heartbeatSFX", "huntTensionSFX", "jumpscareSFX", "appearSFX", "disappearSFX", "huntGracePeriodSFX", "blackTexture", "evidenceDepositor") groups=["enemies"]]
+[node name="RootNode" type="CharacterBody3D" node_paths=PackedStringArray("Locator", "huntStartSFX", "heartbeatSFX", "huntTensionSFX", "jumpscareSFX", "appearSFX", "disappearSFX", "huntGracePeriodSFX", "blackTexture", "evidenceDepositor", "endRevealText") groups=["enemies"]]
 collision_layer = 4
-collision_mask = 3
+collision_mask = 67
 script = ExtResource("4_m1s54")
 Locator = NodePath("RoomLocator")
 huntStartSFX = NodePath("HuntStart")
@@ -1254,16 +1260,17 @@ disappearSFX = NodePath("Disappear")
 huntGracePeriodSFX = NodePath("HuntGracePeriod")
 blackTexture = NodePath("Black")
 evidenceDepositor = NodePath("EvidenceDepositor")
+endRevealText = NodePath("Black/EndText")
 
 [node name="EvidenceDepositor" type="Node" parent="." node_paths=PackedStringArray("Locator")]
 script = ExtResource("2_6rpkm")
-GhostWritingPrefab = ExtResource("3_wu0du")
-EMFLevel5Prefab = ExtResource("3_wu0du")
-DisembodiedFootstepsPrefab = ExtResource("3_wu0du")
-FreezingTemperaturesPrefab = ExtResource("3_wu0du")
-ToxicResiduePrefab = ExtResource("3_wu0du")
+GhostWritingPrefab = ExtResource("3_u6c70")
+EMFLevel5Prefab = ExtResource("4_7duqt")
+DisembodiedFootstepsPrefab = ExtResource("5_fxnde")
+FreezingTemperaturesPrefab = ExtResource("6_03h80")
+ToxicResiduePrefab = ExtResource("4_8cfe6")
 FingerprintsPrefab = ExtResource("3_wu0du")
-ShadowMovementPrefab = ExtResource("3_wu0du")
+ShadowMovementPrefab = ExtResource("5_rhk5u")
 BloodstainsPrefab = ExtResource("3_2xs4e")
 Locator = NodePath("../RoomLocator")
 
@@ -1781,10 +1788,11 @@ transform = Transform3D(0.959607, -0.218611, -0.177098, 0.17136, 0.953391, -0.24
 transform = Transform3D(1, -4.54543e-08, 1.27458e-08, 4.54543e-08, 0.854205, -0.519937, 1.27458e-08, 0.519937, 0.854205, -0.0433234, 1.59457, 0.0752125)
 
 [node name="OmniLight3D" type="OmniLight3D" parent="Skeleton3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.71328e-08, 1.77962, 0.424749)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.51116e-08, 1.69668, 0.516016)
 light_color = Color(1, 0, 0, 1)
+light_energy = 0.5
+light_size = 0.1
 shadow_enabled = true
-shadow_bias = 2.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9359, 0)
@@ -1814,12 +1822,14 @@ transform = Transform3D(-1, 1.73544e-15, -8.74228e-08, 6.8747e-08, -0.617749, -0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.96808, -0.0972275)
 
 [node name="Label3D" type="Label3D" parent="."]
+visible = false
 billboard = 1
 no_depth_test = true
 text = "GHOST"
 
 [node name="Appear" type="AudioStreamPlayer3D" parent="."]
-stream = ExtResource("12_31naj")
+stream = ExtResource("15_s42hg")
+volume_db = -20.0
 panning_strength = 2.0
 
 [node name="Disappear" type="AudioStreamPlayer3D" parent="."]
@@ -1844,6 +1854,14 @@ stream = ExtResource("9_ndn7o")
 volume_db = -80.0
 autoplay = true
 
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 413.0
+offset_top = 424.0
+offset_right = 453.0
+offset_bottom = 464.0
+
 [node name="Black" type="TextureRect" parent="."]
 modulate = Color(1, 1, 1, 0)
 material = SubResource("CanvasItemMaterial_05ybm")
@@ -1859,6 +1877,26 @@ offset_bottom = 1960.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("11_12dif")
+
+[node name="EndText" type="Label" parent="Black"]
+modulate = Color(1, 1, 1, 0)
+top_level = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -451.0
+offset_top = -62.0
+offset_right = 451.0
+offset_bottom = 62.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 70
+text = "THE GHOST WAS A DEMON"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Ghost" type="Node3D" parent="." groups=["ghost"]]
 
