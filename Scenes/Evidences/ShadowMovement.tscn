@@ -1,8 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://c8wpx70gwa0dr"]
+[gd_scene load_steps=7 format=3 uid="uid://c8wpx70gwa0dr"]
 
 [ext_resource type="Script" path="res://Scenes/Evidences/ShadowMovement.gd" id="1_jnog2"]
+[ext_resource type="Texture2D" uid="uid://df0mxnk0osu65" path="res://textures/Shadow1.png" id="2_drgj6"]
+[ext_resource type="Texture2D" uid="uid://vac68tu10vdc" path="res://textures/Shadow2.png" id="3_pv5yn"]
+[ext_resource type="Texture2D" uid="uid://bq6ros8q7fxms" path="res://textures/Shadow3.png" id="4_0iore"]
 [ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="11_fjd40"]
-[ext_resource type="Texture2D" uid="uid://cxq1s8os4v31i" path="res://textures/Black.png" id="16_k2k2s"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_4r2yh"]
 radius = 0.4
@@ -12,19 +14,23 @@ collision_layer = 4
 collision_mask = 3
 script = ExtResource("1_jnog2")
 Locator = NodePath("RoomLocator")
+textures = Array[CompressedTexture2D]([ExtResource("2_drgj6"), ExtResource("3_pv5yn"), ExtResource("4_0iore")])
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9359, 0)
 shape = SubResource("CapsuleShape3D_4r2yh")
 
 [node name="Sprite3D" type="Sprite3D" parent="CollisionShape3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00025475, -0.00196046, 0.0008412)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00025475, -0.26435, 0.0008412)
+modulate = Color(1, 1, 1, 0)
+pixel_size = 0.0015
 billboard = 1
-texture = ExtResource("16_k2k2s")
+texture = ExtResource("2_drgj6")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
 
 [node name="ShadowMovement" type="Label3D" parent="."]
+visible = false
 billboard = 1
 no_depth_test = true
 text = "ShadowMovement"
