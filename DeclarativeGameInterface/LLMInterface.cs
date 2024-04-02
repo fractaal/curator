@@ -24,9 +24,10 @@ public partial class LLMInterface : Node
     private readonly string API_KEY =
         "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";
 
-    private readonly string MODEL = "openai/gpt-3.5-turbo-0125";
+    // private readonly string MODEL = "openai/gpt-3.5-turbo-0125";
 
-    // private readonly string MODEL = "google/gemini-pro";
+    private readonly string MODEL = "google/gemini-pro";
+
     // private readonly string MODEL = "cohere/command-r";
     // private readonly string MODEL = "lizpreciatior/lzlv-70b-fp16-hf";
 
@@ -178,6 +179,7 @@ public partial class LLMInterface : Node
         catch (Exception e)
         {
             GD.PrintErr("Failed to send request: " + e.Message);
+            EmitLLMLastResponseChunk("");
         }
     }
 }
