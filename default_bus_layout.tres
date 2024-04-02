@@ -1,10 +1,23 @@
-[gd_resource type="AudioBusLayout" load_steps=2 format=3 uid="uid://bc1rdlq7r7p6v"]
+[gd_resource type="AudioBusLayout" load_steps=3 format=3 uid="uid://bc1rdlq7r7p6v"]
 
 [sub_resource type="AudioEffectReverb" id="AudioEffectReverb_fwowd"]
 resource_name = "Reverb"
 room_size = 0.15
 wet = 0.25
 
+[sub_resource type="AudioEffectHighPassFilter" id="AudioEffectHighPassFilter_lnwvt"]
+resource_name = "HighPassFilter"
+cutoff_hz = 1000.0
+resonance = 1.0
+
 [resource]
 bus/0/effect/0/effect = SubResource("AudioEffectReverb_fwowd")
 bus/0/effect/0/enabled = true
+bus/1/name = &"TTS Bus"
+bus/1/solo = false
+bus/1/mute = false
+bus/1/bypass_fx = false
+bus/1/volume_db = 0.0
+bus/1/send = &"Master"
+bus/1/effect/0/effect = SubResource("AudioEffectHighPassFilter_lnwvt")
+bus/1/effect/0/enabled = true
