@@ -1,0 +1,121 @@
+[gd_scene load_steps=9 format=3 uid="uid://24g1f7o1rgir"]
+
+[ext_resource type="AudioStream" uid="uid://cg1cen26lapox" path="res://Audio/switch.wav" id="1_7gcr8"]
+[ext_resource type="Script" path="res://Scenes/Tools/SpiritBox.cs" id="1_ccq3c"]
+[ext_resource type="AudioStream" uid="uid://csx1rsbilwkpt" path="res://Audio/SpiritBoxTick.wav" id="2_1dgf5"]
+[ext_resource type="Script" path="res://Scenes/Tools/AudioHelper.gd" id="4_6342j"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_uldmd"]
+size = Vector3(0.315039, 0.0964233, 0.290796)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p5f8w"]
+albedo_color = Color(0.0745098, 0.0745098, 0.0745098, 1)
+roughness = 0.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7xsmd"]
+albedo_color = Color(0.458824, 0.458824, 0.458824, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tcycb"]
+albedo_color = Color(0.721569, 0.305882, 0.337255, 1)
+
+[node name="SpiritBox" type="RigidBody3D" groups=["interactables"]]
+collision_layer = 16
+mass = 0.1
+
+[node name="Power" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("1_7gcr8")
+
+[node name="Tick" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("2_1dgf5")
+volume_db = -15.0
+
+[node name="Interactable" type="Node" parent="." node_paths=PackedStringArray("topCaption", "ghostSpeech", "tick", "spinner", "PowerSound", "TickSound", "GhostSpeechPlayer")]
+script = ExtResource("1_ccq3c")
+topCaption = NodePath("../Label3D2")
+ghostSpeech = NodePath("../Label3D3")
+tick = NodePath("../Label3D4")
+spinner = NodePath("../Spinner")
+PowerSound = NodePath("../Power")
+TickSound = NodePath("../Tick")
+GhostSpeechPlayer = NodePath("../AudioStreamPlayer3D")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00751953, -0.00072632, 0.0206665)
+shape = SubResource("BoxShape3D_uldmd")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.00601196, 0.0249512)
+size = Vector3(0.3, 0.05, 0.250098)
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0117716, 0.0306421)
+material_override = SubResource("StandardMaterial3D_p5f8w")
+size = Vector3(0.29, 0.017, 0.193599)
+
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(-1, 8.74228e-08, 3.82137e-15, 0, -4.37114e-08, 1, 8.74228e-08, 1, 4.37114e-08, 0.000391938, 0.0192478, 0.138488)
+pixel_size = 0.0005
+shaded = true
+modulate = Color(0.258824, 0.258824, 0.258824, 1)
+text = "iGhost"
+outline_size = 0
+
+[node name="CSGCylinder3D2" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.107655, 0, -0.081638)
+material_override = SubResource("StandardMaterial3D_7xsmd")
+radius = 0.008
+height = 0.0436144
+
+[node name="CSGCylinder3D3" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.131338, 0, -0.081638)
+material_override = SubResource("StandardMaterial3D_tcycb")
+radius = 0.008
+height = 0.0436144
+
+[node name="CSGCylinder3D4" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12736, 0, -0.081638)
+material_override = SubResource("StandardMaterial3D_7xsmd")
+radius = 0.008
+height = 0.0436144
+
+[node name="Label3D2" type="Label3D" parent="."]
+transform = Transform3D(-1, 3.82137e-15, 8.74228e-08, 8.74228e-08, 4.37114e-08, 1, 0, 1, -4.37114e-08, 0.10524, 0.0203576, 0.11013)
+pixel_size = 0.0005
+text = "ANALYZING SPECTRAL DATA"
+font_size = 20
+outline_size = 0
+horizontal_alignment = 0
+
+[node name="Spinner" type="Label3D" parent="."]
+transform = Transform3D(-1, 3.82137e-15, 8.74228e-08, 8.74228e-08, 4.37114e-08, 1, 0, 1, -4.37114e-08, 0.128582, 0.0203576, 0.11013)
+pixel_size = 0.001
+text = "["
+font_size = 20
+outline_size = 0
+horizontal_alignment = 0
+
+[node name="Label3D4" type="Label3D" parent="."]
+transform = Transform3D(-1, 3.82137e-15, 8.74228e-08, 8.74228e-08, 4.37114e-08, 1, 0, 1, -4.37114e-08, -0.118998, 0.0203576, 0.11013)
+pixel_size = 0.0005
+modulate = Color(0.603922, 0.678431, 1, 1)
+text = "SPIKE"
+font_size = 20
+outline_size = 0
+horizontal_alignment = 2
+
+[node name="Label3D3" type="Label3D" parent="."]
+transform = Transform3D(-1, 3.82137e-15, 8.74228e-08, 8.74228e-08, 4.37114e-08, 1, 0, 1, -4.37114e-08, 0.132302, 0.0203576, 0.0949235)
+pixel_size = 0.0005
+text = "You are ashdfoajsfodia jsofiajsoifjasoifjaosifjaoisf jaiosfjioasjfioasfasfasfgahsfoiajsfioajsiofajsiofjaiosfjaiosfjaiosfjaiosfjioasfjasf"
+outline_size = 0
+horizontal_alignment = 0
+vertical_alignment = 0
+autowrap_mode = 3
+width = 520.0
+
+[node name="AudioHelper" type="Node" parent="."]
+script = ExtResource("4_6342j")
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
+volume_db = -10.0
+bus = &"TTS Bus"
