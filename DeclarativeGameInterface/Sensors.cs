@@ -9,11 +9,15 @@ public partial class Sensors : Node
     private string ghostType = "";
     private int ghostAge = 0;
 
+    private static int loopCount = 0;
+
     private List<string> NotableEvents = new();
 
     private List<string> SystemFeedback = new();
 
     private string PlayerCurrentRoom = "";
+
+    private Node3D player;
 
     private EventBus bus;
 
@@ -24,6 +28,8 @@ public partial class Sensors : Node
     public override void _Ready()
     {
         bus = EventBus.Get();
+
+        player = GetTree().CurrentScene.GetNode<Node3D>("Player");
 
         // Attaching various object events to sensors
         Room.RoomEntered += (room, body) =>
@@ -52,6 +58,12 @@ public partial class Sensors : Node
         bus.LLMLastResponseChunk += (chunk) =>
         {
             loopCompleted = true;
+            loopCount++;
+
+            if (loopCount % 2 == 0 && SystemFeedback.Count > 0)
+            {
+                SystemFeedback.RemoveAt(0);
+            }
         };
     }
 
@@ -92,7 +104,14 @@ public partial class Sensors : Node
         if (sensorReadElapsed >= sensorReadInterval)
         {
             sensorReadElapsed = 0;
-            return;
+            // return;
+
+            if (player.Get("dead").AsBool())
+            {
+                GD.Print("Player dead, skipping sensor read.");
+                return;
+            }
+
             if (!loopCompleted)
             {
                 GD.Print("Loop not completed yet, skipping sensor read.");
@@ -110,7 +129,7 @@ public partial class Sensors : Node
 
         foreach (var room in Room.GetRooms())
         {
-            info += room.GetInformation() + "\n\n";
+            info += room.GetInformation() + "\n";
         }
 
         return info;
@@ -155,21 +174,27 @@ public partial class Sensors : Node
             GD.Print("Error getting ghost status: ", e.Message);
         }
 
-        return $@"CURRENT TIME: {time}s
+        return $@"<GAME_INFO>
+CURRENT TIME: {time}s
 
--- GHOST INFORMATION
+<GHOST>
 {ghostStatus}
+</GHOST>
 
--- ROOM INFORMATION --
+<ROOMS>
 {GetAllRoomInformation()}
+</ROOMS>
 
--- NOTABLE EVENTS --
+<EVENTS>
 {events}
+</EVENTS>
 
--- PLAYER INFORMATION --
+<PLAYER>
 Current Room: {PlayerCurrentRoom}
+</PLAYER>
 
--- SYSTEM FEEDBACK (AMEND ANY ISSUES YOU SEE HERE IN THE FUTURE) --
-{systemFeedback}";
+<SYSTEM_FEEDBACK> (amend issues presented to you here)
+{systemFeedback}
+</SYSTEM_FEEDBACK>";
     }
 }
