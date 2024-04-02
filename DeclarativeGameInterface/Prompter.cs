@@ -54,11 +54,11 @@ public partial class Prompter : Node
                 new Message { role = "system", content = SYSTEM_PROMPT },
             };
 
-            messages.AddRange(
-                llmResponses
-                    .TakeLast(3)
-                    .Select(response => new Message { role = "assistant", content = response })
-            );
+            // messages.AddRange(
+            //     llmResponses
+            //         .TakeLast(3)
+            //         .Select(response => new Message { role = "assistant", content = response })
+            // );
 
             messages.Add(new Message { role = "user", content = prompt });
 
