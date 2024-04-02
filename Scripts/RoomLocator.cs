@@ -15,6 +15,9 @@ public partial class RoomLocator : Node
     private CollisionObject3D ReferenceBody;
     private Label3D DebugLabel;
 
+    [Signal]
+    public delegate void RoomFoundEventHandler(Room room);
+
     public bool IsInRoom(string room)
     {
         foreach (string compareRoom in Rooms)
