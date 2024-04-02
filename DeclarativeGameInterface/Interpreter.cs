@@ -18,8 +18,11 @@ public partial class Interpreter : Node
 
     private TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
 
-    private HashSet<string> AcknowledgedCommandsSet = new();
+    private HashSet<string> InvalidCommandsSet = new();
     private List<string> RecentCommands = new();
+
+    private bool GhostDepositedEvidence = false;
+    private int CyclesSinceLastEvidenceDeposit = 0;
 
     public override void _Ready()
     {
@@ -45,7 +48,7 @@ public partial class Interpreter : Node
 
         bus.ObjectInteractionAcknowledged += (verb, objectType, target) =>
         {
-            if (AcknowledgedCommandsSet.Contains(verb + "/" + objectType + "/" + target)) // This is a hack to prevent double logging
+            if (InvalidCommandsSet.Contains(verb + "/" + objectType + "/" + target)) // This is a hack to prevent double logging
             {
                 bus.EmitSignal(
                     EventBus.SignalName.NotableEventOccurred,
@@ -55,12 +58,12 @@ public partial class Interpreter : Node
                 AddToRecentCommands($"{verb}{textInfo.ToTitleCase(objectType)}({target})");
             }
 
-            AcknowledgedCommandsSet.Remove(verb + "/" + objectType + "/" + target);
+            InvalidCommandsSet.Remove(verb + "/" + objectType + "/" + target);
         };
 
         bus.LLMLastResponseChunk += (_chunk) =>
         {
-            foreach (string acknowledgedCommand in AcknowledgedCommandsSet)
+            foreach (string acknowledgedCommand in InvalidCommandsSet)
             {
                 var split = acknowledgedCommand.Split("/");
                 var verb = split[0];
@@ -92,7 +95,22 @@ public partial class Interpreter : Node
                 }
             }
 
-            AcknowledgedCommandsSet.Clear();
+            InvalidCommandsSet.Clear();
+
+            if (!GhostDepositedEvidence)
+            {
+                CyclesSinceLastEvidenceDeposit++;
+            }
+
+            if (CyclesSinceLastEvidenceDeposit > 10)
+            {
+                bus.EmitSignal(
+                    EventBus.SignalName.SystemFeedback,
+                    "WARNING: The ghost has not deposited evidence in a while. This UNDERMINES PLAYER AGENCY. Please deposit evidence to progress the game."
+                );
+                CyclesSinceLastEvidenceDeposit = 0;
+                GhostDepositedEvidence = false;
+            }
         };
     }
 
@@ -144,8 +162,8 @@ public partial class Interpreter : Node
             "moveToAsGhost",
             "chasePlayerAsGhost",
             "speakAsGhost",
-            "ghostAppear",
-            "ghostDepositEvidence"
+            "appearAsGhost",
+            "depositEvidenceAsGhost"
         };
 
     private string accumulatedText = "";
@@ -219,11 +237,18 @@ public partial class Interpreter : Node
 
         if (commands.Count > 0)
         {
-            countRecognized++;
+            countRecognized += commands.Count;
         }
 
         foreach (Command command in commands)
         {
+            GD.Print(
+                "command is "
+                    + command.Verb
+                    + " with args "
+                    + command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()
+            );
+
             string prefix = objectInteractionVerbPrefixes.FirstOrDefault(
                 prefix =>
                 {
@@ -239,11 +264,11 @@ public partial class Interpreter : Node
 
                 var target = TargetResolution.NormalizeTargetString(command.Arguments[0]);
 
-                AcknowledgedCommandsSet.Add(prefix + "/" + objectType + "/" + target);
+                InvalidCommandsSet.Add(prefix + "/" + objectType + "/" + target);
 
                 bus.EmitSignal(EventBus.SignalName.ObjectInteraction, prefix, objectType, target);
 
-                return;
+                continue;
             }
 
             if (ghostActionVerbs.Contains(command.Verb))
@@ -261,7 +286,13 @@ public partial class Interpreter : Node
                         $"{command.Verb}({command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()})"
                     );
 
-                    return;
+                    continue;
+                }
+
+                if (command.Verb == "ghostDepositEvidence")
+                {
+                    GhostDepositedEvidence = true;
+                    CyclesSinceLastEvidenceDeposit = 0;
                 }
 
                 bus.EmitSignal(
@@ -279,7 +310,7 @@ public partial class Interpreter : Node
                     $"{command.Verb}({command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()})"
                 );
 
-                return;
+                continue;
             }
 
             bus.EmitSignal(
