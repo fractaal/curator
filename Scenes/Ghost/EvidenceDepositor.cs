@@ -40,7 +40,7 @@ public partial class EvidenceDepositor : Node
         {
             {
                 "Demon",
-                new() { "Bloodstains", "EMF Level 5", "Disembodied Footsteps" }
+                new() { "Bloodstains", "EMF Level 5", "Shadow Movement" }
             },
             {
                 "Wraith",
@@ -48,7 +48,7 @@ public partial class EvidenceDepositor : Node
             },
             {
                 "Phantom",
-                new() { "EMF Level 5, Disembodied Footsteps", "Shadow Movement" }
+                new() { "EMF Level 5", "Disembodied Footsteps", "Shadow Movement" }
             },
             {
                 "Shade",
@@ -80,6 +80,8 @@ public partial class EvidenceDepositor : Node
         while (true)
         {
             chosenEvidence = evidences[random.Next() % evidences.Count];
+
+            GD.Print("Chose evidence: " + chosenEvidence.GetBaseName());
 
             if (!DepositedEvidences.Contains(chosenEvidence))
             {
