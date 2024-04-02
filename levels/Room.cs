@@ -139,7 +139,7 @@ public partial class Room : Area3D
     {
         string info = "";
 
-        info += $"- {Name}\n";
+        info += $"<{Name}>\n";
 
         foreach (Node interactable in Interactables)
         {
@@ -174,6 +174,8 @@ public partial class Room : Area3D
             }
         }
 
+        info += $"</{Name}>\n";
+
         return info.Trim();
     }
 
@@ -182,5 +184,10 @@ public partial class Room : Area3D
         // So using the EventBus is a bit of a stretch here
         // but I need to access the GetTree method
         return EventBus.Get().GetTree().GetNodesInGroup("rooms").OfType<Room>().ToList();
+    }
+
+    public List<Room> GetRoomsInstance()
+    {
+        return Room.GetRooms();
     }
 }
