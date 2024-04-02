@@ -9,8 +9,6 @@ public partial class EMFReader : Holdable
     [Export]
     private Label3D tick;
 
-    private Node3D Ghost;
-
     [Export]
     private AudioStreamPlayer3D PowerSound;
 
@@ -24,7 +22,6 @@ public partial class EMFReader : Holdable
     public override void _Ready()
     {
         base._Ready();
-        Ghost = GetTree().CurrentScene.GetNode<Node3D>("Ghost");
     }
 
     private float GetEMF()
@@ -38,6 +35,22 @@ public partial class EMFReader : Holdable
                 parent.GlobalTransform.Origin.Z
             ) * 3;
 
+        var emfNodes = GetTree().GetNodesInGroup("evidence_emf");
+
+        bool emfIsClose = false;
+        foreach (Node3D node in emfNodes)
+        {
+            var distance = parent.GlobalTransform.Origin.DistanceTo(node.GlobalTransform.Origin);
+
+            if (distance < 2)
+            {
+                emfIsClose = true;
+                break;
+            }
+        }
+
+        var emfConstant = emfIsClose ? 4.5f : 0f;
+
         var distanceToGhost = parent
             .GlobalTransform
             .Origin
@@ -47,12 +60,12 @@ public partial class EMFReader : Holdable
 
         if (Ghost.Get("chasing").AsBool())
         {
-            chaseMultiplier = 3f;
+            chaseMultiplier = (float)GD.RandRange(2.7f, 3.3f);
         }
 
         var distanceToGhostMod = Math.Clamp((3 / distanceToGhost) * 1.5f, 0, 2);
 
-        return Math.Clamp((e + distanceToGhostMod) * chaseMultiplier, 0, 6);
+        return Math.Clamp((e + distanceToGhostMod + emfConstant) * chaseMultiplier, 0, 7);
     }
 
     private double Elapsed;
@@ -73,10 +86,11 @@ public partial class EMFReader : Holdable
         if (!Power)
         {
             display.Text = "";
+            tick.Text = "";
         }
 
         var emf = GetEMF();
-        UpdateInterval = 1f - (emf / 6);
+        UpdateInterval = 1f - (emf / 7);
 
         if (Elapsed >= (UpdateInterval / 2))
         {
@@ -95,7 +109,7 @@ public partial class EMFReader : Holdable
                 TickSound.Play(0);
             }
 
-            display.Modulate = Color.FromHtml("#ffffff").Lerp(Color.FromHtml("#ff0000"), emf / 6);
+            display.Modulate = Color.FromHtml("#ffffff").Lerp(Color.FromHtml("#ff0000"), emf / 7);
             display.Text = "EMF: " + emf.ToString("0.00");
         }
     }
