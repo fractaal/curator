@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://d02jtvmmus5bb"]
 
-[ext_resource type="Texture2D" uid="uid://1telxmy2nqj2" path="res://textures/Bloodstain2.png" id="1_j1ckx"]
+[ext_resource type="Texture2D" uid="uid://cfymicwroder7" path="res://textures/Bloodstain.png" id="1_eknkn"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_klgbf"]
 size = Vector3(0.25, 0.25, 0.25)
@@ -22,4 +22,4 @@ shape = SubResource("BoxShape3D_klgbf")
 [node name="Decal" type="Decal" parent="."]
 transform = Transform3D(1, -3.48787e-16, 3.48787e-16, 3.48787e-16, 1, -3.48787e-16, -3.48787e-16, 3.48787e-16, 1, 0, 0, 0)
 size = Vector3(1, 1, 1)
-texture_albedo = ExtResource("1_j1ckx")
+texture_albedo = ExtResource("1_eknkn")
