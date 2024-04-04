@@ -42,7 +42,15 @@ var GhostType
 var GhostAge
 var FavoriteRoom
 
+@export var infoLabel: RichTextLabel
+
 var manifesting = false
+
+func updateInfoLabel():
+	var out = "[b]Name:[/b] " + FirstName + " " + LastName + "\n"
+	out += "[b]Favorite Room:[/b] " + FavoriteRoom + "\n"
+
+	infoLabel.text = out
 
 func _ready():
 	# Set up name and type
@@ -59,6 +67,7 @@ func _ready():
 
 	var rooms = get_tree().get_nodes_in_group("rooms")
 	FavoriteRoom = rooms[randi() % rooms.size()].name
+	# FavoriteRoom = "Pantry"
 
 	_on_ghost_action("movetoasghost", FavoriteRoom)
 
@@ -135,9 +144,9 @@ func chase(arguments):
 	huntStartSFX.play(0)
 
 	if arguments == "fast":
-		speed = 4
+		speed = 5.25
 	else:
-		speed = 2.5
+		speed = 4
 
 	await get_tree().create_timer(5).timeout
 
@@ -177,6 +186,8 @@ var sameLocationCheckElapsed = 0
 var sameLocationCheckLast = Vector3.ZERO
 
 func _physics_process(delta):
+	updateInfoLabel()
+
 	var current_location = global_transform.origin
 	var next_location = nav_agent.get_next_path_position()
 	var new_velocity = (next_location - current_location).normalized() * speed
@@ -247,7 +258,7 @@ func getStatus():
 	out += "Age: " + str(GhostAge) + "\n"
 	out += "Favorite Room: " + FavoriteRoom + "\n"
 	out += "Current Room: " + Locator.Room + "\n"
-	out += "---"
+	out += "---\n"
 	out += "CHASING PLAYER?: " + ("YES - GO CRAZY!" if chasing else "No") + "\n"
 	out += "VISIBLE?: " + ("Yes" if skeleton.visible else "No") + "\n"
 
