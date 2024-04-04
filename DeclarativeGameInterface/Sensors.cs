@@ -24,10 +24,15 @@ public partial class Sensors : Node
     [Export]
     private RichTextLabel DebugView;
 
+    [Export]
+    private RichTextLabel StatusView;
+
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
         bus = EventBus.Get();
+
+        StatusView = GetTree().CurrentScene.GetNode<RichTextLabel>("AIStatus");
 
         player = GetTree().CurrentScene.GetNode<Node3D>("Player");
 
@@ -77,6 +82,8 @@ public partial class Sensors : Node
 
     private ulong lastTimePoked = 0;
 
+    private bool aiEnabled = false;
+
     public void PokePrompter()
     {
         if (Time.GetTicksMsec() - lastTimePoked < 5000)
@@ -86,6 +93,29 @@ public partial class Sensors : Node
         }
         lastTimePoked = Time.GetTicksMsec();
         bus.EmitSignal(EventBus.SignalName.GameDataRead, GetGameInformationAndHistory());
+    }
+
+    Tween tween;
+
+    public override async void _PhysicsProcess(double delta)
+    {
+        if (Input.IsActionJustPressed("ToggleAI"))
+        {
+            aiEnabled = !aiEnabled;
+
+            StatusView.Text = aiEnabled ? "AI Enabled" : "AI Disabled";
+
+            if (tween != null)
+            {
+                tween.Stop();
+            }
+
+            tween = CreateTween();
+
+            StatusView.Modulate = new Color(1, 1, 1, 1);
+            tween.TweenProperty(StatusView, "modulate", new Color(1, 1, 1, 0), 1);
+            tween.Play();
+        }
     }
 
     // Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -105,6 +135,12 @@ public partial class Sensors : Node
         {
             sensorReadElapsed = 0;
             // return;
+
+            if (!aiEnabled)
+            {
+                GD.Print("AI disabled, skipping sensor read.");
+                return;
+            }
 
             if (player.Get("dead").AsBool())
             {
@@ -190,6 +226,7 @@ CURRENT TIME: {time}s
 </EVENTS>
 
 <PLAYER>
+{player.Call("getStatus")}
 Current Room: {PlayerCurrentRoom}
 </PLAYER>
 
