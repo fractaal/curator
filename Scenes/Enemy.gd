@@ -263,3 +263,11 @@ func getStatus():
 	out += "VISIBLE?: " + ("Yes" if skeleton.visible else "No") + "\n"
 
 	return out
+
+func getStatusStateless():
+	var out = "Name: " + FirstName + " " + LastName + "\n"
+	out += "Type: " + GhostType + "\n"
+	out += "Age: " + str(GhostAge) + "\n"
+	out += "Favorite Room: " + FavoriteRoom + "\n"
+
+	return out
