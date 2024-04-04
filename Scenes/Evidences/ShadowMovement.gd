@@ -14,7 +14,7 @@ var next_location: Vector3
 
 var rooms;
 
-var maxIters = 3
+var maxIters = 10
 var iters = 0
 
 func _ready():
