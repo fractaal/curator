@@ -24,17 +24,21 @@ public partial class Sensors : Node
     [Export]
     private RichTextLabel DebugView;
 
+    private LLMInterface llmInterface;
+
     [Export]
     private RichTextLabel StatusView;
 
     // Called when the node enters the scene tree for the first time.
-    public override void _Ready()
+    public override async void _Ready()
     {
         bus = EventBus.Get();
 
         StatusView = GetTree().CurrentScene.GetNode<RichTextLabel>("AIStatus");
 
         player = GetTree().CurrentScene.GetNode<Node3D>("Player");
+
+        llmInterface = GetNode<LLMInterface>("/root/LLMInterface");
 
         // Attaching various object events to sensors
         Room.RoomEntered += (room, body) =>
@@ -70,6 +74,30 @@ public partial class Sensors : Node
                 SystemFeedback.RemoveAt(0);
             }
         };
+
+        await ToSignal(GetTree().CreateTimer(1), "timeout");
+
+        var file = FileAccess.Open(
+            "res://DeclarativeGameInterface/prompts/BackstoryPrompt.txt",
+            FileAccess.ModeFlags.Read
+        );
+        var backstoryPrompt = file.GetAsText();
+
+        ghostBackstory = await llmInterface.SendIsolated(
+            new List<Message>
+            {
+                new Message { role = "system", content = backstoryPrompt },
+                new Message
+                {
+                    role = "user",
+                    content = GetTree()
+                        .CurrentScene
+                        .GetNode("Ghost")
+                        .Call("getStatusStateless")
+                        .ToString()
+                }
+            }
+        );
     }
 
     private double tickInterval = 0.5;
@@ -83,6 +111,8 @@ public partial class Sensors : Node
     private ulong lastTimePoked = 0;
 
     private bool aiEnabled = false;
+
+    private string ghostBackstory = "No backstory yet...";
 
     public void PokePrompter()
     {
@@ -216,6 +246,10 @@ CURRENT TIME: {time}s
 <GHOST>
 {ghostStatus}
 </GHOST>
+
+<GHOST_BACKSTORY>
+{ghostBackstory}
+</GHOST_BACKSTORY>
 
 <ROOMS>
 {GetAllRoomInformation()}
