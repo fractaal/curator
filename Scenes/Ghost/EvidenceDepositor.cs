@@ -7,9 +7,6 @@ public partial class EvidenceDepositor : Node
     // WIP
 
     [Export]
-    private PackedScene GhostWritingPrefab;
-
-    [Export]
     private PackedScene EMFLevel5Prefab;
 
     [Export]
@@ -93,7 +90,7 @@ public partial class EvidenceDepositor : Node
 
         PackedScene evidencePrefab = chosenEvidence switch
         {
-            "Ghost Writing" => GhostWritingPrefab,
+            "Bloodstains" => BloodstainsPrefab,
             "EMF Level 5" => EMFLevel5Prefab,
             "Disembodied Footsteps" => DisembodiedFootstepsPrefab,
             "Freezing Temperatures" => FreezingTemperaturesPrefab,
@@ -108,6 +105,10 @@ public partial class EvidenceDepositor : Node
             var evidence = evidencePrefab.Instantiate<Node3D>();
             GetTree().Root.AddChild(evidence);
             evidence.GlobalPosition = Locator.RoomObject?.GetRandomPosition() ?? Vector3.Zero;
+        }
+        else
+        {
+            GD.PrintErr("Evidence prefab not found for " + chosenEvidence);
         }
     }
 }
