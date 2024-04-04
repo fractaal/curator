@@ -1,4 +1,4 @@
-[gd_scene load_steps=39 format=3 uid="uid://ctahsvj88g1om"]
+[gd_scene load_steps=41 format=3 uid="uid://ctahsvj88g1om"]
 
 [ext_resource type="Script" path="res://levels/node_3d.gd" id="1_7plsp"]
 [ext_resource type="PackedScene" uid="uid://7gv6q50fuutj" path="res://Scenes/Player/player.tscn" id="1_eisjc"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://c5nn4hpuwrtes" path="res://Scenes/FloorLamp.tscn" id="8_50qpy"]
 [ext_resource type="PackedScene" uid="uid://bbhrmf5ph6a17" path="res://Scenes/Ghost.tscn" id="9_1ok4b"]
 [ext_resource type="Script" path="res://SaySomething.gd" id="9_klx4h"]
+[ext_resource type="Texture2D" uid="uid://bxwdyaqtkjqqk" path="res://models/Door/Door_Door.jpg" id="10_jl02b"]
 [ext_resource type="PackedScene" uid="uid://cbnyfileu33e7" path="res://Scenes/CeilingLight.tscn" id="10_oimnh"]
 [ext_resource type="Script" path="res://levels/Room.cs" id="12_kaqth"]
 [ext_resource type="Script" path="res://Scripts/ModeReadout.cs" id="13_bc6nn"]
@@ -23,7 +24,7 @@
 [ext_resource type="PackedScene" uid="uid://cc1v1twvevriu" path="res://Scenes/Tools/TemperatureReader.tscn" id="22_06xlt"]
 [ext_resource type="PackedScene" uid="uid://byg6wn7sspnbk" path="res://Scenes/Tools/EMFReader2.tscn" id="23_5fppm"]
 [ext_resource type="PackedScene" uid="uid://24g1f7o1rgir" path="res://Scenes/Tools/SpiritBox.tscn" id="23_5qaef"]
-[ext_resource type="PackedScene" uid="uid://boejxxg3pk1pd" path="res://Scenes/CeilingLight2.tscn" id="24_2thbs"]
+[ext_resource type="PackedScene" path="res://Scenes/CeilingLight2.tscn" id="24_2thbs"]
 [ext_resource type="Script" path="res://levels/Debug.gd" id="25_wy030"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6g5uc"]
@@ -43,7 +44,6 @@ sky = SubResource("Sky_ivwug")
 sky_rotation = Vector3(3.48787e-16, 3.48787e-16, 3.48787e-16)
 ambient_light_color = Color(0.890196, 0.890196, 0.890196, 1)
 tonemap_mode = 2
-ssao_enabled = true
 ssao_radius = 0.42
 ssao_intensity = 4.0
 ssao_detail = 1.0
@@ -163,6 +163,10 @@ albedo_texture = ExtResource("3_m1rsk")
 uv1_scale = Vector3(3, 3, 3)
 uv1_triplanar = true
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fmty3"]
+albedo_texture = ExtResource("10_jl02b")
+albedo_texture_msdf = true
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_hvrpw"]
 size = Vector3(9.07156, 3.45926, 12.7359)
 
@@ -201,7 +205,7 @@ shadow_enabled = true
 shadow_bias = 0.0
 
 [node name="Door" parent="." instance=ExtResource("4_b4bgh")]
-transform = Transform3D(0.955687, 0, 0, 0, 0.955687, 0, 0, 0, 0.955687, -3.32682, 1.59722, 4.60326)
+transform = Transform3D(0.955687, 0, 0, 0, 0.955687, 0, 0, 0, 0.955687, -3.0944, 1.93014, 4.61919)
 
 [node name="Door2" parent="." instance=ExtResource("4_b4bgh")]
 transform = Transform3D(-0.955687, 0, -8.35488e-08, 0, 0.955687, 0, 8.35488e-08, 0, -0.955687, 2.43551, 1.83477, 20.5003)
@@ -226,7 +230,7 @@ block_color_group = 2
 block_style = 2
 
 [node name="BasicBlock17" parent="NavigationRegion3D" instance=ExtResource("1_ujgwk")]
-transform = Transform3D(-8.74228e-08, 0, -30, 0, 5.6384, 0, 2, 0, -1.31134e-06, -0.861121, 2.95161, -2.7792)
+transform = Transform3D(-8.74228e-08, 0, -30, 0, 5.6384, 0, 2, 0, -1.31134e-06, -0.848635, 2.97745, -2.77559)
 block_color_group = 2
 block_style = 2
 
@@ -374,9 +378,9 @@ use_collision = true
 size = Vector3(0.549911, 4.13572, 13.8229)
 
 [node name="CSGBox3D" type="CSGBox3D" parent="NavigationRegion3D/CSGBox3D2"]
-transform = Transform3D(0.954399, 0, 0, 0, 2.6227, 0, 0, 0, 1.32803, 0, -0.343993, 1.03153)
+transform = Transform3D(0.954399, 0, 0, 0, 2.6227, 0, 0, 0, 1.32803, -0.00263405, -0.153689, 1.03288)
 operation = 2
-size = Vector3(1, 1, 1.16134)
+size = Vector3(1, 1.15088, 1.14541)
 
 [node name="CSGBox3D3" type="CSGBox3D" parent="NavigationRegion3D"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -1.32102, 2.04774, 11.0518)
@@ -437,9 +441,9 @@ use_collision = true
 size = Vector3(4.20013, 4.34341, 0.491351)
 
 [node name="CSGBox3D2" type="CSGBox3D" parent="NavigationRegion3D/CSGBox3D8"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.245131, 0, 0.0381794)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.195089, 0.0766968, 0.0381794)
 operation = 2
-size = Vector3(1.37264, 2.93833, 1)
+size = Vector3(1.69986, 3.09172, 1)
 
 [node name="CSGBox3D9" type="CSGBox3D" parent="NavigationRegion3D"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 5.42122, 1.7738, 19.9212)
@@ -460,6 +464,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.31564, 3.86406, 12.1055)
 
 [node name="CSGBox3D4" type="CSGBox3D" parent="NavigationRegion3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.05479, 0.9731, 10.8418)
+material_override = SubResource("StandardMaterial3D_fmty3")
 use_collision = true
 size = Vector3(5.69365, 1.36072, 8.08347)
 
@@ -487,19 +492,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.87314, 5.86032, 17.8285)
 use_collision = true
 size = Vector3(2.04895, 3.72636, 1)
 
-[node name="CSGBox3D14" type="CSGBox3D" parent="NavigationRegion3D"]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -3.95366, 1.39327, 5.43824)
-use_collision = true
-size = Vector3(2.04895, 3.72636, 1)
-
 [node name="Ghost" parent="." instance=ExtResource("9_1ok4b")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.79612, 0.5, 6.84054)
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
-offset_left = 37.0
-offset_top = 745.755
-offset_right = 613.0
-offset_bottom = 838.13
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -170.0
+offset_right = 616.0
+offset_bottom = -77.625
+grow_vertical = 0
 theme_override_font_sizes/normal_font_size = 14
 theme_override_font_sizes/bold_font_size = 14
 bbcode_enabled = true
@@ -509,10 +513,14 @@ text = "[b]T[/b] - Toggle Flashlight
 [b]Q / Shift-Q[/b] - Toggle, Throw (Left Hand)"
 
 [node name="AIStatus" type="RichTextLabel" parent="."]
-offset_left = 37.0
-offset_top = 623.0
-offset_right = 613.0
-offset_bottom = 646.0
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -220.0
+offset_right = 616.0
+offset_bottom = -197.0
+grow_vertical = 0
 theme_override_font_sizes/normal_font_size = 14
 theme_override_font_sizes/bold_font_size = 14
 bbcode_enabled = true
@@ -541,8 +549,8 @@ grow_vertical = 2
 layout_mode = 1
 offset_left = 28.0
 offset_top = 28.0
-offset_right = 528.0
-offset_bottom = 144.0
+offset_right = 778.0
+offset_bottom = 68.0
 placeholder_text = "Command Here"
 script = ExtResource("6_l450q")
 
@@ -551,10 +559,10 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -131.0
-offset_top = -285.0
-offset_right = 422.0
-offset_bottom = 661.0
+offset_left = -904.0
+offset_top = 32.0
+offset_right = -351.0
+offset_bottom = 978.0
 grow_horizontal = 0
 theme_override_font_sizes/normal_font_size = 8
 theme_override_font_sizes/bold_font_size = 8
@@ -597,9 +605,9 @@ script = ExtResource("13_bc6nn")
 [node name="SensorsDebug" type="RichTextLabel" parent="DebugUI"]
 layout_mode = 1
 offset_left = 31.0
-offset_top = 158.0
+offset_top = 90.0
 offset_right = 524.0
-offset_bottom = 1016.0
+offset_bottom = 948.0
 theme_override_font_sizes/normal_font_size = 8
 theme_override_font_sizes/bold_font_size = 8
 theme_override_font_sizes/italics_font_size = 8
