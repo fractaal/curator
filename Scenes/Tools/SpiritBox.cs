@@ -46,9 +46,13 @@ public partial class SpiritBox : Holdable
 
     private string ghostSpeechText = "";
 
+    private bool isProcessing = false;
+
     string[] spinnerFrames = new string[] { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" };
 
-    public override void _Ready()
+    private List<string> messageQueue = new List<string>();
+
+    public override async void _Ready()
     {
         base._Ready();
 
@@ -58,42 +62,7 @@ public partial class SpiritBox : Holdable
         {
             if (verb == "speakAsGhost" && Power)
             {
-                Mode = "INTERPRET";
-                topCaption.Text = "SPECTRAL VOICE DETECTED";
-                arguments = Regex.Replace(arguments, "\"", "");
-                arguments = Regex.Replace(arguments.ToLower(), "player", "");
-                ghostSpeech.Text = arguments;
-
-                var tokenized = FakeTokenize(RemoveNonAlphabetical(arguments));
-
-                ghostSpeechText = "";
-
-                GenerateSpeechAudio(arguments);
-
-                foreach (var token in tokenized)
-                {
-                    if (!Power)
-                        return;
-                    ghostSpeechText += token.ToUpper();
-                    ghostSpeechText = ghostSpeechText
-                        .TakeLast(140)
-                        .Aggregate("", (acc, c) => acc + c);
-                    ghostSpeech.Text = ghostSpeechText + GetRandomCharacters();
-                    await ToSignal(GetTree().CreateTimer(GD.Randf() % 0.075, false), "timeout");
-                    TickSound.Play(0);
-                    tick.Text = "SPEAKING";
-                    await ToSignal(GetTree().CreateTimer(0.075, false), "timeout");
-                    tick.Text = "";
-                    currentInterpretSpinnerFrame =
-                        (currentInterpretSpinnerFrame + 1) % spinnerFrames.Length;
-                }
-
-                ghostSpeech.Text = ghostSpeechText;
-
-                await ToSignal(GetTree().CreateTimer(5, false), "timeout");
-                ghostSpeech.Text = "";
-                Mode = "IDLE";
-                topCaption.Text = "ANALYZING SPECTRAL DATA";
+                messageQueue.Add(arguments);
             }
         };
 
@@ -101,6 +70,59 @@ public partial class SpiritBox : Holdable
         {
             CallDeferred(nameof(OnTTSFileReady), audioFilePath);
         };
+
+        // Go through messages one at a time
+        while (true)
+        {
+            await ToSignal(GetTree().CreateTimer(0.5f, false), "timeout");
+
+            if (!isProcessing && messageQueue.Count > 0)
+            {
+                var firstMessage = messageQueue[0];
+                messageQueue.RemoveAt(0);
+
+                Speak(firstMessage);
+            }
+        }
+    }
+
+    private async void Speak(string text)
+    {
+        isProcessing = true;
+        Mode = "INTERPRET";
+        topCaption.Text = "SPECTRAL VOICE DETECTED";
+        text = Regex.Replace(text, "\"", "");
+        text = Regex.Replace(text.ToLower(), "player", "");
+        ghostSpeech.Text = text;
+
+        var tokenized = FakeTokenize(RemoveNonAlphabetical(text));
+
+        ghostSpeechText = "";
+
+        GenerateSpeechAudio(text);
+
+        foreach (var token in tokenized)
+        {
+            if (!Power)
+                return;
+            ghostSpeechText += token.ToUpper();
+            ghostSpeechText = ghostSpeechText.TakeLast(140).Aggregate("", (acc, c) => acc + c);
+            ghostSpeech.Text = ghostSpeechText + GetRandomCharacters();
+            await ToSignal(GetTree().CreateTimer(GD.Randf() % 0.075, false), "timeout");
+            TickSound.Play(0);
+            tick.Text = "SPEAKING";
+            await ToSignal(GetTree().CreateTimer(0.075, false), "timeout");
+            tick.Text = "";
+            currentInterpretSpinnerFrame =
+                (currentInterpretSpinnerFrame + 1) % spinnerFrames.Length;
+        }
+
+        ghostSpeech.Text = ghostSpeechText;
+
+        await ToSignal(GetTree().CreateTimer(2, false), "timeout");
+        isProcessing = false;
+        Mode = "IDLE";
+        topCaption.Text = "ANALYZING SPECTRAL DATA";
     }
 
     private double IdleFramesInterval = 0.5;
@@ -145,17 +167,29 @@ public partial class SpiritBox : Holdable
                     ChaseUpdateInterval = GD.RandRange(0.01f, 0.1f);
                     TickSound.PitchScale = (float)GD.RandRange(1.25f, 2f);
                     Mode = "INTERPRET";
-                    topCaption.Text = GlitchText("SPECTRAL VOICE DETECTED", 0.5);
 
                     currentInterpretSpinnerFrame =
                         (currentInterpretSpinnerFrame + 1) % spinnerFrames.Length;
 
-                    var text =
-                        ghostSpeechText.Length > 0
-                            ? GlitchText(ghostSpeechText, 0.3)
-                            : GlitchText("UNABLE TO TRANSLATE", 0.3);
-
                     var doATick = GD.Randf() > 0.5;
+
+                    string text;
+
+                    if (doATick)
+                    {
+                        text =
+                            ghostSpeechText.Length > 0
+                                ? GlitchText(ghostSpeechText, 0.3)
+                                : GlitchText("UNABLE TO TRANSLATE", 0.3);
+                    }
+                    else
+                    {
+                        text = ghostSpeechText.Length > 0 ? ghostSpeechText : "UNABLE TO TRANSLATE";
+                    }
+
+                    topCaption.Text = doATick
+                        ? GlitchText("SPECTRAL VOICE DETECTED", 0.5)
+                        : "SPECTRAL VOICE DETECTED";
 
                     tick.Text = doATick ? "SPEAKING" : "";
 
