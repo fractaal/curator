@@ -87,6 +87,48 @@ public partial class LLMInterface : Node
         thread.Start();
     }
 
+    public async Task<string> SendIsolated(List<Message> messages)
+    {
+        try
+        {
+            using (var request = new HttpRequestMessage(HttpMethod.Post, url))
+            {
+                request.Content = JsonContent.Create(
+                    new { model = MODEL, messages = messages.ToArray() }
+                );
+
+                var response = await _client.SendAsync(
+                    request,
+                    HttpCompletionOption.ResponseHeadersRead
+                );
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Assuming you want to return the response content as a string
+                    var responseString = await response.Content.ReadAsStringAsync();
+
+                    var json = JsonNode.Parse(responseString).AsObject();
+                    var message = json["choices"]
+                        .AsArray()[0]["message"]["content"]
+                        .AsValue()
+                        .ToString();
+                    GD.Print(message);
+                    return message;
+                }
+                else
+                {
+                    // Handle non-success status codes as needed
+                    return "Error: " + response.StatusCode;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            GD.PrintErr("Failed to send request: " + e.Message);
+            return "";
+        }
+    }
+
     private async Task DoRequest(List<Message> messages)
     {
         EventBus bus = EventBus.Get();
