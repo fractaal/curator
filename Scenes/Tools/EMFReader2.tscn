@@ -1,7 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://byg6wn7sspnbk"]
+[gd_scene load_steps=10 format=3 uid="uid://byg6wn7sspnbk"]
 
 [ext_resource type="Script" path="res://Scenes/Tools/EMFReader.cs" id="1_baf20"]
+[ext_resource type="FontFile" uid="uid://dg4fvw3nd4p4u" path="res://Fonts/FantasqueSansMono-Bold.ttf" id="1_qwidn"]
 [ext_resource type="AudioStream" uid="uid://cg1cen26lapox" path="res://Audio/switch.wav" id="2_b7qax"]
+[ext_resource type="FontFile" uid="uid://dhvoljulm758p" path="res://Fonts/JetBrains Mono Regular Nerd Font Complete Mono.ttf" id="2_j5yo7"]
 [ext_resource type="AudioStream" uid="uid://catg8owgou2hf" path="res://Audio/ToolBeep.wav" id="3_4f8of"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u0h5p"]
@@ -32,15 +34,25 @@ operation = 2
 size = Vector3(0.114807, 0.0291748, 0.141418)
 
 [node name="Label3D" type="Label3D" parent="."]
-transform = Transform3D(-1, 0, 8.74228e-08, 8.74228e-08, -4.37114e-08, 1, 3.82137e-15, 1, 4.37114e-08, -0.000236511, 0.0148017, 0.0994759)
+transform = Transform3D(-1, 0, 8.74228e-08, 8.74228e-08, -4.37114e-08, 1, 3.82137e-15, 1, 4.37114e-08, -0.000236511, 0.0148017, 0.103767)
 pixel_size = 0.0005
 shaded = true
 modulate = Color(0, 0, 0, 1)
 text = "EMSIGHT"
+font = ExtResource("1_qwidn")
+outline_size = 0
+
+[node name="Label3D4" type="Label3D" parent="."]
+transform = Transform3D(-1, 0, 8.74228e-08, 8.74228e-08, -4.37114e-08, 1, 3.82137e-15, 1, 4.37114e-08, -0.000236511, 0.0148017, 0.09147)
+pixel_size = 0.0003
+shaded = true
+modulate = Color(0, 0, 0, 1)
+text = "0T-EM900"
+font = ExtResource("1_qwidn")
 outline_size = 0
 
 [node name="Label3D3" type="Label3D" parent="."]
-transform = Transform3D(-1, 0, 8.74228e-08, 8.74228e-08, -4.37114e-08, 1, 3.82137e-15, 1, 4.37114e-08, 0.0467083, 0.00124361, -0.0118523)
+transform = Transform3D(-1, 0, 8.74228e-08, 8.74228e-08, -4.37114e-08, 1, 3.82137e-15, 1, 4.37114e-08, 0.0467083, 0.00124361, -0.0204094)
 pixel_size = 0.0002
 shaded = true
 modulate = Color(0, 0, 0, 1)
@@ -49,19 +61,24 @@ text = "<E> to toggle power in hand.
 when not holding it.
 
 Enjoy ghost hunting! Don't die"
+font = ExtResource("2_j5yo7")
 outline_size = 0
 horizontal_alignment = 0
+autowrap_mode = 3
+width = 550.0
 
 [node name="Label3D2" type="Label3D" parent="."]
 transform = Transform3D(-1, 0, 8.74228e-08, 8.74228e-08, -4.37114e-08, 1, 3.82137e-15, 1, 4.37114e-08, -0.000236511, 0.0155174, 0.0525942)
 pixel_size = 0.0005
 text = "EMF 5"
+font = ExtResource("2_j5yo7")
 outline_size = 0
 
 [node name="Tick" type="Label3D" parent="."]
 transform = Transform3D(-1, 0, 8.74228e-08, 8.74228e-08, -4.37114e-08, 1, 3.82137e-15, 1, 4.37114e-08, 0.0492823, 0.0155174, 0.0331503)
 pixel_size = 0.0003
 text = "TICK"
+font = ExtResource("2_j5yo7")
 outline_size = 0
 horizontal_alignment = 0
 

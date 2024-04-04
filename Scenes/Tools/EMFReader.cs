@@ -114,12 +114,12 @@ public partial class EMFReader : Holdable
         }
     }
 
-    public override void interact()
-    {
-        var parent = GetParent<RigidBody3D>();
-        parent.Freeze = true;
-        Holding = true;
-    }
+    // public override void interact()
+    // {
+    //     var parent = GetParent<RigidBody3D>();
+    //     parent.Freeze = true;
+    //     Holding = true;
+    // }
 
     public override void secondaryInteract()
     {
