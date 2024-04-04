@@ -37,6 +37,10 @@ var ghostHead: Node3D
 
 var worldEnvironment: WorldEnvironment
 
+@export var flashlightAudio: AudioStreamPlayer3D
+
+@export var playerStats: Node3D
+
 func kill():
 	dead = true
 
@@ -103,7 +107,7 @@ func _physics_process(delta):
 			
 		if Input.is_action_just_pressed("ToggleFlashlight") and not hasFocusOnGui:
 			isFlashlightOn = !isFlashlightOn
-			
+			flashlightAudio.play(0)
 			$SpotLight3D.spot_range = 100 if isFlashlightOn else 0
 	
 	# Add the gravity.
@@ -124,7 +128,8 @@ func _physics_process(delta):
 	if not dead:
 		$Head/Camera3d.position.y = 0.845 + sin(Time.get_ticks_msec() * (0.015 if isRunning else 0.01)) * velocity.length() * 0.01
 
-	$Head/Camera3d/ItemAttachmentPoint.position.y = -0.145 - sin(Time.get_ticks_msec() * 0.007) * velocity.length() * 0.0025
+	$Head/Camera3d/ItemAttachmentPointRight.position.y = -0.145 - sin(Time.get_ticks_msec() * 0.007) * velocity.length() * 0.0025
+	$Head/Camera3d/ItemAttachmentPointLeft.position.y = -0.145 - sin(Time.get_ticks_msec() * 0.007) * velocity.length() * - 0.0025
 	
 	var targetHeadTiltUp = (-input_dir.y if is_on_floor() else 1) * velocity.length() * 0.015
 	var targetHeadTiltSide = -input_dir.x * velocity.length() * 0.025
@@ -196,3 +201,9 @@ func secondaryInteract():
 
 	if interactable:
 		interactable.secondaryInteract()
+
+func getStatus():
+	if playerStats:
+		return playerStats.getStatus()
+	else:
+		return "NO PLAYER STATS AVAILABLE"
