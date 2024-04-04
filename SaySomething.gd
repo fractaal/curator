@@ -11,7 +11,12 @@ func _input(event):
 		grab_focus()
 	elif (event.is_action_pressed("ui_text_completion_accept")&&has_focus()):
 
-		EventBus.emit_signal("NotableEventOccurred", "Player said: \"" + text + "\"");
+		if (text.strip_edges() == ""):
+			clear()
+			release_focus()
+			return
+
+		EventBus.emit_signal("NotableEventOccurred", "Player said: \"" + text.strip_edges() + "\"");
 		
 		clear()
 		release_focus()
