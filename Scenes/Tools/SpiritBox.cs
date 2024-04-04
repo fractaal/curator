@@ -44,6 +44,8 @@ public partial class SpiritBox : Holdable
 
     private string Mode = "IDLE";
 
+    private string ghostSpeechText = "";
+
     string[] spinnerFrames = new string[] { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" };
 
     public override void _Ready()
@@ -64,7 +66,7 @@ public partial class SpiritBox : Holdable
 
                 var tokenized = FakeTokenize(RemoveNonAlphabetical(arguments));
 
-                string fullText = "";
+                ghostSpeechText = "";
 
                 GenerateSpeechAudio(arguments);
 
@@ -72,19 +74,21 @@ public partial class SpiritBox : Holdable
                 {
                     if (!Power)
                         return;
-                    fullText += token.ToUpper();
-                    fullText = fullText.TakeLast(140).Aggregate("", (acc, c) => acc + c);
-                    ghostSpeech.Text = fullText + GetRandomCharacters();
-                    await ToSignal(GetTree().CreateTimer(GD.Randf() % 0.125, false), "timeout");
+                    ghostSpeechText += token.ToUpper();
+                    ghostSpeechText = ghostSpeechText
+                        .TakeLast(140)
+                        .Aggregate("", (acc, c) => acc + c);
+                    ghostSpeech.Text = ghostSpeechText + GetRandomCharacters();
+                    await ToSignal(GetTree().CreateTimer(GD.Randf() % 0.075, false), "timeout");
                     TickSound.Play(0);
                     tick.Text = "SPEAKING";
-                    await ToSignal(GetTree().CreateTimer(0.125, false), "timeout");
+                    await ToSignal(GetTree().CreateTimer(0.075, false), "timeout");
                     tick.Text = "";
                     currentInterpretSpinnerFrame =
                         (currentInterpretSpinnerFrame + 1) % spinnerFrames.Length;
                 }
 
-                ghostSpeech.Text = fullText;
+                ghostSpeech.Text = ghostSpeechText;
 
                 await ToSignal(GetTree().CreateTimer(5, false), "timeout");
                 ghostSpeech.Text = "";
@@ -141,21 +145,26 @@ public partial class SpiritBox : Holdable
                     ChaseUpdateInterval = GD.RandRange(0.01f, 0.1f);
                     TickSound.PitchScale = (float)GD.RandRange(1.25f, 2f);
                     Mode = "INTERPRET";
-                    topCaption.Text = "SPECTRAL VOICE DETECTED";
+                    topCaption.Text = GlitchText("SPECTRAL VOICE DETECTED", 0.5);
 
                     currentInterpretSpinnerFrame =
                         (currentInterpretSpinnerFrame + 1) % spinnerFrames.Length;
 
-                    string fullText = GetRandomCharacters(10, GD.RandRange(10, 140));
+                    var text =
+                        ghostSpeechText.Length > 0
+                            ? GlitchText(ghostSpeechText, 0.3)
+                            : GlitchText("UNABLE TO TRANSLATE", 0.3);
 
                     var doATick = GD.Randf() > 0.5;
 
                     tick.Text = doATick ? "SPEAKING" : "";
 
+                    GhostSpeechPlayer.PitchScale = (float)GD.RandRange(0.6f, 1.15f);
+
                     if (doATick)
                         TickSound.Play(0);
 
-                    ghostSpeech.Text = fullText;
+                    ghostSpeech.Text = text;
                 }
             }
             else
@@ -164,6 +173,7 @@ public partial class SpiritBox : Holdable
                 if (!HasSetModeIdleAfterChase)
                 {
                     HasSetModeIdleAfterChase = true;
+                    GhostSpeechPlayer.PitchScale = 1f;
                     ghostSpeech.Text = "";
                     Mode = "IDLE";
                 }
@@ -217,6 +227,24 @@ public partial class SpiritBox : Holdable
         return GetRandomCharacters(2, 4);
     }
 
+    static string GlitchText(string text, double glitchProbability)
+    {
+        Random random = new Random();
+        string glitchCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        char[] chars = text.ToCharArray();
+
+        for (int i = 0; i < chars.Length; i++)
+        {
+            if (random.NextDouble() < glitchProbability)
+            {
+                // Replace the character with a random glitch character
+                chars[i] = glitchCharacters[random.Next(glitchCharacters.Length)];
+            }
+        }
+
+        return new string(chars);
+    }
+
     public string RemoveNonAlphabetical(string input)
     {
         // This regex matches any character that is NOT a letter (a-z, A-Z) or a space.
@@ -243,12 +271,12 @@ public partial class SpiritBox : Holdable
         GhostSpeechPlayer.Play();
     }
 
-    public override void interact()
-    {
-        var parent = GetParent<RigidBody3D>();
-        parent.Freeze = true;
-        Holding = true;
-    }
+    // public override void interact()
+    // {
+    //     var parent = GetParent<RigidBody3D>();
+    //     parent.Freeze = true;
+    //     Holding = true;
+    // }
 
     public override void secondaryInteract()
     {
@@ -279,7 +307,7 @@ public partial class SpiritBox : Holdable
         string binForMacOS = "/opt/homebrew/bin/espeak";
         string binForWindows = "espeak-ng";
 
-        string command = $"\"{text}\" -s 140 -p 20 -g 10 -w \"{tempFilePath}\"";
+        string command = $"\"{text}\" -s 180 -p 20 -g 3 -w \"{tempFilePath}\"";
 
         try
         {

@@ -1,9 +1,10 @@
-[gd_scene load_steps=9 format=3 uid="uid://24g1f7o1rgir"]
+[gd_scene load_steps=10 format=3 uid="uid://24g1f7o1rgir"]
 
 [ext_resource type="AudioStream" uid="uid://cg1cen26lapox" path="res://Audio/switch.wav" id="1_7gcr8"]
 [ext_resource type="Script" path="res://Scenes/Tools/SpiritBox.cs" id="1_ccq3c"]
 [ext_resource type="AudioStream" uid="uid://csx1rsbilwkpt" path="res://Audio/SpiritBoxTick.wav" id="2_1dgf5"]
-[ext_resource type="Script" path="res://Scenes/Tools/AudioHelper.gd" id="4_6342j"]
+[ext_resource type="FontFile" uid="uid://dg4fvw3nd4p4u" path="res://Fonts/FantasqueSansMono-Bold.ttf" id="4_jctuk"]
+[ext_resource type="FontFile" uid="uid://mbijwkkci6k6" path="res://Fonts/InputMonoCondensed-Regular.ttf" id="4_kf2d3"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_uldmd"]
 size = Vector3(0.315039, 0.0964233, 0.290796)
@@ -58,6 +59,7 @@ pixel_size = 0.0005
 shaded = true
 modulate = Color(0.258824, 0.258824, 0.258824, 1)
 text = "iGhost"
+font = ExtResource("4_jctuk")
 outline_size = 0
 
 [node name="CSGCylinder3D2" type="CSGCylinder3D" parent="."]
@@ -82,6 +84,7 @@ height = 0.0436144
 transform = Transform3D(-1, 3.82137e-15, 8.74228e-08, 8.74228e-08, 4.37114e-08, 1, 0, 1, -4.37114e-08, 0.10524, 0.0203576, 0.11013)
 pixel_size = 0.0005
 text = "ANALYZING SPECTRAL DATA"
+font = ExtResource("4_kf2d3")
 font_size = 20
 outline_size = 0
 horizontal_alignment = 0
@@ -90,6 +93,7 @@ horizontal_alignment = 0
 transform = Transform3D(-1, 3.82137e-15, 8.74228e-08, 8.74228e-08, 4.37114e-08, 1, 0, 1, -4.37114e-08, 0.128582, 0.0203576, 0.11013)
 pixel_size = 0.001
 text = "["
+font = ExtResource("4_kf2d3")
 font_size = 20
 outline_size = 0
 horizontal_alignment = 0
@@ -99,6 +103,7 @@ transform = Transform3D(-1, 3.82137e-15, 8.74228e-08, 8.74228e-08, 4.37114e-08, 
 pixel_size = 0.0005
 modulate = Color(0.603922, 0.678431, 1, 1)
 text = "SPIKE"
+font = ExtResource("4_kf2d3")
 font_size = 20
 outline_size = 0
 horizontal_alignment = 2
@@ -107,14 +112,12 @@ horizontal_alignment = 2
 transform = Transform3D(-1, 3.82137e-15, 8.74228e-08, 8.74228e-08, 4.37114e-08, 1, 0, 1, -4.37114e-08, 0.132302, 0.0203576, 0.0949235)
 pixel_size = 0.0005
 text = "You are ashdfoajsfodia jsofiajsoifjasoifjaosifjaoisf jaiosfjioasjfioasfasfasfgahsfoiajsfioajsiofajsiofjaiosfjaiosfjaiosfjaiosfjioasfjasf"
+font = ExtResource("4_kf2d3")
 outline_size = 0
 horizontal_alignment = 0
 vertical_alignment = 0
 autowrap_mode = 3
 width = 520.0
-
-[node name="AudioHelper" type="Node" parent="."]
-script = ExtResource("4_6342j")
 
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
 volume_db = -10.0
