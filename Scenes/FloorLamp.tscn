@@ -5,8 +5,10 @@
 [ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="3_u7flv"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gba8v"]
+resource_local_to_scene = true
 emission_enabled = true
 emission = Color(1, 0.898039, 0.658824, 1)
+emission_energy_multiplier = 10.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g3nf5"]
 emission_enabled = true
@@ -59,6 +61,7 @@ size = Vector3(0.333252, 2.88196, 0.359497)
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
 transform = Transform3D(1.98895, 0, 0, 0, 1, 0, 0, 0, 1.98895, 0, 0.0521736, 0)
+collision_mask = 0
 radius = 0.2
 height = 0.0695413
 sides = 16
@@ -66,6 +69,8 @@ cone = true
 
 [node name="CSGCylinder3D2" type="CSGCylinder3D" parent="."]
 transform = Transform3D(1.98895, 0, 0, 0, 1, 0, 0, 0, 1.98895, 0, 1.88705, 0)
+gi_mode = 0
+collision_mask = 0
 radius = 0.1
 height = 1.33763
 sides = 16
@@ -96,6 +101,7 @@ spot_angle = 70.0
 
 [node name="CSGBox3D" type="CSGBox3D" parent="."]
 transform = Transform3D(-1, 0, 1.50996e-07, 0, 1, 0, -1.50996e-07, 0, -1, 0.00163913, 0.985896, -0.00504506)
+collision_mask = 0
 size = Vector3(0.05, 1.91527, 0.05)
 
 [node name="GPUParticlesCollisionBox3D2" type="GPUParticlesCollisionBox3D" parent="."]
@@ -103,7 +109,7 @@ transform = Transform3D(0.98889, 0, 0, 0, 0.98889, 0, 0, 0, 0.98889, 0.0101972, 
 size = Vector3(10, 1, 10)
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.49638, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.94617, 0)
 light_color = Color(0.960784, 0.760784, 0.576471, 1)
 light_energy = 0.5
 omni_range = 10.0
@@ -129,6 +135,7 @@ process_material = SubResource("ParticleProcessMaterial_cnlpd")
 draw_pass_1 = SubResource("BoxMesh_2k75j")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
+collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0057373, 1.40556, 0.003479)

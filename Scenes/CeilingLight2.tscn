@@ -1,18 +1,19 @@
-[gd_scene load_steps=12 format=3 uid="uid://cbnyfileu33e7"]
+[gd_scene load_steps=14 format=3 uid="uid://boejxxg3pk1pd"]
 
-[ext_resource type="Script" path="res://Scenes/GameLight.gd" id="1_joy05"]
-[ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="2_coido"]
+[ext_resource type="Texture2D" uid="uid://i14u4rcieiwl" path="res://textures/flashlight4.png" id="1_glqbg"]
+[ext_resource type="Script" path="res://Scenes/GameLight.gd" id="1_tgs20"]
+[ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="2_h4117"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_olj7d"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4r0pw"]
+albedo_color = Color(0.247059, 0.247059, 0.247059, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jvri3"]
+albedo_color = Color(0.247059, 0.247059, 0.247059, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3je4y"]
 resource_local_to_scene = true
 emission_enabled = true
-emission = Color(1, 1, 1, 1)
-emission_energy_multiplier = 10.0
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ct417"]
-resource_local_to_scene = true
-emission_enabled = true
-emission = Color(1, 1, 1, 1)
+emission = Color(1, 0.882353, 0.580392, 1)
 emission_energy_multiplier = 10.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_senht"]
@@ -64,17 +65,26 @@ size = Vector3(0.015, 0.015, 0.015)
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.264038, 0)
+material_override = SubResource("StandardMaterial3D_4r0pw")
+radius = 0.28
 height = 0.233093
 sides = 16
 
+[node name="CSGCylinder3D3" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.54707, 0)
+material_override = SubResource("StandardMaterial3D_jvri3")
+radius = 0.023
+height = 2.513
+sides = 16
+
 [node name="CSGCylinder3D2" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.999949, 0.0100704, 0, -0.0100704, 0.999949, -0.000795424, 0.218891, 0.00335073)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.000795424, 0.218891, 0.00335073)
 gi_mode = 0
 radius = 0.420702
 height = 0.321534
 sides = 16
 cone = true
-material = SubResource("StandardMaterial3D_olj7d")
+material = SubResource("StandardMaterial3D_3je4y")
 
 [node name="CSGCylinder3D4" type="CSGCylinder3D" parent="."]
 transform = Transform3D(-1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0, 0, 1, -0.000795424, -0.102809, 0.00335073)
@@ -83,16 +93,31 @@ radius = 0.420702
 height = 0.321534
 sides = 16
 cone = true
-material = SubResource("StandardMaterial3D_ct417")
+material = SubResource("StandardMaterial3D_3je4y")
 
 [node name="CSGCylinder3D3" type="CSGCylinder3D" parent="CSGCylinder3D4"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000795424, 0.0451472, -0.00335073)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000795426, 0.0709145, -0.00335073)
 operation = 2
 height = 0.233093
 sides = 16
 
+[node name="SpotLight3D2" type="SpotLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, -0.139222, 0)
+light_color = Color(0.960784, 0.760784, 0.576471, 1)
+light_energy = 0.75
+light_indirect_energy = 8.0
+light_projector = ExtResource("1_glqbg")
+light_size = 1.0
+shadow_enabled = true
+shadow_blur = 2.0
+spot_range = 10.0
+spot_attenuation = 2.0
+spot_angle = 60.0
+
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.103799, 0)
+visible = false
+light_color = Color(1, 1, 0.431373, 1)
 light_size = 0.1
 shadow_enabled = true
 omni_range = 20.0
@@ -123,10 +148,10 @@ draw_pass_1 = SubResource("BoxMesh_8k1vn")
 shape = SubResource("BoxShape3D_c2myf")
 
 [node name="Interactable" type="Node" parent="." node_paths=PackedStringArray("nodesWithEmission", "locator", "Sparks")]
-script = ExtResource("1_joy05")
+script = ExtResource("1_tgs20")
 nodesWithEmission = [NodePath("../CSGCylinder3D2"), NodePath("../CSGCylinder3D4")]
 locator = NodePath("../RoomLocator")
 Sparks = NodePath("../Sparks")
 
 [node name="RoomLocator" type="Node" parent="."]
-script = ExtResource("2_coido")
+script = ExtResource("2_h4117")

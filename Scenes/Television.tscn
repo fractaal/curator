@@ -75,6 +75,7 @@ size = Vector3(1, 1, 1.72644)
 
 [node name="Screen" type="CSGBox3D" parent="CSGCombiner3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0844285, 0.447644, -0.000695825)
+gi_mode = 0
 size = Vector3(0.0513058, 1, 1.72644)
 material = SubResource("StandardMaterial3D_o4cw2")
 
