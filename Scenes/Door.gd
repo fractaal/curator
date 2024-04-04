@@ -54,7 +54,7 @@ func open():
 	isOpen = true
 	
 	var tween = create_tween()
-	await tween.tween_method(_openStep, 0.0, 1.0, 1.0).set_ease(Tween.EASE_OUT_IN).finished
+	await tween.tween_method(_openStep, 0.0, 1.0, 1.0).set_trans(Tween.TRANS_CUBIC).finished
 
 	isAnimating = false
 
@@ -77,7 +77,7 @@ func _close():
 	isAnimating = true
 
 	var tween = create_tween()
-	await tween.tween_method(_closeStep, 0.0, 1.0, 1.0).set_ease(Tween.EASE_OUT_IN).finished
+	await tween.tween_method(_closeStep, 0.0, 1.0, 1.0).set_trans(Tween.TRANS_CUBIC).finished
 
 	isAnimating = false
 
