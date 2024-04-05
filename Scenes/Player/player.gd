@@ -155,7 +155,7 @@ func _physics_process(delta):
 	
 	move_and_slide()
 	
-	var unclampedIntensityNoise = 7 + flashlightIntensityNoise.get_noise_1d(Time.get_ticks_msec() * 0.15) * 10
+	var unclampedIntensityNoise = 7 # + flashlightIntensityNoise.get_noise_1d(Time.get_ticks_msec() * 0.15) * 10
 	var clampedIntensityNoise = clamp(unclampedIntensityNoise, 0, 10)
 	
 	$SpotLight3D.light_energy = clampedIntensityNoise

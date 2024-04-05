@@ -121,4 +121,3 @@ width = 520.0
 
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
 volume_db = -10.0
-bus = &"TTS Bus"

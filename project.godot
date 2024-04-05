@@ -14,6 +14,11 @@ config/name="ReasoningEngine"
 run/main_scene="res://levels/node_3d.tscn"
 config/features=PackedStringArray("4.2", "C#", "Forward Plus")
 
+[audio]
+
+driver/enable_input=true
+driver/mix_rate=16000
+
 [autoload]
 
 EventBus="*res://Scripts/EventBus.cs"
@@ -149,16 +154,21 @@ ToggleDebugUI={
 
 common/physics_ticks_per_second=128
 common/max_physics_steps_per_frame=16
+3d/physics_engine="JoltPhysics3D"
+jolt_3d/collisions/areas_detect_static_bodies=true
 
 [rendering]
 
 lights_and_shadows/directional_shadow/soft_shadow_filter_quality=0
-lights_and_shadows/positional_shadow/soft_shadow_filter_quality=0
+lights_and_shadows/positional_shadow/soft_shadow_filter_quality=3
+lights_and_shadows/positional_shadow/soft_shadow_filter_quality.mobile=3
 global_illumination/gi/use_half_resolution=true
 anti_aliasing/screen_space_roughness_limiter/enabled=false
 scaling_3d/mode=2
-scaling_3d/scale=0.5
+scaling_3d/scale=0.8
 scaling_3d/fsr_sharpness=0.8
 global_illumination/sdfgi/probe_ray_count=2
 global_illumination/sdfgi/frames_to_converge=3
+anti_aliasing/quality/use_taa=true
+occlusion_culling/use_occlusion_culling=true
 anti_aliasing/canvas_textures/default_texture_repeat=1

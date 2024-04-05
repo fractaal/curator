@@ -93,7 +93,6 @@ sides = 16
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.103799, 0)
-light_size = 0.1
 shadow_enabled = true
 omni_range = 20.0
 omni_attenuation = 1.75

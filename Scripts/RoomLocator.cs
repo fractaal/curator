@@ -94,6 +94,7 @@ public partial class RoomLocator : Node
                         Room = room.Name;
                         Rooms.Add(Room);
                         DebugLabel.Text = "Room: " + Room;
+                        GD.Print("Found room for " + GetParent().Name + ": " + Room);
                     }
                 }
                 catch (Exception)
@@ -105,7 +106,14 @@ public partial class RoomLocator : Node
 
         if (Room == "None")
         {
-            DebugLabel.Text = "Can't detect room (No overlapping room)";
+            if (DebugLabel != null)
+            {
+                DebugLabel.Text = "Can't detect room (No overlapping room)";
+            }
+            else
+            {
+                GD.Print("Can't detect room (No overlapping room)");
+            }
         }
     }
 

@@ -117,6 +117,7 @@ func turnOn():
 	restore()
 		
 func restore():
+	await get_tree().create_timer(randf_range(0.0, 1.5)).timeout
 	RestoreSFX.pitch_scale = randf_range(0.85, 1.3)
 	RestoreSFX.seek(0)
 	RestoreSFX.play()

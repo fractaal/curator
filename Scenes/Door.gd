@@ -102,13 +102,13 @@ func unlock():
 	locked = false
 
 func _openStep(progress: float):
-	var y = lerp(0, 135, progress)
+	var y = lerp(0, 105, progress)
 	door.rotation.y = deg_to_rad(y)
 	# print(y)
 	# rotation.y = y
 
 func _closeStep(progress: float):
-	var y = lerp(135, 0, progress)
+	var y = lerp(105, 0, progress)
 	door.rotation.y = deg_to_rad(y)
 	
 func interact():
