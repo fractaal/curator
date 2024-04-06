@@ -60,6 +60,7 @@ material = SubResource("StandardMaterial3D_ge6xl")
 size = Vector3(0.015, 0.015, 0.015)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_c2myf"]
+size = Vector3(1, 0.513428, 1)
 
 [node name="CeilingLight" type="Node3D" groups=["interactables", "lights"]]
 
@@ -71,10 +72,10 @@ height = 0.233093
 sides = 16
 
 [node name="CSGCylinder3D3" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.54707, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.717702, 0)
 material_override = SubResource("StandardMaterial3D_jvri3")
 radius = 0.023
-height = 2.513
+height = 1.0
 sides = 16
 
 [node name="CSGCylinder3D2" type="CSGCylinder3D" parent="."]
@@ -143,6 +144,7 @@ draw_pass_1 = SubResource("BoxMesh_8k1vn")
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0953369, 0)
 shape = SubResource("BoxShape3D_c2myf")
 
 [node name="Interactable" type="Node" parent="." node_paths=PackedStringArray("nodesWithEmission", "locator", "Sparks")]

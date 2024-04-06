@@ -110,7 +110,6 @@ size = Vector3(10, 1, 10)
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.94617, 0)
-visible = false
 light_color = Color(0.960784, 0.760784, 0.576471, 1)
 light_energy = 0.5
 omni_range = 10.0

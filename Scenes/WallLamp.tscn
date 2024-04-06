@@ -329,6 +329,7 @@ light_indirect_energy = 8.0
 light_projector = ExtResource("2_0io5v")
 shadow_enabled = true
 shadow_blur = 2.0
+spot_angle = 60.0
 
 [node name="SpotLight3D2" type="SpotLight3D" parent="."]
 transform = Transform3D(1, 8.74228e-08, 3.40926e-15, -2.26267e-08, 0.258819, 0.965926, 8.44439e-08, -0.965926, 0.258819, -2.89981, -24.7328, 63.0083)
@@ -337,6 +338,7 @@ light_indirect_energy = 8.0
 light_projector = ExtResource("2_0io5v")
 shadow_enabled = true
 shadow_blur = 2.0
+spot_angle = 60.0
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 transform = Transform3D(333.333, 0, 0, 0, 333.333, 0, 0, 0, 333.333, 0, 32.7618, 6.53858)
