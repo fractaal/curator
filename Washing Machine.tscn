@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://ccekbxd18illm"]
+
+[ext_resource type="PackedScene" uid="uid://df882d5m5mq5m" path="res://models/Chair/Washing Machine/Washing Machine.glb" id="1_f0i0r"]
+
+[node name="Node3D11" type="Node3D"]
+
+[node name="Washing Machine" parent="." instance=ExtResource("1_f0i0r")]
+transform = Transform3D(0.4, 0, 0, 0, 0.4, 0, 0, 0, 0.4, 0, 0, 0)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.163269, 0.531677, 0.0946655)
+visible = false
+use_collision = true
+size = Vector3(1.04749, 2.06335, 1.18933)

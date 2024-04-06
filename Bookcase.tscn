@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://qadd3ea7f3ag"]
+
+[ext_resource type="PackedScene" uid="uid://m63apa1qke4" path="res://models/Bookcase.fbx" id="1_66ph7"]
+
+[node name="Node3D10" type="Node3D"]
+
+[node name="Root Scene" parent="." instance=ExtResource("1_66ph7")]
+transform = Transform3D(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05, 0, 0, 0)

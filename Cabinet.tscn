@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://bl2ue6w66xymv"]
+
+[ext_resource type="PackedScene" uid="uid://cx1tsixosvm4u" path="res://models/SM_sideboard_B.fbx" id="1_irfur"]
+
+[node name="Node3D15" type="Node3D"]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(-2.3, 0, -3.47299e-07, 0, 2.3, 0, 3.47299e-07, 0, -2.3, -4.59945e-09, 1.37394, -0.0304627)
+visible = false
+use_collision = true
+size = Vector3(1, 1.2114, 0.445435)
+
+[node name="Root Scene" parent="." instance=ExtResource("1_irfur")]
+transform = Transform3D(-2.3, 0, -3.4729e-07, 0, 2.3, 0, 3.4729e-07, 0, -2.3, 0, 0, 0)
