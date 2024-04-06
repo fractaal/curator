@@ -12,6 +12,9 @@ public partial class PlayerStats : Node3D
     public Node3D ghostNode;
     public CharacterBody3D character;
 
+    [Export]
+    public RoomLocator locator;
+
     public override void _Ready()
     {
         character = GetParent<CharacterBody3D>();
@@ -78,9 +81,19 @@ public partial class PlayerStats : Node3D
         // Calculate distance from ghost
         float distanceFromGhost = currentPosition.DistanceTo((ghostNode).GlobalPosition);
 
+        if (currentSpeed > 1)
+        {
+            locator.FindRoom();
+        }
+
+        string room = locator.Room == "None" ? "Outside" : locator.Room;
+
         // Convert speeds to units per second and compile the status message
         string status =
-            $"Current Speed: {currentSpeed:F1}u/s ({currentSpeedNatural})\n"
+            $"Current Room: "
+            + room
+            + "\n"
+            + $"Current Speed: {currentSpeed:F1}u/s ({currentSpeedNatural})\n"
             + $"Average Speed (last 10s): {averageSpeed:F1}u/s ({averageSpeedNatural})\n"
             + $"Total Distance Travelled (last 10s): {totalDistance:F1}u\n"
             + $"Distance from Ghost: {distanceFromGhost:F1}u";
