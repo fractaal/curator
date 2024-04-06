@@ -72,7 +72,7 @@ public partial class RoomLocator : Node
         }
     }
 
-    private void FindRoom()
+    public void FindRoom()
     {
         Rooms.Clear();
         Room = "None";
