@@ -52,6 +52,9 @@ public partial class EventBus : Node
     [Signal]
     public delegate void VoiceRecognitionEventHandler(bool isPartial, string message);
 
+    [Signal]
+    public delegate void GhostBackstoryEventHandler(string message);
+
     // Some game-specific signals
     [Signal]
     public delegate void PlayerHPChangedEventHandler(int hp);
