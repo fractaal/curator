@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://vpyvcf4tm560"]
+
+[ext_resource type="Script" path="res://models/PhysicsObject.gd" id="1_ep35j"]
+[ext_resource type="PackedScene" uid="uid://c6ygv143tg2sb" path="res://models/Chair/Jar1/Jar1.glb" id="2_dwqp2"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_tcyqr"]
+size = Vector3(0.25, 0.684692, 0.25)
+
+[node name="Node3D" type="RigidBody3D" groups=["interactables"]]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.310519, 0)
+shape = SubResource("BoxShape3D_tcyqr")
+
+[node name="Interactable" type="Node" parent="."]
+script = ExtResource("1_ep35j")
+
+[node name="Jar" parent="." instance=ExtResource("2_dwqp2")]

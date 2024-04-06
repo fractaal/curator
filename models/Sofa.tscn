@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://c8b8kxy0m5d2f"]
+
+[ext_resource type="PackedScene" uid="uid://dsbrs2cjlymgj" path="res://models/Sofa/FBX_Corona.FBX" id="1_gdbqa"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_t2x82"]
+albedo_color = Color(0.803922, 0.686275, 0.541176, 1)
+roughness = 0.5
+
+[node name="Root Scene" instance=ExtResource("1_gdbqa")]
+
+[node name="Pillow_02" parent="RootNode" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_t2x82")
+
+[node name="Pillow_01" parent="RootNode" index="1"]
+surface_material_override/0 = SubResource("StandardMaterial3D_t2x82")
+
+[node name="Sofa_Seat" parent="RootNode" index="3"]
+material_override = SubResource("StandardMaterial3D_t2x82")

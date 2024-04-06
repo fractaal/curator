@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://tcpgunomg5at"]
+
+[ext_resource type="PackedScene" uid="uid://dfd75ads88jl1" path="res://models/Roadblock/Roadblock.glb" id="1_5ewde"]
+
+[node name="Roadblock" type="Node3D"]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0126953, 0.88841, 0)
+visible = false
+use_collision = true
+size = Vector3(1.88672, 1.74426, 1)
+
+[node name="Roadblock" parent="." instance=ExtResource("1_5ewde")]

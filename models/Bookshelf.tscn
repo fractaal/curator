@@ -1,0 +1,23 @@
+[gd_scene load_steps=5 format=3 uid="uid://chdkq52kt5idp"]
+
+[ext_resource type="PackedScene" uid="uid://ov4swbwviuwa" path="res://models/Bookshelf/Bookself.fbx" id="1_glqyk"]
+[ext_resource type="Texture2D" uid="uid://b25pkim3gtakr" path="res://models/Bookshelf/Diffuse.png" id="2_y5dan"]
+[ext_resource type="Texture2D" uid="uid://bmv5t7i1htyg1" path="res://models/Bookshelf/Roughness.png" id="3_i6syx"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3ko7y"]
+albedo_texture = ExtResource("2_y5dan")
+roughness_texture = ExtResource("3_i6syx")
+normal_enabled = true
+normal_texture = ExtResource("2_y5dan")
+
+[node name="Root Scene" instance=ExtResource("1_glqyk")]
+
+[node name="Library_LOD0" parent="RootNode/Library" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+surface_material_override/0 = SubResource("StandardMaterial3D_3ko7y")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="." index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.59436, 0.00543213)
+visible = false
+use_collision = true
+size = Vector3(1, 1.19312, 0.332886)
