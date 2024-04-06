@@ -249,7 +249,7 @@ public partial class Interpreter : Node
                     + command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()
             );
 
-            string prefix = objectInteractionVerbPrefixes.FirstOrDefault(
+            string objectInteractionPrefix = objectInteractionVerbPrefixes.FirstOrDefault(
                 prefix =>
                 {
                     var result = command.Verb.Contains(prefix);
@@ -258,15 +258,22 @@ public partial class Interpreter : Node
                 null
             );
 
-            if (prefix != null)
+            if (objectInteractionPrefix != null)
             {
-                string objectType = Regex.Replace(command.Verb, prefix, "").ToLower();
+                string objectType = Regex
+                    .Replace(command.Verb, objectInteractionPrefix, "")
+                    .ToLower();
 
                 var target = TargetResolution.NormalizeTargetString(command.Arguments[0]);
 
-                InvalidCommandsSet.Add(prefix + "/" + objectType + "/" + target);
+                InvalidCommandsSet.Add(objectInteractionPrefix + "/" + objectType + "/" + target);
 
-                bus.EmitSignal(EventBus.SignalName.ObjectInteraction, prefix, objectType, target);
+                bus.EmitSignal(
+                    EventBus.SignalName.ObjectInteraction,
+                    objectInteractionPrefix,
+                    objectType,
+                    target
+                );
 
                 continue;
             }
@@ -293,6 +300,27 @@ public partial class Interpreter : Node
                 {
                     GhostDepositedEvidence = true;
                     CyclesSinceLastEvidenceDeposit = 0;
+                }
+
+                if (command.Verb == "speakAsGhost")
+                {
+                    var message = command.Arguments[0];
+                    var sanitizePattern = new Regex("\"([^\"]*)\"");
+
+                    Match match = sanitizePattern.Match(message);
+
+                    if (match.Success)
+                    {
+                        command.Arguments[0] = match.Groups[1].Value;
+                    }
+                    else
+                    {
+                        bus.EmitSignal(
+                            EventBus.SignalName.SystemFeedback,
+                            $"Malformed 'speakAsGhost' command - please ensure you pass in exactly ONE argument of type string - the message you intend to convey. Proper syntax is speakAsGhost(\"<MESSAGE HERE>\")"
+                        );
+                        continue;
+                    }
                 }
 
                 bus.EmitSignal(

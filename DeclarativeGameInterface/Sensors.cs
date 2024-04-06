@@ -15,8 +15,6 @@ public partial class Sensors : Node
 
     private List<string> SystemFeedback = new();
 
-    private string PlayerCurrentRoom = "";
-
     private Node3D player;
 
     private EventBus bus;
@@ -39,13 +37,6 @@ public partial class Sensors : Node
         player = GetTree().CurrentScene.GetNode<Node3D>("Player");
 
         llmInterface = GetNode<LLMInterface>("/root/LLMInterface");
-
-        // Attaching various object events to sensors
-        Room.RoomEntered += (room, body) =>
-        {
-            float time = Time.GetTicksMsec() / 1000;
-            PlayerCurrentRoom = room.Name;
-        };
 
         bus.NotableEventOccurred += (message) =>
         {
@@ -98,6 +89,21 @@ public partial class Sensors : Node
                 }
             }
         );
+
+        var sanitizedBackstory = await llmInterface.SendIsolated(
+            new List<Message>
+            {
+                new Message
+                {
+                    role = "system",
+                    content =
+                        "Erase any mention of 'Demon', 'Banshee', 'Poltergeist', 'Phantom', 'Wraith', or 'Shade' in the following message -- the player should not know the ghost type."
+                },
+                new Message { role = "user", content = ghostBackstory }
+            }
+        );
+
+        bus.EmitSignal(EventBus.SignalName.GhostBackstory, sanitizedBackstory);
     }
 
     private double tickInterval = 0.5;
@@ -261,7 +267,6 @@ CURRENT TIME: {time}s
 
 <PLAYER>
 {player.Call("getStatus")}
-Current Room: {PlayerCurrentRoom}
 </PLAYER>
 
 <SYSTEM_FEEDBACK> (amend issues presented to you here)
