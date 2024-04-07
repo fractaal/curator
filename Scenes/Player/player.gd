@@ -67,6 +67,9 @@ func _ready():
 	
 	ghostHead = get_tree().current_scene.get_node("Ghost/Head")
 
+var interactableUICheckInterval = 0.05
+var interactableUICheckElapsed = 0
+
 func _physics_process(delta):
 	hasFocusOnGui = true if get_viewport().gui_get_focus_owner() != null else false
 
@@ -87,10 +90,14 @@ func _physics_process(delta):
 
 		worldEnvironment.environment.adjustment_brightness = noise_y_high.get_noise_1d(Time.get_ticks_msec() + 9999) + 1
 
+	if Input.is_action_just_pressed("ToggleMouse"):
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
+
 	if not dead:
 		# Handle Jump.
-		if Input.is_action_pressed("Jump") and is_on_floor() and not hasFocusOnGui:
-			velocity.y = JUMP_VELOCITY
+		# if Input.is_action_pressed("Jump") and is_on_floor() and not hasFocusOnGui:
+		# 	velocity.y = JUMP_VELOCITY
+
 		# Handle Shooting
 		if Input.is_action_just_pressed("Shoot") and not hasFocusOnGui:
 			interact()
@@ -160,6 +167,26 @@ func _physics_process(delta):
 	
 	$SpotLight3D.light_energy = clampedIntensityNoise
 
+	interactableUICheckElapsed += delta
+	if interactableUICheckElapsed >= interactableUICheckInterval:
+		interactableUICheckElapsed = 0
+		if gunRay.is_colliding():
+			var object: Node3D = gunRay.get_collider()
+
+			var interactable = find_interactable(object)
+
+			if interactable and (global_position - interactable.get_parent().global_position).length() < 3:
+				if interactable.has_method("getStatusForPlayer"):
+					$CenterContainer/VBoxContainer/Label.text = interactable.getStatusForPlayer() + "\n[INTERACT]"
+				else:
+					$CenterContainer/VBoxContainer/Label.text = "[INTERACT]"
+
+				$CenterContainer/VBoxContainer/Label.visible = true
+			else:
+				$CenterContainer/VBoxContainer/Label.visible = false
+		else:
+			$CenterContainer/VBoxContainer/Label.visible = false
+
 func _input(event):
 	if event is InputEventMouseMotion and not dead:
 		rotation.y -= event.relative.x / mouseSensibility
@@ -188,7 +215,7 @@ func interact():
 
 	var interactable = find_interactable(object)
 
-	if interactable:
+	if interactable and (global_position - interactable.get_parent().global_position).length() < 3:
 		interactable.interact()
 
 func secondaryInteract():
@@ -199,7 +226,7 @@ func secondaryInteract():
 
 	var interactable = find_interactable(object)
 
-	if interactable:
+	if interactable and (global_position - interactable.get_parent().global_position).length() < 3:
 		interactable.secondaryInteract()
 
 func getStatus():
