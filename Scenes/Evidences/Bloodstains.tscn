@@ -10,6 +10,7 @@ collision_layer = 32
 
 [node name="Label3D" type="Label3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -0.0405273, 0.0383301, 0)
+visible = false
 pixel_size = 0.001
 billboard = 1
 text = "Bloodstains"
