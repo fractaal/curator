@@ -32,34 +32,73 @@ public partial class EvidenceDepositor : Node
 
     private Random random = new Random();
 
-    public Dictionary<string, List<string>> GhostToEvidences =
+    private List<string> Evidences =
         new()
+        {
+            "Bloodstains",
+            "EMF Level 5",
+            "Disembodied Footsteps",
+            "Freezing Temperatures",
+            "Toxic Residue",
+            "Fingerprints",
+            "Shadow Movement"
+        };
+
+    public static Dictionary<string, List<string>> GhostToEvidences;
+
+    public EvidenceDepositor()
+    {
+        GhostToEvidences = new()
         {
             {
                 "Demon",
-                new() { "Bloodstains", "EMF Level 5", "Shadow Movement" }
+                new() { Evidences[0], Evidences[1], Evidences[2] }
             },
             {
                 "Wraith",
-                new() { "Freezing Temperatures", "Toxic Residue", "Fingerprints" }
+                new() { Evidences[1], Evidences[2], Evidences[3] }
             },
             {
                 "Phantom",
-                new() { "EMF Level 5", "Disembodied Footsteps", "Shadow Movement" }
+                new() { Evidences[2], Evidences[3], Evidences[4] }
             },
             {
                 "Shade",
-                new() { "Fingerprints", "Freezing Temperatures", "Disembodied Footsteps" }
+                new() { Evidences[3], Evidences[4], Evidences[5] }
             },
             {
                 "Poltergeist",
-                new() { "EMF Level 5", "Fingerprints", "Bloodstains" }
+                new() { Evidences[4], Evidences[5], Evidences[6] }
             },
             {
                 "Banshee",
-                new() { "Fingerprints", "Freezing Temperatures", "Disembodied Footsteps" }
+                new() { Evidences[5], Evidences[6], Evidences[0] }
             }
         };
+    }
+
+    public string GetEvidenceForGhost(string ghostType)
+    {
+        var evidences = GhostToEvidences[ghostType];
+
+        if (evidences == null)
+        {
+            return "";
+        }
+
+        string output = "";
+
+        for (int i = 0; i < evidences.Count; i++)
+        {
+            output += evidences[i];
+            if (i < evidences.Count - 1)
+            {
+                output += ", ";
+            }
+        }
+
+        return output;
+    }
 
     HashSet<string> DepositedEvidences = new();
 
@@ -105,6 +144,12 @@ public partial class EvidenceDepositor : Node
             var evidence = evidencePrefab.Instantiate<Node3D>();
             GetTree().Root.AddChild(evidence);
             evidence.GlobalPosition = Locator.RoomObject?.GetRandomPosition() ?? Vector3.Zero;
+            EventBus
+                .Get()
+                .EmitSignal(
+                    EventBus.SignalName.NotableEventOccurred,
+                    "Evidence deposited: " + chosenEvidence
+                );
         }
         else
         {
