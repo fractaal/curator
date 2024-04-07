@@ -89,7 +89,7 @@ func _updateStatusLabel():
 	
 	statusLabel.text = out
 	
-func turnOn():
+func turnon():
 	switch.seek(0)
 	switch.play()
 
@@ -99,7 +99,7 @@ func turnOn():
 
 	_updateStatusLabel()
 
-func turnOff():
+func turnoff():
 	switch.seek(0)
 	switch.play()
 
@@ -109,12 +109,12 @@ func turnOff():
 
 	_updateStatusLabel()
 	
-func playFreakyMusicOn():
+func playfreakymusicon():
 	switch.seek(0)
 	switch.play()
 
 	if not isOn:
-		turnOn()
+		turnon()
 
 	staticSound.stop()
 	song.play(lastSongPosition)
@@ -129,7 +129,7 @@ func stop():
 	lastSongPosition = song.get_playback_position()
 
 	if not isOn:
-		turnOn()
+		turnon()
 	
 	song.stop()
 
@@ -140,15 +140,15 @@ func stop():
 
 func togglePower():
 	if isOn:
-		turnOff()
+		turnoff()
 	else:
-		turnOn()
+		turnon()
 
 func togglePlay():
 	if isPlaying:
 		stop()
 	else:
-		playFreakyMusicOn()
+		playfreakymusicon()
 
 func interact():
 	togglePower()
@@ -161,5 +161,11 @@ func secondaryInteract():
 func getStatus():
 	if isOn:
 		return "Radio Status: On, " + ("Playing freaky music" if isPlaying else "Static")
+	else:
+		return "Radio Status: Off"
+ 
+func getStatusForPlayer():
+	if isOn:
+		return "Radio Status: On, " + ("???" if isPlaying else "Static")
 	else:
 		return "Radio Status: Off"
