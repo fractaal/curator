@@ -3,7 +3,7 @@ extends CharacterBody3D
 var speed = 2.5
 
 @onready var nav_agent = $NavigationAgent3D
-@onready var _animator = $AnimationPlayer
+#@onready var _animator = $AnimationPlayer
 @onready var skeleton: Node3D = $Skeleton3D
 @onready var CollisionShape = $CollisionShape3D
 @export var Locator: Node
@@ -32,8 +32,8 @@ var chaseSpeed = "slow"
 
 var chasing_EntireSequence = false
 
-var FirstNames = ["John", "Jennifer", "Madison", "Mark", "Abrahm", "Dominic", "Kimi"]
-var LastNames = ["Black", "Brown", "Jackson", "Peralta", "Walker", "Carpenter"]
+var FirstNames = ["John", "Jennifer", "Madison", "Mark", "Abrahm", "Dominic", "Kimi", "Shan", "Mariane", "Sofia", "Elijah", "Venj", "Chun-chun", "Raj", "Elden", "Niggy", "Ben"]
+var LastNames = ["Black", "Brown", "Jackson", "Peralta", "Walker", "Carpenter", "Mabait", "Baylin", "John", "Requinton", "Samonte", "Torrejos", "Abadilla", "Poggers", "Rocat", "Lumbay"]
 var GhostTypes = ["Demon", "Wraith", "Phantom", "Shade", "Banshee", "Poltergeist"]
 
 var FirstName
@@ -42,15 +42,7 @@ var GhostType
 var GhostAge
 var FavoriteRoom
 
-@export var infoLabel: RichTextLabel
-
 var manifesting = false
-
-func updateInfoLabel():
-	var out = "[b]Name:[/b] " + FirstName + " " + LastName + "\n"
-	out += "[b]Favorite Room:[/b] " + FavoriteRoom + "\n"
-
-	infoLabel.text = out
 
 func _ready():
 	# Set up name and type
@@ -68,6 +60,11 @@ func _ready():
 	var rooms = get_tree().get_nodes_in_group("rooms")
 	FavoriteRoom = rooms[randi() % rooms.size()].name
 	# FavoriteRoom = "Pantry"
+
+	EventBus.emit_signal("GhostInformation", "Name - " + FirstName + " " + LastName)
+	EventBus.emit_signal("GhostInformation", "Type - " + GhostType)
+	EventBus.emit_signal("GhostInformation", "Age - " + str(GhostAge))
+	EventBus.emit_signal("GhostInformation", "Favorite Room - " + FavoriteRoom)
 
 	_on_ghost_action("movetoasghost", FavoriteRoom)
 
@@ -143,20 +140,28 @@ func chase(arguments):
 	huntGracePeriodSFX.play(0)
 	huntStartSFX.play(0)
 
-	if arguments == "fast":
+	if arguments == "end":
+		speed = 0
+	elif arguments == "fast":
 		speed = 5.25
 	else:
 		speed = 4
 
 	await get_tree().create_timer(5).timeout
 
-	for i in range(0, 200):
+	if arguments == "end":
+		speed = 35
+
+	var huntTime = 25 if arguments != "end" else 9999
+
+	for i in range(0, huntTime * 10):
 		update_target_location(player.global_transform.origin)
 		var length = (player.global_transform.origin - global_transform.origin).length()
 
 		if (length < 1.25):
 			jumpscareSFX.play(0)
 			player.kill()
+			EventBus.emit_signal("GameLost", "Player was caught by the ghost")
 			break
 
 		await get_tree().create_timer(0.1).timeout
@@ -186,8 +191,6 @@ var sameLocationCheckElapsed = 0
 var sameLocationCheckLast = Vector3.ZERO
 
 func _physics_process(delta):
-	updateInfoLabel()
-
 	var current_location = global_transform.origin
 	var next_location = nav_agent.get_next_path_position()
 	var new_velocity = (next_location - current_location).normalized() * speed
