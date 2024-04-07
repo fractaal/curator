@@ -24,15 +24,12 @@ public partial class Sensors : Node
 
     private LLMInterface llmInterface;
 
-    [Export]
-    private RichTextLabel StatusView;
+    private bool gameEnded = false;
 
     // Called when the node enters the scene tree for the first time.
     public override async void _Ready()
     {
         bus = EventBus.Get();
-
-        StatusView = GetTree().CurrentScene.GetNode<RichTextLabel>("AIStatus");
 
         player = GetTree().CurrentScene.GetNode<Node3D>("Player");
 
@@ -64,6 +61,16 @@ public partial class Sensors : Node
             {
                 SystemFeedback.RemoveAt(0);
             }
+        };
+
+        bus.GameWon += (string message) =>
+        {
+            gameEnded = true;
+        };
+
+        bus.GameLost += (string message) =>
+        {
+            gameEnded = true;
         };
 
         await ToSignal(GetTree().CreateTimer(1), "timeout");
@@ -131,26 +138,16 @@ public partial class Sensors : Node
         bus.EmitSignal(EventBus.SignalName.GameDataRead, GetGameInformationAndHistory());
     }
 
-    Tween tween;
-
     public override async void _PhysicsProcess(double delta)
     {
         if (Input.IsActionJustPressed("ToggleAI"))
         {
             aiEnabled = !aiEnabled;
 
-            StatusView.Text = aiEnabled ? "AI Enabled" : "AI Disabled";
-
-            if (tween != null)
-            {
-                tween.Stop();
-            }
-
-            tween = CreateTween();
-
-            StatusView.Modulate = new Color(1, 1, 1, 1);
-            tween.TweenProperty(StatusView, "modulate", new Color(1, 1, 1, 0), 1);
-            tween.Play();
+            bus.EmitSignal(
+                EventBus.SignalName.ToastNotification,
+                aiEnabled ? "AI Enabled" : "AI Disabled"
+            );
         }
     }
 
@@ -163,7 +160,7 @@ public partial class Sensors : Node
         if (DebugView != null && tickElapsed >= tickInterval)
         {
             DebugView.Text = GetGameInformationAndHistory();
-            DebugView.ScrollToLine(DebugView.GetLineCount() - 1);
+            // DebugView.ScrollToLine(DebugView.GetLineCount() - 1);
             tickElapsed = 0;
         }
 
@@ -181,6 +178,12 @@ public partial class Sensors : Node
             if (player.Get("dead").AsBool())
             {
                 GD.Print("Player dead, skipping sensor read.");
+                return;
+            }
+
+            if (gameEnded)
+            {
+                GD.Print("Game ended, skipping sensor read.");
                 return;
             }
 
