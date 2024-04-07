@@ -48,6 +48,26 @@ func _on_object_interact(verb: String, type: String, target: String):
 		else:
 			return
 
+var hasPlayerWon = false
+var winSongBeatTime = 0.517
+var winSongElapsed = 0
+
+func playerWon():
+	hasPlayerWon = true
+
+var lastChosenEnergy = 0
+
+func _process(delta):
+	if hasPlayerWon:
+		winSongElapsed += delta
+		if winSongElapsed >= winSongBeatTime:
+			winSongElapsed = 0
+			setColor(Color(randf(), randf(), randf()))
+			lastChosenEnergy = randf_range(2, 5)
+			setEnergy(lastChosenEnergy)
+		else:
+			setEnergy(clamp(lastChosenEnergy - (winSongElapsed / winSongBeatTime) * lastChosenEnergy, 0.5, 100))
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	noise = FastNoiseLite.new()
@@ -113,6 +133,12 @@ func setEnergy(num):
 	for node in nodesWithEmission:
 		node.material.emission_energy_multiplier = defaultIntensities[node.name] * num
 
+func setColor(color):
+	for light in lights:
+		light.light_color = color
+	for node in nodesWithEmission:
+		node.material.emission = color
+
 func turnOn():
 	restore()
 		
@@ -177,8 +203,11 @@ func _explodeStep(progress: float):
 	var noiseMult = clamp(noise.get_noise_1d(Time.get_ticks_msec() + 0.5), 0, 1)
 	var cleanEnergy = 1 / pow(10 * progress, 2.5)
 	setEnergy((cleanEnergy * noiseMult * 0.75) + (cleanEnergy * 0.25))
+
+func turnon():
+	restore()
  
-func turnOff():
+func turnoff():
 	await get_tree().create_timer(randf_range(0.0, 0.5)).timeout
 
 	TurnOffSFX.pitch_scale = randf_range(0.85, 1.3)
@@ -206,6 +235,9 @@ func turnOnInstant(): # Only the player should be able to do this
 
 func getStatus():
 	return "Light Status - " + ("Off" if isDead else "On") + (" " if interactable else " (**Player can't interact**)")
+
+func getStatusForPlayer():
+	return "Light Status - " + ("Off" if isDead else "On") + (" " if interactable else " (Dead)")
 
 func interact():
 	pass
