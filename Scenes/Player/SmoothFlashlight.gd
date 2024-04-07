@@ -25,4 +25,4 @@ func _physics_process(_delta):
 	$"../SpotLight3D".global_rotation = local_rotation_noised
 	
 	$"../SpotLight3D".position.x = 0.357 + ((noise_x_high.get_noise_1d((Time.get_ticks_msec() + velocity.length()) * 0.05) * 2) + (sin((Time.get_ticks_msec() + velocity.length()) * 0.01) * 0.5)) * velocity.length() * 0.05
-	$"../SpotLight3D".position.y = 0.037 + ((noise_y_high.get_noise_1d((Time.get_ticks_msec() + velocity.length()) * 0.05) * 2) + (cos((Time.get_ticks_msec() + velocity.length()) * 0.01) * 0.5)) * velocity.length() * 0.05
+	$"../SpotLight3D".position.y = 0.6 + ((noise_y_high.get_noise_1d((Time.get_ticks_msec() + velocity.length()) * 0.05) * 2) + (cos((Time.get_ticks_msec() + velocity.length()) * 0.01) * 0.5)) * velocity.length() * 0.05
