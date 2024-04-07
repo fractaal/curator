@@ -27,7 +27,7 @@ func _ready():
 	noiseY.seed = targetNode.position.y * 512
 	noiseZ.seed = targetNode.position.z * 64
 
-func _process(delta):
+func _process(_delta):
 
 	var time = Time.get_ticks_msec() * modulationRate
 
