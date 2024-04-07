@@ -8,10 +8,15 @@ func _ready():
 
 func _input(event):
 	if (event.is_action_pressed("ui_text_completion_accept")&&has_focus()):
-		var tokenized = fakeTokenize(text)
+		var tokenized := fakeTokenize(text)
+		
+		await get_tree().create_timer(0.1).timeout
 		
 		clear()
 		release_focus()
+		
+		if tokenized.size() == 0:
+			return
 		
 		await get_tree().create_timer(randf_range(0.4, 1.2)).timeout
 
@@ -23,16 +28,16 @@ func _input(event):
 
 		EventBus.emit_signal("LLMLastResponseChunk", tokenized[tokenized.size() - 1]);
 
-func fakeTokenize(_text):
+func fakeTokenize(_text: String) -> Array[String]:
 
-	var currentLength = 0
-	var maxLength = _text.length()
+	var currentLength := 0
+	var maxLength := _text.length()
 
-	var tokenized = []
+	var tokenized: Array[String] = []
 
 	while (currentLength < maxLength):
-		var interval = randi_range(2, 4)
-		var start = currentLength
+		var interval := randi_range(2, 4)
+		var start := currentLength
 		tokenized.append(_text.substr(start, interval))
 		currentLength += interval
 	
