@@ -144,6 +144,9 @@ public abstract partial class Holdable : Node
 
     public void interact()
     {
+        if (Holding)
+            return;
+
         if (rightAvailable)
         {
             GD.Print("Interacting with right hand");
