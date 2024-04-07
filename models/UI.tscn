@@ -1,0 +1,120 @@
+[gd_scene load_steps=5 format=3 uid="uid://c67gfivc3tneg"]
+
+[ext_resource type="FontFile" uid="uid://dg4fvw3nd4p4u" path="res://Fonts/FantasqueSansMono-Bold.ttf" id="1_cw2qb"]
+[ext_resource type="Texture2D" uid="uid://xidnfnd8quyf" path="res://textures/Cursor.png" id="2_oti8g"]
+[ext_resource type="Script" path="res://models/GhostStatusReceiver.gd" id="2_q7i2v"]
+[ext_resource type="Script" path="res://models/GhostGuesser.gd" id="3_4ivlh"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchor_right = 0.6
+anchor_bottom = 0.6
+offset_right = -6.10352e-05
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+custom_minimum_size = Vector2(960, 540)
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RichTextLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+theme_override_fonts/normal_font = ExtResource("1_cw2qb")
+theme_override_font_sizes/normal_font_size = 24
+text = "ECTO-LINUX Kernel Version 5.7.1"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="RichTextLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer/ScrollContainer"]
+custom_minimum_size = Vector2(480, 510)
+layout_mode = 2
+theme_override_fonts/normal_font = ExtResource("1_cw2qb")
+text = "asfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfas"
+script = ExtResource("2_q7i2v")
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="HBoxContainer" node_paths=PackedStringArray("confirmLabel")]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+script = ExtResource("3_4ivlh")
+confirmLabel = NodePath("ConfirmLabel")
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="HBoxContainer/VBoxContainer2"]
+custom_minimum_size = Vector2(0, 26.645)
+layout_mode = 2
+text = "I think the ghost is a..."
+
+[node name="DemonButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+text = "Demon"
+
+[node name="DemonLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer2"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+
+[node name="WraithButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+text = "Wraith"
+
+[node name="WraithLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer2"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+
+[node name="PhantomButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+text = "Phantom"
+
+[node name="PhantomLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer2"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+
+[node name="ShadeButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+text = "Shade"
+
+[node name="ShadeLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer2"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+
+[node name="Banshee" type="Button" parent="HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+text = "Banshee"
+
+[node name="BansheeLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer2"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+
+[node name="Poltergeist" type="Button" parent="HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+text = "Poltergeist"
+
+[node name="PoltergeistLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer2"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+
+[node name="ConfirmLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer2"]
+custom_minimum_size = Vector2(0, 26.645)
+layout_mode = 2
+
+[node name="DemonButton2" type="Button" parent="HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0, 0, 1)
+text = "CONFIRM CHOICE"
+
+[node name="Cursor" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 754.0
+offset_top = 454.0
+offset_right = 794.0
+offset_bottom = 496.0
+mouse_filter = 2
+texture = ExtResource("2_oti8g")
