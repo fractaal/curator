@@ -1,0 +1,42 @@
+[gd_scene load_steps=7 format=3 uid="uid://h5v8lv5lfktd"]
+
+[ext_resource type="Script" path="res://UI.gd" id="1_6wciu"]
+[ext_resource type="PackedScene" uid="uid://c67gfivc3tneg" path="res://models/UI.tscn" id="1_ekhru"]
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_t3ye3"]
+viewport_path = NodePath("viewport")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wx48p"]
+resource_local_to_scene = true
+shading_mode = 0
+albedo_texture = SubResource("ViewportTexture_t3ye3")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_ijymo"]
+size = Vector2(1.8, 1.013)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_3x0am"]
+size = Vector3(1.797, 1.019, 0.268195)
+
+[node name="Node3D" type="Node3D"]
+script = ExtResource("1_6wciu")
+
+[node name="display" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.499471, 0.619294)
+material_override = SubResource("StandardMaterial3D_wx48p")
+mesh = SubResource("PlaneMesh_ijymo")
+skeleton = NodePath("../CSGBox3D")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0197754, 0.4782, 0.473616)
+size = Vector3(2.153, 1.239, 0.28)
+
+[node name="viewport" type="SubViewport" parent="."]
+size = Vector2i(960, 540)
+
+[node name="Control" parent="viewport" instance=ExtResource("1_ekhru")]
+
+[node name="area" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="area"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000881314, 0.496759, 0.645376)
+shape = SubResource("BoxShape3D_3x0am")

@@ -6,3 +6,9 @@
 
 [node name="Root Scene" parent="." instance=ExtResource("1_66ph7")]
 transform = Transform3D(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05, 0, 0, 0)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0328674, 1.87354, -0.0615234)
+visible = false
+use_collision = true
+size = Vector3(2.47614, 4.74707, 1.12305)
