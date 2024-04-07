@@ -98,7 +98,7 @@ public partial class TargetResolution : Node
                     EventBus.SignalName.SystemFeedback,
                     "Target '"
                         + target
-                        + "' is invalid. Please remember valid targets are only 'all', 'in <ROOM NAME>'"
+                        + "' is invalid. Maybe such a target doesn't exist. Please remember valid targets are only 'all', '<ROOM NAME>'"
                 );
             return new Vector3();
         }
