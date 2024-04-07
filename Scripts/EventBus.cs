@@ -55,6 +55,21 @@ public partial class EventBus : Node
     [Signal]
     public delegate void GhostBackstoryEventHandler(string message);
 
+    [Signal]
+    public delegate void GhostInformationEventHandler(string message);
+
+    [Signal]
+    public delegate void PlayerDecidedGhostTypeEventHandler(string message);
+
+    [Signal]
+    public delegate void GameWonEventHandler(string message);
+
+    [Signal]
+    public delegate void GameLostEventHandler(string message);
+
+    [Signal]
+    public delegate void ToastNotificationEventHandler(string message);
+
     // Some game-specific signals
     [Signal]
     public delegate void PlayerHPChangedEventHandler(int hp);
