@@ -7,7 +7,7 @@
 [ext_resource type="FontFile" uid="uid://mbijwkkci6k6" path="res://Fonts/InputMonoCondensed-Regular.ttf" id="4_kf2d3"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_uldmd"]
-size = Vector3(0.315039, 0.0964233, 0.290796)
+size = Vector3(0.297534, 0.0520615, 0.24848)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p5f8w"]
 albedo_color = Color(0.0745098, 0.0745098, 0.0745098, 1)
@@ -41,7 +41,7 @@ TickSound = NodePath("../Tick")
 GhostSpeechPlayer = NodePath("../AudioStreamPlayer3D")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00751953, -0.00072632, 0.0206665)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00113529, -0.00441818, 0.0267426)
 shape = SubResource("BoxShape3D_uldmd")
 
 [node name="CSGBox3D" type="CSGBox3D" parent="."]
