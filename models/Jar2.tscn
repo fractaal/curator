@@ -1,18 +1,26 @@
-[gd_scene load_steps=4 format=3 uid="uid://6qfh7o0ivou"]
+[gd_scene load_steps=5 format=3 uid="uid://6qfh7o0ivou"]
 
 [ext_resource type="PackedScene" uid="uid://dant1ckg78y67" path="res://models/Chair/Jar2/Jar2.glb" id="1_l4mdy"]
+[ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="2_hj2n7"]
 [ext_resource type="Script" path="res://models/PhysicsObject.gd" id="2_q4n6b"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_tcyqr"]
-size = Vector3(0.25, 0.684692, 0.25)
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_dhiny"]
+height = 0.6
+radius = 0.112005
 
 [node name="Node3D" type="RigidBody3D" groups=["interactables"]]
+collision_layer = 128
+collision_mask = 143
+mass = 0.1
 
 [node name="Jar2" parent="." instance=ExtResource("1_l4mdy")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.310519, 0)
-shape = SubResource("BoxShape3D_tcyqr")
+shape = SubResource("CylinderShape3D_dhiny")
+
+[node name="RoomLocator" type="Node" parent="."]
+script = ExtResource("2_hj2n7")
 
 [node name="Interactable" type="Node" parent="."]
 script = ExtResource("2_q4n6b")
