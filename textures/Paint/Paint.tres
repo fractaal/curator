@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://wc8qbhfipsw" path="res://textures/Paint/Paint_normal.png" id="3"]
 
 [resource]
-albedo_color = Color(0.909804, 0.823529, 0.784314, 1)
+albedo_color = Color(0.819608, 0.85098, 0.847059, 1)
 albedo_texture = ExtResource("1")
 roughness_texture = ExtResource("2")
 roughness_texture_channel = 1
