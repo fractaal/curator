@@ -60,7 +60,7 @@ public partial class SpiritBox : Holdable
 
         bus.GhostAction += async (verb, arguments) =>
         {
-            if (verb == "speakAsGhost" && Power)
+            if (verb == "speakasghost" && Power)
             {
                 messageQueue.Add(arguments);
             }
@@ -91,11 +91,9 @@ public partial class SpiritBox : Holdable
         isProcessing = true;
         Mode = "INTERPRET";
         topCaption.Text = "SPECTRAL VOICE DETECTED";
-        text = Regex.Replace(text, "\"", "");
-        text = Regex.Replace(text.ToLower(), "player", "");
         ghostSpeech.Text = text;
 
-        var tokenized = FakeTokenize(RemoveNonAlphabetical(text));
+        var tokenized = FakeTokenize(text);
 
         ghostSpeechText = "";
 
@@ -341,7 +339,7 @@ public partial class SpiritBox : Holdable
         string binForMacOS = "/opt/homebrew/bin/espeak";
         string binForWindows = "espeak-ng";
 
-        string command = $"\"{text}\" -s 180 -p 20 -g 3 -w \"{tempFilePath}\"";
+        string command = $"\"{text}\" -s 130 -p 20 -g 15 -w \"{tempFilePath}\"";
 
         try
         {
