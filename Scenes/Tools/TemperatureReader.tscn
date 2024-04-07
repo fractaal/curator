@@ -7,7 +7,7 @@
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_cbufo"]
 margin = 0.0
-size = Vector3(0.206747, 0.21985, 0.22226)
+size = Vector3(0.0807395, 0.141388, 0.22226)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qlfoy"]
 albedo_color = Color(1, 1, 0.364706, 1)
@@ -28,7 +28,7 @@ mass = 0.1
 continuous_cd = true
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00216389, -0.0428393, 0.0302888)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00298285, -0.0385514, 0.0302888)
 shape = SubResource("BoxShape3D_cbufo")
 
 [node name="Interactable" type="Node" parent="." node_paths=PackedStringArray("display", "tick", "PowerSound", "TickSound")]
