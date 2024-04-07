@@ -17,7 +17,7 @@ albedo_color = Color(0.792157, 0.188235, 0, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_cbufo"]
 margin = 0.0
-size = Vector3(0.206747, 0.0988802, 0.268738)
+size = Vector3(0.115896, 0.0286263, 0.237389)
 
 [node name="EmfReader" type="RigidBody3D" groups=["interactables"]]
 collision_layer = 16
@@ -93,7 +93,7 @@ material_override = SubResource("StandardMaterial3D_o12bk")
 size = Vector3(0.100038, 0.0147514, 0.0187302)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00216389, 0.0176457, 0.0070496)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.000923399, -0.000267712, -0.000720939)
 shape = SubResource("BoxShape3D_cbufo")
 
 [node name="Interactable" type="Node" parent="." node_paths=PackedStringArray("display", "tick", "PowerSound", "TickSound")]
