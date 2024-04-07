@@ -40,3 +40,6 @@ func secondaryInteract():
 
 func getStatus():
 	return ""
+
+func getStatusForPlayer():
+	return "Switch, " + ("On" if isOn else "Off")
