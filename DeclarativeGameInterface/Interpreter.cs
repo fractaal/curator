@@ -145,25 +145,28 @@ public partial class Interpreter : Node
             "flicker",
             "explode",
             "restore",
-            "turnOff",
-            "turnOn",
-            "playFreakyMusicOn",
+            "turnoff",
+            "turnon",
+            "playfreakymusicon",
             "stop",
             "open",
             "close",
             "unlock",
             "lock",
+            "throw",
+            "jolt",
+            "shift",
         };
 
     private List<string> ghostActionVerbs =
         new()
         {
-            "moveAsGhost",
-            "moveToAsGhost",
-            "chasePlayerAsGhost",
-            "speakAsGhost",
-            "appearAsGhost",
-            "depositEvidenceAsGhost"
+            "moveasghost",
+            "movetoasghost",
+            "chaseplayerasghost",
+            "speakasghost",
+            "appearasghost",
+            "depositevidenceasghost"
         };
 
     private string accumulatedText = "";
@@ -199,12 +202,12 @@ public partial class Interpreter : Node
 
                 var value = match.Value;
                 var separatedString = value.Split("(");
-                var verb = separatedString[0];
+                var verb = separatedString[0].ToLower();
 
                 var argumentString = separatedString[1].Substring(0, separatedString[1].Length - 1);
                 var arguments = argumentString
                     .Split(",")
-                    .Select(argument => argument.Trim())
+                    .Select(argument => argument.Trim().ToLower())
                     .ToList();
 
                 recognizedCommands.Add(new Command { Verb = verb, Arguments = arguments });
@@ -240,8 +243,10 @@ public partial class Interpreter : Node
             countRecognized += commands.Count;
         }
 
-        foreach (Command command in commands)
+        for (int i = 0; i < commands.Count; i++)
         {
+            Command command = commands[i];
+
             GD.Print(
                 "command is "
                     + command.Verb
@@ -280,7 +285,7 @@ public partial class Interpreter : Node
 
             if (ghostActionVerbs.Contains(command.Verb))
             {
-                if (command.Verb == "moveAsGhost" || command.Verb == "moveToAsGhost")
+                if (command.Verb == "moveasghost" || command.Verb == "movetoasghost")
                 {
                     var target = TargetResolution.NormalizeTargetString(command.Arguments[0]);
 
@@ -296,31 +301,31 @@ public partial class Interpreter : Node
                     continue;
                 }
 
-                if (command.Verb == "ghostDepositEvidence")
+                if (command.Verb == "ghostdepositevidence")
                 {
                     GhostDepositedEvidence = true;
                     CyclesSinceLastEvidenceDeposit = 0;
                 }
 
-                if (command.Verb == "speakAsGhost")
+                if (command.Verb == "speakasghost")
                 {
-                    var message = command.Arguments[0];
-                    var sanitizePattern = new Regex("\"([^\"]*)\"");
+                    var message = "";
 
-                    Match match = sanitizePattern.Match(message);
+                    for (int j = 0; j < command.Arguments.Count; j++)
+                    {
+                        message += command.Arguments[j];
+                        if (j < command.Arguments.Count - 1)
+                        {
+                            message += ", ";
+                        }
+                    }
 
-                    if (match.Success)
-                    {
-                        command.Arguments[0] = match.Groups[1].Value;
-                    }
-                    else
-                    {
-                        bus.EmitSignal(
-                            EventBus.SignalName.SystemFeedback,
-                            $"Malformed 'speakAsGhost' command - please ensure you pass in exactly ONE argument of type string - the message you intend to convey. Proper syntax is speakAsGhost(\"<MESSAGE HERE>\")"
-                        );
-                        continue;
-                    }
+                    message = TargetResolution.NormalizeTargetString(message);
+                    message = message.Replace("\"", "");
+                    message = message.Replace("-", "");
+                    message = message.Replace("player", "");
+
+                    command.Arguments = new() { message };
                 }
 
                 bus.EmitSignal(
