@@ -14,6 +14,9 @@ public partial class LatencyStatistics : Node
     private ulong firstInterpreterCommandRecognizedTime;
     private ulong lastInterpreterCommandRecognizedTime;
 
+    private RichTextLabel FancyProgressBar;
+    private RichTextLabel CurrentTime;
+
     private void UpdateLog()
     {
         //         LogManager.UpdateLog(
@@ -33,54 +36,60 @@ public partial class LatencyStatistics : Node
         // ");
 
         string displayLoopStartTime =
-            loopStartTime == 0 ? "--" : (loopStartTime / 1000).ToString() + "s";
+            loopStartTime == 0 ? "--" : (loopStartTime / 1000f).ToString("F") + "s";
         string displayGameDataReadTime =
             gameDataReadTime == 0
                 ? "[color=\"#ff8000\"]+--s[/color]"
-                : "+" + (gameDataReadTime / 1000).ToString() + "s";
+                : "+" + (gameDataReadTime / 1000f).ToString("F") + "s";
         string displayLLMPromptedTime =
             llmPromptedTime == 0
                 ? "[color=\"#ff8000\"]+--s[/color]"
-                : "+" + (llmPromptedTime / 1000).ToString() + "s";
+                : "+" + (llmPromptedTime / 1000f).ToString("F") + "s";
         string displayLLMFirstResponseTime =
             llmFirstResponseTime == 0
                 ? "[color=\"#ff8000\"]+--s[/color]"
-                : "+" + (llmFirstResponseTime / 1000).ToString() + "s";
+                : "+" + (llmFirstResponseTime / 1000f).ToString("F") + "s";
         string displayLLMLastResponseTime =
             llmLastResponseTime == 0
                 ? "[color=\"#ff8000\"]+--s[/color]"
-                : "+" + (llmLastResponseTime / 1000).ToString() + "s";
+                : "+" + (llmLastResponseTime / 1000f).ToString("F") + "s";
         string displayFirstInterpreterCommandRecognizedTime =
             firstInterpreterCommandRecognizedTime == 0
                 ? "[color=\"#ff8000\"]+--s[/color]"
-                : "+" + (firstInterpreterCommandRecognizedTime / 1000).ToString() + "s";
+                : "+" + (firstInterpreterCommandRecognizedTime / 1000f).ToString("F") + "s";
         string displayLastInterpreterCommandRecognizedTime =
             lastInterpreterCommandRecognizedTime == 0
                 ? "[color=\"#ff8000\"]+--s[/color]"
-                : "+" + (lastInterpreterCommandRecognizedTime / 1000).ToString() + "s";
+                : "+" + (lastInterpreterCommandRecognizedTime / 1000f).ToString("F") + "s";
 
         LogManager.UpdateLog(
             "latencyStatistics",
-            $@"Loop Start at											  {displayLoopStartTime}
-Game Data Read									{displayGameDataReadTime}
-LLM Prompted										{displayLLMPromptedTime}
-LLM First Response Chunk				{displayLLMFirstResponseTime}
-LLM Last Response Chunk				{displayLLMLastResponseTime}
+            $@"Loop Start at                {displayLoopStartTime}
+Game Data Read              {displayGameDataReadTime}
+LLM Prompted                {displayLLMPromptedTime}
 
-First Command Recognized				{displayFirstInterpreterCommandRecognizedTime}
-Last Command Recognized				{displayLastInterpreterCommandRecognizedTime}
+LLM First Response Chunk    {displayLLMFirstResponseTime}
+First Command Recognized    {displayFirstInterpreterCommandRecognizedTime}
 
-Command Recognized Count			{interpreterCommandRecognizedCount}
-Command Density								{(double)interpreterCommandRecognizedCount / ((llmLastResponseTime - loopStartTime) / 1000)} actions / sec"
+Last Command Recognized     {displayLastInterpreterCommandRecognizedTime}
+LLM Last Response Chunk     {displayLLMLastResponseTime}
+
+Command Recognized Count    {interpreterCommandRecognizedCount}"
         );
     }
 
     public override void _Ready()
     {
         EventBus bus = EventBus.Get();
+        FancyProgressBar = GetTree()
+            .CurrentScene
+            .GetNode<RichTextLabel>("DebugUI/FancyProgressBar");
+
+        CurrentTime = GetTree().CurrentScene.GetNode<RichTextLabel>("DebugUI/CurrentTime");
 
         bus.GameDataRead += (data) =>
         {
+            Reset();
             if (loopStartTime == 0)
             {
                 loopStartTime = Time.GetTicksMsec();
@@ -88,6 +97,8 @@ Command Density								{(double)interpreterCommandRecognizedCount / ((llmLastRes
             gameDataReadTime = Time.GetTicksMsec() - loopStartTime;
 
             UpdateLog();
+
+            DesiredProgressBarWidth = 0;
         };
 
         bus.LLMPrompted += (prompt) =>
@@ -95,6 +106,8 @@ Command Density								{(double)interpreterCommandRecognizedCount / ((llmLastRes
             llmPromptedTime = Time.GetTicksMsec() - loopStartTime;
 
             UpdateLog();
+
+            DesiredProgressBarWidth = 4;
         };
 
         bus.LLMFirstResponseChunk += (chunk) =>
@@ -102,6 +115,8 @@ Command Density								{(double)interpreterCommandRecognizedCount / ((llmLastRes
             llmFirstResponseTime = Time.GetTicksMsec() - loopStartTime;
 
             UpdateLog();
+
+            DesiredProgressBarWidth = 8;
         };
 
         bus.InterpreterCommandRecognized += (command) =>
@@ -110,7 +125,9 @@ Command Density								{(double)interpreterCommandRecognizedCount / ((llmLastRes
             if (interpreterCommandRecognizedCount == 1)
             {
                 firstInterpreterCommandRecognizedTime = Time.GetTicksMsec() - loopStartTime;
+                DesiredProgressBarWidth = 10;
             }
+            DesiredProgressBarWidth = 14;
             lastInterpreterCommandRecognizedTime = Time.GetTicksMsec() - loopStartTime;
 
             UpdateLog();
@@ -119,9 +136,67 @@ Command Density								{(double)interpreterCommandRecognizedCount / ((llmLastRes
         bus.LLMLastResponseChunk += (chunk) =>
         {
             llmLastResponseTime = Time.GetTicksMsec() - loopStartTime;
+            DesiredProgressBarWidth = 21;
             UpdateLog();
-            Reset();
         };
+    }
+
+    private double ProgressBarTick = 0.025;
+    private double ProgressBarElapsed = 200;
+
+    private double TickIndicatorTick = 0.1f;
+    private double TickIndicatorElapsed = 0;
+
+    private int DesiredProgressBarWidth = 0;
+    private int ActualProgressBarWidth = 0;
+
+    private bool ProgressBarTickIndicator = false;
+
+    public override void _Process(double delta)
+    {
+        ProgressBarElapsed += delta;
+        TickIndicatorElapsed += delta;
+
+        if (ProgressBarElapsed >= ProgressBarTick)
+        {
+            FancyProgressBar.Modulate = new Color(1, 0, 0, 1).Lerp(
+                new Color(0, 1, 0, 1),
+                (float)ActualProgressBarWidth / 21
+            );
+
+            ProgressBarElapsed = 0;
+
+            ActualProgressBarWidth++;
+            if (ActualProgressBarWidth > DesiredProgressBarWidth)
+            {
+                ActualProgressBarWidth = DesiredProgressBarWidth;
+            }
+
+            if (TickIndicatorElapsed > TickIndicatorTick)
+            {
+                TickIndicatorElapsed = 0;
+                ProgressBarTickIndicator = !ProgressBarTickIndicator;
+            }
+
+            int tick = ProgressBarTickIndicator ? 1 : 0;
+
+            if (ActualProgressBarWidth >= 21)
+            {
+                ActualProgressBarWidth = 21;
+                FancyProgressBar.Text = "[b]" + new string('-', ActualProgressBarWidth) + "|[/b]";
+            }
+            else
+            {
+                FancyProgressBar.Text =
+                    "[b]" + new string('-', ActualProgressBarWidth + tick) + ">[/b]";
+            }
+
+            CurrentTime.Text =
+                "[right]"
+                + ((Time.GetTicksMsec() - loopStartTime) / 1000f).ToString("F")
+                + "s[/right]";
+            CurrentTime.Position = new Vector2(730, 50 + (ActualProgressBarWidth * 7));
+        }
     }
 
     private void Reset()
