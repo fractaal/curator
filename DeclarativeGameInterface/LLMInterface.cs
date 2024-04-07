@@ -21,20 +21,39 @@ public partial class LLMInterface : Node
 
     private readonly System.Net.Http.HttpClient _client = new System.Net.Http.HttpClient();
     private readonly string url = "https://openrouter.ai/api/v1/chat/completions";
-    private readonly string API_KEY =
-        "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";
 
-    private readonly string MODEL = "openai/gpt-3.5-turbo-0125";
+    // private readonly string MODEL = "openai/gpt-3.5-turbo-0125";
 
-    // private readonly string MODEL = "google/gemini-pro";
+    private readonly string DEFAULT_MODEL = "google/gemini-pro";
+    private string MODEL = "";
+    private bool SettingsFileMissing = false;
 
     // private readonly string MODEL = "cohere/command-r";
     // private readonly string MODEL = "lizpreciatior/lzlv-70b-fp16-hf";
 
     public LLMInterface()
     {
-        _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + API_KEY);
-        _client.DefaultRequestHeaders.Add("X-Title", "Curator");
+        string paramsFile = Path.Combine(
+            Path.GetDirectoryName(OS.GetExecutablePath()),
+            "settings.txt"
+        );
+
+        if (File.Exists(paramsFile))
+        {
+            string file = File.ReadAllText(paramsFile);
+            var lines = file.Split("\n");
+
+            var API_KEY = lines[0].Trim();
+            MODEL = lines[1] ?? DEFAULT_MODEL;
+            MODEL = MODEL.Trim();
+
+            _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + API_KEY);
+            _client.DefaultRequestHeaders.Add("X-Title", "Curator");
+        }
+        else
+        {
+            SettingsFileMissing = true;
+        }
     }
 
     public override void _Ready()
@@ -45,6 +64,14 @@ public partial class LLMInterface : Node
             "llmModel",
             "[color=\"0000FF\"]Using model [b]" + MODEL + "[/b][/color]"
         );
+
+        if (SettingsFileMissing)
+        {
+            GetTree()
+                .CurrentScene
+                .GetNode<RichTextLabel>("CenterContainer/SettingsFileMissingWarning")
+                .Visible = true;
+        }
     }
 
     public void _emitLLMResponseChunk(string chunk)
