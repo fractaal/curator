@@ -43,7 +43,7 @@ public partial class PlayerStats : Node3D
 
     public string SpeedToNatural(double speed)
     {
-        if (speed > 6)
+        if (speed > 5)
         {
             return "Sprinting";
         }
@@ -54,6 +54,22 @@ public partial class PlayerStats : Node3D
         else
         {
             return "Still";
+        }
+    }
+
+    public string DistanceToNatural(double distance)
+    {
+        if (distance > 10)
+        {
+            return "Far";
+        }
+        else if (distance > 5)
+        {
+            return "Near";
+        }
+        else
+        {
+            return "Very Near";
         }
     }
 
@@ -79,24 +95,24 @@ public partial class PlayerStats : Node3D
         string currentSpeedNatural = SpeedToNatural(currentSpeed);
 
         // Calculate distance from ghost
-        float distanceFromGhost = currentPosition.DistanceTo((ghostNode).GlobalPosition);
+        float distanceFromGhost = character.GlobalPosition.DistanceTo((ghostNode).GlobalPosition);
 
         if (currentSpeed > 1)
         {
             locator.FindRoom();
         }
 
-        string room = locator.Room == "None" ? "Outside" : locator.Room;
+        string room = locator.Room == "None" ? "Outside The House" : locator.Room;
 
         // Convert speeds to units per second and compile the status message
         string status =
             $"Current Room: "
             + room
             + "\n"
-            + $"Current Speed: {currentSpeed:F1}u/s ({currentSpeedNatural})\n"
-            + $"Average Speed (last 10s): {averageSpeed:F1}u/s ({averageSpeedNatural})\n"
-            + $"Total Distance Travelled (last 10s): {totalDistance:F1}u\n"
-            + $"Distance from Ghost: {distanceFromGhost:F1}u";
+            + $"Current Speed: {currentSpeedNatural} ({currentSpeed:F1}u/s)\n"
+            + $"Average Speed (last 10s): {averageSpeedNatural} ({averageSpeed:F1}u/s)\n"
+            + $"Total Distance Travelled (last 10s): {DistanceToNatural(totalDistance)} ({totalDistance:F1}u)\n"
+            + $"Distance from Ghost: {DistanceToNatural(distanceFromGhost)} ({distanceFromGhost:F1}u)";
 
         return status;
     }
