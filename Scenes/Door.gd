@@ -96,6 +96,12 @@ func lock():
 
 	locked = true
 
+	await get_tree().create_timer(60).timeout
+
+	if locked:
+		EventBus.emit_signal("SystemFeedback", "Door in " + locator.Room + " was locked for too long. Avoid locking out doors for long periods of time. This UNDERMINES PLAYER AGENCY.")
+		unlock()
+
 func unlock():
 	unlockSFX.seek(0)
 	unlockSFX.play()
@@ -130,3 +136,6 @@ func getStatus():
 		return "Door - Open"
 	else:
 		return "Door - Closed, " + ("Locked" if locked else "Unlocked")
+
+func getStatusForPlayer():
+	return getStatus()
