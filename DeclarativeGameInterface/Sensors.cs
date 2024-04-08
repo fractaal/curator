@@ -40,7 +40,7 @@ public partial class Sensors : Node
             float time = Time.GetTicksMsec() / 1000;
 
             NotableEvents.Add($"{time}s: " + message);
-            NotableEvents = NotableEvents.TakeLast(30).ToList();
+            NotableEvents = NotableEvents.TakeLast(60).ToList();
             // PokePrompter();
         };
 
@@ -49,7 +49,7 @@ public partial class Sensors : Node
             float time = Time.GetTicksMsec() / 1000;
 
             SystemFeedback.Add($"{time}s: " + message);
-            SystemFeedback = SystemFeedback.TakeLast(5).ToList();
+            SystemFeedback = SystemFeedback.TakeLast(30).ToList();
         };
 
         bus.LLMLastResponseChunk += (chunk) =>
