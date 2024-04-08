@@ -8,7 +8,14 @@ var shiftSfx: AudioStreamPlayer3D
 var joltSfx: AudioStreamPlayer3D
 var throwSfx: AudioStreamPlayer3D
 
+var registry = preload ("res://Scripts/InteractableRegistry.cs")
+
+var originalRotation: Vector3
+
+var objectType := "physics object"
+
 func _ready():
+	registry.Register(objectType)
 	shiftSfx = AudioStreamPlayer3D.new()
 	joltSfx = AudioStreamPlayer3D.new()
 	throwSfx = AudioStreamPlayer3D.new()
@@ -31,6 +38,8 @@ func _ready():
 	rigidBody = get_parent() as RigidBody3D
 	locator = get_parent().get_node("RoomLocator")
 	player = get_tree().current_scene.get_node("Player")
+	
+	originalRotation = rigidBody.global_rotation_degrees
 
 	EventBus.ObjectInteraction.connect(_on_object_interact)
 
@@ -87,4 +96,4 @@ func shift():
 	) * rigidBody.mass)
 
 func getStatus():
-	return ""
+	return "Physics Object"

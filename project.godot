@@ -31,6 +31,7 @@ VoiceWebServer="*res://Scripts/VoiceWebServer.cs"
 EndgameHandler="*res://Scripts/EndgameHandler.cs"
 Logger="*res://Scripts/Logger.cs"
 ToastNotifications="*res://Scripts/ToastNotifications.cs"
+InteractableRegistry="*res://Scripts/InteractableRegistry.cs"
 
 [display]
 

@@ -14,6 +14,8 @@ var lastSongPosition = 0
 var isOn = true;
 var isPlaying = false;
 
+var registry = preload ("res://Scripts/InteractableRegistry.cs")
+
 func generate_random_red():
 	var r = randf_range(0.0, 1) # Full red
 	var g = randf_range(0.0, 0.2) # Random green, up to 0.2 intensity
@@ -43,8 +45,11 @@ var material: StandardMaterial3D
 
 var random: RandomNumberGenerator = RandomNumberGenerator.new()
 
+var objectType := "radio"
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	registry.Register(objectType)
 	_updateStatusLabel()
 
 	EventBus.ObjectInteraction.connect(_on_object_interact)

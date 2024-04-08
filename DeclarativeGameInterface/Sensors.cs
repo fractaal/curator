@@ -81,36 +81,36 @@ public partial class Sensors : Node
         );
         var backstoryPrompt = file.GetAsText();
 
-        ghostBackstory = await llmInterface.SendIsolated(
-            new List<Message>
-            {
-                new Message { role = "system", content = backstoryPrompt },
-                new Message
-                {
-                    role = "user",
-                    content = GetTree()
-                        .CurrentScene
-                        .GetNode("Ghost")
-                        .Call("getStatusStateless")
-                        .ToString()
-                }
-            }
-        );
+        // ghostBackstory = await llmInterface.SendIsolated(
+        //     new List<Message>
+        //     {
+        //         new Message { role = "system", content = backstoryPrompt },
+        //         new Message
+        //         {
+        //             role = "user",
+        //             content = GetTree()
+        //                 .CurrentScene
+        //                 .GetNode("Ghost")
+        //                 .Call("getStatusStateless")
+        //                 .ToString()
+        //         }
+        //     }
+        // );
 
-        var sanitizedBackstory = await llmInterface.SendIsolated(
-            new List<Message>
-            {
-                new Message
-                {
-                    role = "system",
-                    content =
-                        "Erase any mention of 'Demon', 'Banshee', 'Poltergeist', 'Phantom', 'Wraith', or 'Shade' in the following message -- the player should not know the ghost type."
-                },
-                new Message { role = "user", content = ghostBackstory }
-            }
-        );
+        // var sanitizedBackstory = await llmInterface.SendIsolated(
+        //     new List<Message>
+        //     {
+        //         new Message
+        //         {
+        //             role = "system",
+        //             content =
+        //                 "Erase any mention of 'Demon', 'Banshee', 'Poltergeist', 'Phantom', 'Wraith', or 'Shade' in the following message -- the player should not know the ghost type."
+        //         },
+        //         new Message { role = "user", content = ghostBackstory }
+        //     }
+        // );
 
-        bus.EmitSignal(EventBus.SignalName.GhostBackstory, sanitizedBackstory);
+        // bus.EmitSignal(EventBus.SignalName.GhostBackstory, sanitizedBackstory);
     }
 
     private double tickInterval = 0.5;
@@ -126,17 +126,6 @@ public partial class Sensors : Node
     private bool aiEnabled = false;
 
     private string ghostBackstory = "No backstory yet...";
-
-    public void PokePrompter()
-    {
-        if (Time.GetTicksMsec() - lastTimePoked < 5000)
-        {
-            GD.Print("Poke too soon, skipping.");
-            return;
-        }
-        lastTimePoked = Time.GetTicksMsec();
-        bus.EmitSignal(EventBus.SignalName.GameDataRead, GetGameInformationAndHistory());
-    }
 
     public override async void _PhysicsProcess(double delta)
     {

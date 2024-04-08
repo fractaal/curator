@@ -15,6 +15,8 @@ var isAnimating = false
 
 @export var locator: Node
 
+var registry = preload ("res://Scripts/InteractableRegistry.cs")
+
 func _on_object_interact(verb: String, type: String, target: String):
 	if not type.to_lower().contains("door"):
 		return
@@ -33,8 +35,11 @@ func _on_object_interact(verb: String, type: String, target: String):
 		else:
 			return
 
+var objectType := "door"
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	registry.Register(objectType)
 	EventBus.ObjectInteraction.connect(_on_object_interact)
 
 func open():

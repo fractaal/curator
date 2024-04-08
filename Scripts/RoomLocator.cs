@@ -94,7 +94,7 @@ public partial class RoomLocator : Node
                         Room = room.Name;
                         Rooms.Add(Room);
                         DebugLabel.Text = "Room: " + Room;
-                        GD.Print("Found room for " + GetParent().Name + ": " + Room);
+                        // GD.Print("Found room for " + GetParent().Name + ": " + Room);
                     }
                 }
                 catch (Exception)

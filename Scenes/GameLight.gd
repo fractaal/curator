@@ -26,6 +26,8 @@ var RestoreSFX: AudioStreamPlayer3D
 var HumSFX: AudioStreamPlayer3D
 var TurnOffSFX: AudioStreamPlayer3D
 
+var registry = preload ("res://Scripts/InteractableRegistry.cs")
+
 @export var locator: Node
 @export var Sparks: GPUParticles3D
 
@@ -68,8 +70,12 @@ func _process(delta):
 		else:
 			setEnergy(clamp(lastChosenEnergy - (winSongElapsed / winSongBeatTime) * lastChosenEnergy, 0.5, 100))
 
+var objectType := "light"
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	registry.Register(objectType);
+	
 	noise = FastNoiseLite.new()
 
 	ExplodeSFX = AudioStreamPlayer3D.new()

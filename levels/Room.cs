@@ -43,6 +43,8 @@ public partial class Room : Area3D
     {
         Interactables = new();
 
+        SetCollisionMaskValue(8, true); // Physics objects layer
+
         Monitoring = true;
         BodyEntered += (body) =>
         {
@@ -139,12 +141,29 @@ public partial class Room : Area3D
     {
         string info = "";
 
+        var missingInteractables = InteractableRegistry.Interactables;
+
         info += $"<{Name}>\n";
 
         foreach (Node interactable in Interactables)
         {
             try
             {
+                var type = interactable.Get("objectType").AsString();
+
+                if (type == null)
+                {
+                    GD.PushWarning(
+                        "Interactable "
+                            + interactable.GetParent().Name
+                            + " has no objectType property"
+                    );
+                }
+                else
+                {
+                    missingInteractables.Remove(type);
+                }
+
                 if (interactable.HasMethod("getStatus"))
                 {
                     string line = interactable.Call("getStatus").AsString();
@@ -172,6 +191,11 @@ public partial class Room : Area3D
             {
                 GD.PushWarning("Error getting interactable status: " + e.Message);
             }
+        }
+
+        for (int i = 0; i < missingInteractables.Count; i++)
+        {
+            info += $"\tNo {missingInteractables.ElementAt(i)}s in this room\n";
         }
 
         info += $"</{Name}>\n";

@@ -1429,11 +1429,11 @@ offset_top = 90.0
 offset_right = 531.0
 offset_bottom = 590.0
 theme_override_fonts/normal_font = ExtResource("43_ff5h2")
-theme_override_font_sizes/normal_font_size = 8
-theme_override_font_sizes/bold_font_size = 8
-theme_override_font_sizes/italics_font_size = 8
-theme_override_font_sizes/bold_italics_font_size = 8
-theme_override_font_sizes/mono_font_size = 8
+theme_override_font_sizes/normal_font_size = 12
+theme_override_font_sizes/bold_font_size = 12
+theme_override_font_sizes/italics_font_size = 12
+theme_override_font_sizes/bold_italics_font_size = 12
+theme_override_font_sizes/mono_font_size = 12
 bbcode_enabled = true
 
 [node name="LatencyStatistics" type="RichTextLabel" parent="DebugUI"]
@@ -1827,10 +1827,12 @@ mouse_filter = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Control" type="Control" parent="CenterContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Label" type="Label" parent="CenterContainer/VBoxContainer"]
 modulate = Color(1, 1, 1, 0)
@@ -1847,6 +1849,7 @@ vertical_alignment = 2
 visible = false
 custom_minimum_size = Vector2(450, 250)
 layout_mode = 2
+mouse_filter = 2
 theme_override_fonts/normal_font = ExtResource("61_etk1b")
 theme_override_fonts/bold_font = ExtResource("62_l181e")
 bbcode_enabled = true
