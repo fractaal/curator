@@ -565,6 +565,16 @@ ShadowMovementPrefab = ExtResource("5_rhk5u")
 BloodstainsPrefab = ExtResource("3_2xs4e")
 Locator = NodePath("../RoomLocator")
 
+[node name="RayCast3D" type="RayCast3D" parent="."]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1.72506, 0)
+target_position = Vector3(0, 0, 60)
+collision_mask = 11
+
+[node name="CSGBox3D" type="CSGBox3D" parent="RayCast3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.84217e-14, 0, 2.82983)
+visible = false
+size = Vector3(0.1, 0.1, 5.59424)
+
 [node name="Skeleton3D" type="Skeleton3D" parent="."]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0.05, 0)
 visible = false
@@ -1091,7 +1101,6 @@ shape = SubResource("CapsuleShape3D_4r2yh")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
 path_postprocessing = 1
-avoidance_enabled = true
 radius = 1.0
 
 [node name="LeftHandTarget" type="Node3D" parent="."]
