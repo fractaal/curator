@@ -28,6 +28,7 @@ skeleton = NodePath("../CSGBox3D")
 
 [node name="CSGBox3D" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0197754, 0.4782, 0.473616)
+use_collision = true
 size = Vector3(2.153, 1.239, 0.28)
 
 [node name="viewport" type="SubViewport" parent="."]
