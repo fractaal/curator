@@ -37,77 +37,159 @@ size_flags_vertical = 3
 [node name="RichTextLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer/ScrollContainer"]
 custom_minimum_size = Vector2(480, 510)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 theme_override_fonts/normal_font = ExtResource("1_cw2qb")
 text = "asfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfasasfasojfoiasjfasoiasjfcoiasjfoiasfcasfas"
 script = ExtResource("2_q7i2v")
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="HBoxContainer" node_paths=PackedStringArray("confirmLabel")]
+[node name="VBoxContainer2" type="GridContainer" parent="HBoxContainer" node_paths=PackedStringArray("confirmLabel")]
 layout_mode = 2
 size_flags_horizontal = 3
-alignment = 1
+columns = 2
 script = ExtResource("3_4ivlh")
-confirmLabel = NodePath("ConfirmLabel")
+confirmLabel = NodePath("ColorRect/Label")
 
 [node name="RichTextLabel2" type="RichTextLabel" parent="HBoxContainer/VBoxContainer2"]
 custom_minimum_size = Vector2(0, 26.645)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_fonts/normal_font = ExtResource("1_cw2qb")
 text = "I think the ghost is a..."
 
-[node name="DemonButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
-layout_mode = 2
-text = "Demon"
-
-[node name="DemonLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer2"]
-custom_minimum_size = Vector2(0, 25)
-layout_mode = 2
-
-[node name="WraithButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
-layout_mode = 2
-text = "Wraith"
-
-[node name="WraithLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer2"]
-custom_minimum_size = Vector2(0, 25)
-layout_mode = 2
-
-[node name="PhantomButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
-layout_mode = 2
-text = "Phantom"
-
-[node name="PhantomLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer2"]
-custom_minimum_size = Vector2(0, 25)
-layout_mode = 2
-
-[node name="ShadeButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
-layout_mode = 2
-text = "Shade"
-
-[node name="ShadeLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer2"]
-custom_minimum_size = Vector2(0, 25)
-layout_mode = 2
-
-[node name="Banshee" type="Button" parent="HBoxContainer/VBoxContainer2"]
-layout_mode = 2
-text = "Banshee"
-
-[node name="BansheeLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer2"]
-custom_minimum_size = Vector2(0, 25)
-layout_mode = 2
-
-[node name="Poltergeist" type="Button" parent="HBoxContainer/VBoxContainer2"]
-layout_mode = 2
-text = "Poltergeist"
-
-[node name="PoltergeistLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer2"]
-custom_minimum_size = Vector2(0, 25)
-layout_mode = 2
-
-[node name="ConfirmLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer2"]
+[node name="RichTextLabel3" type="RichTextLabel" parent="HBoxContainer/VBoxContainer2"]
 custom_minimum_size = Vector2(0, 26.645)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
-[node name="DemonButton2" type="Button" parent="HBoxContainer/VBoxContainer2"]
+[node name="DemonButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
+modulate = Color(1, 0.133333, 0.576471, 1)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_cw2qb")
+text = "Demon"
+
+[node name="DemonLabel" type="Label" parent="HBoxContainer/VBoxContainer2"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_cw2qb")
+text = "Testing"
+autowrap_mode = 3
+
+[node name="WraithButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
+modulate = Color(0, 0.588235, 0.45098, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_cw2qb")
+text = "Wraith"
+
+[node name="WraithLabel" type="Label" parent="HBoxContainer/VBoxContainer2"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_cw2qb")
+text = "Testing"
+autowrap_mode = 3
+
+[node name="PhantomButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
+modulate = Color(0, 0.533333, 0.913725, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_cw2qb")
+text = "Phantom"
+
+[node name="PhantomLabel" type="Label" parent="HBoxContainer/VBoxContainer2"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_cw2qb")
+text = "Testing"
+autowrap_mode = 3
+
+[node name="ShadeButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
+modulate = Color(0.717647, 0.729412, 0.780392, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_cw2qb")
+text = "Shade"
+
+[node name="ShadeLabel" type="Label" parent="HBoxContainer/VBoxContainer2"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_cw2qb")
+text = "Testing"
+autowrap_mode = 3
+
+[node name="Banshee" type="Button" parent="HBoxContainer/VBoxContainer2"]
+modulate = Color(0.682353, 0.286275, 0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_cw2qb")
+text = "Banshee"
+
+[node name="BansheeLabel" type="Label" parent="HBoxContainer/VBoxContainer2"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_cw2qb")
+text = "Testing"
+autowrap_mode = 3
+
+[node name="Poltergeist" type="Button" parent="HBoxContainer/VBoxContainer2"]
+modulate = Color(0.937255, 0.603922, 0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_cw2qb")
+text = "Poltergeist"
+
+[node name="PoltergeistLabel" type="Label" parent="HBoxContainer/VBoxContainer2"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_cw2qb")
+text = "Testing"
+autowrap_mode = 3
+
+[node name="ColorRect" type="ColorRect" parent="HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer2/ColorRect"]
+modulate = Color(0, 0, 0, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("1_cw2qb")
+text = "[SELECTED GHOST TYPE HERE]"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ConfirmButton" type="Button" parent="HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 theme_override_colors/font_color = Color(1, 0, 0, 1)
+theme_override_fonts/font = ExtResource("1_cw2qb")
 text = "CONFIRM CHOICE"
 
 [node name="Cursor" type="TextureRect" parent="."]
