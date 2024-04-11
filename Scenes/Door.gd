@@ -15,6 +15,8 @@ var isAnimating = false
 
 @export var locator: Node
 
+var ghost: Node3D
+
 var registry = preload ("res://Scripts/InteractableRegistry.cs")
 
 func _on_object_interact(verb: String, type: String, target: String):
@@ -41,6 +43,8 @@ var objectType := "door"
 func _ready():
 	registry.Register(objectType)
 	EventBus.ObjectInteraction.connect(_on_object_interact)
+
+	ghost = get_tree().current_scene.get_node("Ghost")
 
 func open():
 
@@ -92,6 +96,8 @@ func toggle():
 	else:
 		open()
 
+var lockTime = 0
+
 func lock():
 	lockSFX.seek(0)
 	lockSFX.play()
@@ -101,9 +107,12 @@ func lock():
 
 	locked = true
 
-	await get_tree().create_timer(60).timeout
+	lockTime = Time.get_ticks_msec()
 
-	if locked:
+func _physics_process(delta):
+	var time := Time.get_ticks_msec()
+
+	if locked and (time - lockTime) > 30000 and not ghost.chasing:
 		EventBus.emit_signal("SystemFeedback", "Door in " + locator.Room + " was locked for too long. Avoid locking out doors for long periods of time. This UNDERMINES PLAYER AGENCY.")
 		unlock()
 
@@ -140,7 +149,7 @@ func getStatus():
 	if isOpen:
 		return "Door - Open"
 	else:
-		return "Door - Closed, " + ("Locked" if locked else "Unlocked")
+		return "Door - Closed, " + ("Locked (" + "%d" % ((Time.get_ticks_msec() - lockTime) / 1000) + "s ago)" if locked else "Unlocked")
 
 func getStatusForPlayer():
 	return getStatus()

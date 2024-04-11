@@ -20,6 +20,8 @@ var interactable = true
 
 var rng = RandomNumberGenerator.new()
 
+var kill_time = 0
+
 var ExplodeSFX: AudioStreamPlayer3D
 var FlickerSFX: AudioStreamPlayer3D
 var RestoreSFX: AudioStreamPlayer3D
@@ -60,6 +62,12 @@ func playerWon():
 var lastChosenEnergy = 0
 
 func _process(delta):
+
+	if kill_time != 0 and Time.get_ticks_msec() - kill_time > 30000:
+		kill_time = 0
+		if not interactable:
+			interactable = true
+
 	if hasPlayerWon:
 		winSongElapsed += delta
 		if winSongElapsed >= winSongBeatTime:
@@ -190,6 +198,7 @@ func _flickerStep(_step: float):
 
 func explode():
 	await get_tree().create_timer(randf_range(0.0, 0.5)).timeout
+	kill_time = Time.get_ticks_msec()
 
 	HumSFX.stop()
 	ExplodeSFX.pitch_scale = randf_range(0.85, 1.3)
@@ -240,7 +249,7 @@ func turnOnInstant(): # Only the player should be able to do this
 	isDead = false
 
 func getStatus():
-	return "Light Status - " + ("Off" if isDead else "On") + (" " if interactable else " (**Player can't interact**)")
+	return "Light Status - " + ("Off" if isDead else "On") + (" " if interactable else "(Dead - " + "(%d" % ((Time.get_ticks_msec() - kill_time) / 1000) + "s ago) (**Player can't interact**)")
 
 func getStatusForPlayer():
 	return "Light Status - " + ("Off" if isDead else "On") + (" " if interactable else " (Dead)")
