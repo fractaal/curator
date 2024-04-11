@@ -7,6 +7,9 @@ using Godot;
 public partial class Prompter : Node
 {
     private string SYSTEM_PROMPT = "";
+
+    private string BEHAVIOR_PROMPT = "";
+
     private List<string> llmResponses = new List<string>();
     private string data = "";
 
@@ -24,6 +27,13 @@ public partial class Prompter : Node
             FileAccess.ModeFlags.Read
         );
         SYSTEM_PROMPT = file.GetAsText();
+
+        BEHAVIOR_PROMPT = FileAccess
+            .Open(
+                "res://DeclarativeGameInterface/prompts/BehaviorPrompt.txt",
+                FileAccess.ModeFlags.Read
+            )
+            .GetAsText();
     }
 
     public override void _Ready()
@@ -54,13 +64,8 @@ public partial class Prompter : Node
                 new Message { role = "system", content = SYSTEM_PROMPT },
             };
 
-            // messages.AddRange(
-            //     llmResponses
-            //         .TakeLast(3)
-            //         .Select(response => new Message { role = "assistant", content = response })
-            // );
-
             messages.Add(new Message { role = "user", content = prompt });
+            messages.Add(new Message { role = "system", content = BEHAVIOR_PROMPT });
 
             promptDebugUI.Text = messages.Aggregate(
                 "",
