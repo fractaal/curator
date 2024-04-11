@@ -7,6 +7,9 @@ func _physics_process(_delta):
 		animate()
 			
 func _ready():
+	text = text.c_escape()
+	text = text.replace("\\r\\n", "\n")
+	text = text.c_unescape()
 	animate()
 
 func animate():
