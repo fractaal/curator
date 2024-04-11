@@ -6,6 +6,7 @@ var speed = 2.5
 #@onready var _animator = $AnimationPlayer
 @onready var skeleton: Node3D = $Skeleton3D
 @onready var CollisionShape = $CollisionShape3D
+@onready var LineOfSightCheck = $RayCast3D
 @export var Locator: Node
 
 @export var huntStartSFX: AudioStreamPlayer
@@ -22,6 +23,8 @@ var speed = 2.5
 
 @export var endRevealText: Label
 
+var GhostData := preload ("res://Scripts/GhostData.gd")
+
 var player: Node3D
 
 var last_location = Vector3()
@@ -32,9 +35,9 @@ var chaseSpeed = "slow"
 
 var chasing_EntireSequence = false
 
-var FirstNames = ["John", "Jennifer", "Madison", "Mark", "Abrahm", "Dominic", "Kimi", "Shan", "Mariane", "Sofia", "Elijah", "Venj", "Chun-chun", "Raj", "Elden", "Niggy", "Ben"]
-var LastNames = ["Black", "Brown", "Jackson", "Peralta", "Walker", "Carpenter", "Mabait", "Baylin", "John", "Requinton", "Samonte", "Torrejos", "Abadilla", "Poggers", "Rocat", "Lumbay"]
-var GhostTypes = ["Demon", "Wraith", "Phantom", "Shade", "Banshee", "Poltergeist"]
+var FirstNames := ["John", "Jennifer", "Madison", "Mark", "Abrahm", "Dominic", "Kimi", "Shan", "Mariane", "Sofia", "Elijah", "Venj", "Chun-chun", "Raj", "Elden", "Niggy", "Ben"]
+var LastNames := ["Black", "Brown", "Jackson", "Peralta", "Walker", "Carpenter", "Mabait", "Baylin", "John", "Requinton", "Samonte", "Torrejos", "Abadilla", "Poggers", "Rocat", "Lumbay"]
+var GhostTypes: Array[String]
 
 var FirstName
 var LastName
@@ -44,7 +47,19 @@ var FavoriteRoom
 
 var manifesting = false
 
+var gameEnded = false
+
+func _on_game_won(_reason):
+	gameEnded = true
+	set_process(false)
+
+func _on_game_lost(_reason):
+	gameEnded = true
+	set_process(false)
+
 func _ready():
+	GhostTypes = GhostData.GetGhostTypes()
+
 	# Set up name and type
 	FirstName = FirstNames[randi() % FirstNames.size()]
 	LastName = LastNames[randi() % LastNames.size()]
@@ -65,6 +80,9 @@ func _ready():
 	EventBus.emit_signal("GhostInformation", "Type - " + GhostType)
 	EventBus.emit_signal("GhostInformation", "Age - " + str(GhostAge))
 	EventBus.emit_signal("GhostInformation", "Favorite Room - " + FavoriteRoom)
+
+	EventBus.GameWon.connect(_on_game_won)
+	EventBus.GameLost.connect(_on_game_lost)
 
 	_on_ghost_action("movetoasghost", FavoriteRoom)
 
@@ -116,7 +134,7 @@ func _on_ghost_action(verb, arguments):
 			evidenceDepositor.DepositEvidence(GhostType)
 
 func appear():
-	if chasing:
+	if chasing or gameEnded:
 		return
 	manifesting = true
 	appearSFX.pitch_scale = randf_range(0.75, 0.85)
@@ -131,7 +149,7 @@ func appear():
 	skeleton.visible = false
 
 func chase(arguments):
-	if chasing:
+	if chasing or gameEnded:
 		return
 
 	chasing_EntireSequence = true
@@ -186,11 +204,32 @@ func chase(arguments):
 
 	chasing_EntireSequence = false
 
+	EventBus.emit_signal("ObjectInteraction", "unlock", "doors", "all")
+
 var sameLocationCheckInterval = 0.5
 var sameLocationCheckElapsed = 0
 var sameLocationCheckLast = Vector3.ZERO
 
+var inLineOfSight = false
+
 func _physics_process(delta):
+	LineOfSightCheck.look_at(player.global_position + Vector3(0, .75, 0))
+	LineOfSightCheck.rotate_object_local(Vector3(0, 1, 0), PI)
+
+	if LineOfSightCheck.is_colliding():
+		var object: Node3D = LineOfSightCheck.get_collider()
+		
+		var parent = object
+		
+		inLineOfSight = false
+		
+		while (parent != null):
+			if parent != player:
+				parent = parent.get_parent()
+			else:
+				inLineOfSight = true
+				break
+	
 	var current_location = global_transform.origin
 	var next_location = nav_agent.get_next_path_position()
 	var new_velocity = (next_location - current_location).normalized() * speed
@@ -262,6 +301,7 @@ func getStatus():
 	out += "Favorite Room: " + FavoriteRoom + "\n"
 	out += "Current Room: " + Locator.Room + "\n"
 	out += "---\n"
+	out += "IN LINE OF SIGHT? (WOULD THE PLAYER SEE THE GHOST IF IT MANIFESTS?): " + ("YES" if inLineOfSight else "NO") + "\n"
 	out += "CHASING PLAYER?: " + ("YES - GO CRAZY!" if chasing else "No") + "\n"
 	out += "VISIBLE?: " + ("Yes" if skeleton.visible else "No") + "\n"
 
