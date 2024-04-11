@@ -58,8 +58,9 @@ public partial class EndgameHandler : Node
             else
             {
                 GD.Print("you lose");
-                ghost.CallDeferred("update_target_location", ghost.GlobalPosition);
-                ghost.CallDeferred("chase", "end");
+                ghost.Call("update_target_location", ghost.GlobalPosition);
+                ghost.Call("chase", "end");
+
                 bus.EmitSignal(EventBus.SignalName.ObjectInteraction, "turnoff", "lights", "all");
 
                 bus.EmitSignal(EventBus.SignalName.ObjectInteraction, "lock", "doors", "all");
