@@ -26,6 +26,10 @@ public partial class LLMInterface : Node
 
     private readonly string DEFAULT_MODEL = "google/gemini-pro";
     private string MODEL = "";
+    private float MODEL_TEMPERATURE = 1.0f;
+    private string AUX_MODEL = "";
+    private float AUX_MODEL_TEMPERATURE = 1.0f;
+
     private bool SettingsFileMissing = false;
 
     // private readonly string MODEL = "cohere/command-r";
@@ -38,22 +42,38 @@ public partial class LLMInterface : Node
             "settings.txt"
         );
 
-        if (File.Exists(paramsFile))
-        {
-            string file = File.ReadAllText(paramsFile);
-            var lines = file.Split("\n");
-
-            var API_KEY = lines[0].Trim();
-            MODEL = lines[1] ?? DEFAULT_MODEL;
-            MODEL = MODEL.Trim();
-
-            _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + API_KEY);
-            _client.DefaultRequestHeaders.Add("X-Title", "Curator");
-        }
-        else
+        if (Config.SettingsFileMissing)
         {
             SettingsFileMissing = true;
+            return;
         }
+
+        MODEL = Config.Get("MODEL") ?? DEFAULT_MODEL;
+        MODEL = MODEL.Trim();
+
+        AUX_MODEL = Config.Get("AUX_MODEL") ?? DEFAULT_MODEL;
+        AUX_MODEL = AUX_MODEL.Trim();
+
+        try
+        {
+            MODEL_TEMPERATURE = float.Parse(Config.Get("MODEL_TEMPERATURE"));
+        }
+        catch (Exception e)
+        {
+            GD.PrintErr("Failed to parse MODEL_TEMPERATURE: " + e.Message);
+        }
+
+        try
+        {
+            AUX_MODEL_TEMPERATURE = float.Parse(Config.Get("AUX_MODEL_TEMPERATURE"));
+        }
+        catch (Exception e)
+        {
+            GD.PrintErr("Failed to parse AUX_MODEL_TEMPERATURE: " + e.Message);
+        }
+
+        _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + Config.Get("API_KEY"));
+        _client.DefaultRequestHeaders.Add("X-Title", "Curator");
     }
 
     public override void _Ready()
@@ -121,7 +141,12 @@ public partial class LLMInterface : Node
             using (var request = new HttpRequestMessage(HttpMethod.Post, url))
             {
                 request.Content = JsonContent.Create(
-                    new { model = MODEL, messages = messages.ToArray() }
+                    new
+                    {
+                        model = AUX_MODEL,
+                        messages = messages.ToArray(),
+                        temperature = AUX_MODEL_TEMPERATURE
+                    }
                 );
 
                 var response = await _client.SendAsync(
@@ -151,7 +176,7 @@ public partial class LLMInterface : Node
         }
         catch (Exception e)
         {
-            GD.PrintErr("Failed to send request: " + e.Message);
+            GD.PrintErr("Failed to send request: " + e.Message + ", " + e.StackTrace);
             return "";
         }
     }
@@ -167,6 +192,7 @@ public partial class LLMInterface : Node
                 request.Content = JsonContent.Create(
                     new
                     {
+                        temperature = MODEL_TEMPERATURE,
                         stream = true,
                         model = MODEL,
                         messages = messages.ToArray()
