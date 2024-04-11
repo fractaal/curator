@@ -48,7 +48,7 @@ func kill():
 
 	EventBus.emit_signal("ObjectInteraction", "explode", "lights", "all")
 
-	$Head/Camera3d.position.y += 0.15
+	$Head/Camera3d.position.y += 0.4
 	$Head/Camera3d.fov = 120
 	
 	tween.tween_property($Head/Camera3d, "fov", 20, 0.25).set_delay(1.75)
