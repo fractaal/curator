@@ -24,12 +24,28 @@ public partial class Interpreter : Node
     private bool GhostDepositedEvidence = false;
     private int CyclesSinceLastEvidenceDeposit = 0;
 
+    private bool GhostHasChased = false;
+    private int CyclesSinceLastChase = 0;
+
+    private bool AnyCommandWasPerformed = false;
+
+    private Node ghostData;
+
+    private int Cycles = 0;
+
+    private LLMInterface llmInterface;
+    private NarrativeIntegrity Integrity;
+
     public override void _Ready()
     {
         LogManager.UpdateLog("llmResponse", "");
 
+        ghostData = GetTree().Root.GetNode<Node>("GhostData");
+
         player = (Node3D)GetTree().CurrentScene.FindChild("Player");
         ghost = (Node3D)GetTree().CurrentScene.FindChild("Ghost");
+        llmInterface = (LLMInterface)GetTree().Root.GetNode("LLMInterface");
+        Integrity = (NarrativeIntegrity)GetTree().Root.GetNode("NarrativeIntegrity");
 
         GD.Print("Initialized interpreter with values player: ", player, " ghost: ", ghost);
 
@@ -72,7 +88,7 @@ public partial class Interpreter : Node
 
                 bus.EmitSignal(
                     EventBus.SignalName.SystemFeedback,
-                    $"ERROR: Trying to {verb} {objectType} in/at {target} FAILED.\nThe object doesn't exist in the room.\nRefer to the available objects per room in ROOM INFORMATION."
+                    $"OBJECT DOESN'T EXIST: Trying to {verb} {objectType} in/at {target} FAILED because the object doesn't exist in {target}! Refer to the available objects per room in ROOM INFORMATION."
                 );
             }
 
@@ -88,10 +104,34 @@ public partial class Interpreter : Node
                 {
                     bus.EmitSignal(
                         EventBus.SignalName.SystemFeedback,
-                        $"WARNING: You are using {mostFrequentCommand.Key} too often ({mostFrequentCommand.Value} times recently). You are becoming predictable - BAD. VARY your commands."
+                        $"WARNING: You are using {mostFrequentCommand.Key} too often ({mostFrequentCommand.Value} times recently). You are becoming predictable. VARY your commands, utilize what is available to you!"
                     );
 
                     RecentCommands.RemoveAll(match => match.Contains(mostFrequentCommand.Key));
+                }
+            }
+
+            if (Cycles > 0 && Cycles % 10 == 0) // Every 10 cycles
+            {
+                var unusedVerbs = new List<string>(objectInteractionVerbs);
+                unusedVerbs.AddRange(ghostActionVerbs);
+
+                foreach (string _ in RecentCommands)
+                {
+                    var command = _.Split("(")[0];
+
+                    if (unusedVerbs.Contains(command))
+                    {
+                        unusedVerbs.Remove(command);
+                    }
+                }
+
+                if (unusedVerbs.Count > 0)
+                {
+                    bus.EmitSignal(
+                        EventBus.SignalName.SystemFeedback,
+                        $"WARNING: You have not used the following commands recently: {unusedVerbs.Aggregate("", (acc, verb) => acc + verb + ", ").Trim()}. DIVERSIFY your command usage for a more engaging experience."
+                    );
                 }
             }
 
@@ -102,15 +142,42 @@ public partial class Interpreter : Node
                 CyclesSinceLastEvidenceDeposit++;
             }
 
-            if (CyclesSinceLastEvidenceDeposit > 10)
+            if (!GhostHasChased)
+            {
+                CyclesSinceLastChase++;
+            }
+
+            if (!AnyCommandWasPerformed)
             {
                 bus.EmitSignal(
                     EventBus.SignalName.SystemFeedback,
-                    "WARNING: The ghost has not deposited evidence in a while. This UNDERMINES PLAYER AGENCY. Please deposit evidence to progress the game."
+                    "ERROR: AI director performed no commands! This is UNACCEPTABLE! PLEASE remember to invoke commands using the appropriate syntax to enact change in the game world!"
+                );
+            }
+
+            if (CyclesSinceLastEvidenceDeposit > 20)
+            {
+                bus.EmitSignal(
+                    EventBus.SignalName.SystemFeedback,
+                    "WARNING: AI director has not deposited evidence in a while. This UNDERMINES PLAYER AGENCY! Please deposit evidence to progress the game."
                 );
                 CyclesSinceLastEvidenceDeposit = 0;
                 GhostDepositedEvidence = false;
             }
+
+            if (CyclesSinceLastChase > 10)
+            {
+                bus.EmitSignal(
+                    EventBus.SignalName.SystemFeedback,
+                    "WARNING: AI director did not start ghost chase in a while. This MAKES THE GAME BORING! Use `chasePlayerAsGhost` to reinforce the horror element!"
+                );
+                CyclesSinceLastChase = 0;
+                GhostHasChased = false;
+            }
+
+            AnyCommandWasPerformed = false;
+
+            Cycles++;
         };
     }
 
@@ -158,6 +225,26 @@ public partial class Interpreter : Node
             "shift",
         };
 
+    private List<string> objectInteractionVerbs =
+        new()
+        {
+            "turnofflights",
+            "flickerlights",
+            "explodelights",
+            "restorelights",
+            "turnonradios",
+            "turnoffradios",
+            "playfreakymusiconradios",
+            "stopradios",
+            "opendoors",
+            "closedoors",
+            "lockdoors",
+            "unlockdoors",
+            "shiftobjects",
+            "joltobjects",
+            "throwobjects",
+        };
+
     private List<string> ghostActionVerbs =
         new()
         {
@@ -168,6 +255,8 @@ public partial class Interpreter : Node
             "appearasghost",
             "depositevidenceasghost"
         };
+
+    private List<string> internalVerbs = new() { "amendsystemfeedback" };
 
     private string accumulatedText = "";
 
@@ -221,7 +310,7 @@ public partial class Interpreter : Node
         }
     }
 
-    public void Interpret(string chunk)
+    public async void Interpret(string chunk)
     {
         EventBus bus = EventBus.Get();
 
@@ -263,13 +352,40 @@ public partial class Interpreter : Node
                 null
             );
 
+            if (internalVerbs.Contains(command.Verb))
+            {
+                if (command.Verb == "amendsystemfeedback")
+                {
+                    var keyword = new string(
+                        command
+                            .Arguments[0]
+                            .Where((c) => char.IsLetterOrDigit(c) || c == ' ')
+                            .ToArray()
+                    );
+
+                    bus.EmitSignal(EventBus.SignalName.AmendSystemFeedback, keyword);
+                    continue;
+                }
+            }
+
             if (objectInteractionPrefix != null)
             {
+                AnyCommandWasPerformed = true;
                 string objectType = Regex
                     .Replace(command.Verb, objectInteractionPrefix, "")
                     .ToLower();
 
                 var target = TargetResolution.NormalizeTargetString(command.Arguments[0]);
+
+                if (TargetResolution.IsValidTarget(target) == false)
+                {
+                    bus.EmitSignal(
+                        EventBus.SignalName.SystemFeedback,
+                        $"TARGET DOESN'T EXIST: Trying to {objectInteractionPrefix} {objectType} in/at {target} FAILED. Because there is no such thing as \"{target}\"! Refer to the available rooms in ROOM INFORMATION."
+                    );
+
+                    continue;
+                }
 
                 InvalidCommandsSet.Add(objectInteractionPrefix + "/" + objectType + "/" + target);
 
@@ -285,9 +401,22 @@ public partial class Interpreter : Node
 
             if (ghostActionVerbs.Contains(command.Verb))
             {
+                AnyCommandWasPerformed = true;
                 if (command.Verb == "moveasghost" || command.Verb == "movetoasghost")
                 {
                     var target = TargetResolution.NormalizeTargetString(command.Arguments[0]);
+
+                    if (TargetResolution.IsValidTarget(target) == false)
+                    {
+                        bus.EmitSignal(
+                            EventBus.SignalName.SystemFeedback,
+                            $"TARGET DOESN'T EXIST: Trying to {command.Verb} {target} FAILED. Because there is no such thing as \"{target}\"! Refer to the available rooms in ROOM INFORMATION."
+                        );
+
+                        GD.Print("isn't a valid target");
+
+                        continue;
+                    }
 
                     bus.EmitSignal(EventBus.SignalName.GhostAction, command.Verb, target);
                     bus.EmitSignal(
@@ -301,10 +430,34 @@ public partial class Interpreter : Node
                     continue;
                 }
 
-                if (command.Verb == "ghostdepositevidence")
+                if (command.Verb == "depositevidenceasghost")
                 {
+                    bus.EmitSignal(EventBus.SignalName.AmendSystemFeedback, "deposit evidence");
                     GhostDepositedEvidence = true;
                     CyclesSinceLastEvidenceDeposit = 0;
+                }
+
+                if (command.Verb == "chaseplayerasghost")
+                {
+                    if (player.GetNode("Locator").Get("Room").AsString() == "None")
+                    {
+                        bus.EmitSignal(
+                            EventBus.SignalName.SystemFeedback,
+                            "ERROR: You tried to chase the player with `chasePlayerAsGhost`, but the player is currently outside. Try again when they're inside."
+                        );
+                        continue;
+                    }
+
+                    bus.EmitSignal(EventBus.SignalName.AmendSystemFeedback, "chase");
+                    GhostHasChased = true;
+                    CyclesSinceLastChase = 0;
+
+                    bus.EmitSignal(
+                        EventBus.SignalName.ObjectInteraction,
+                        "lock",
+                        "doors",
+                        "entrance"
+                    );
                 }
 
                 if (command.Verb == "speakasghost")
@@ -320,8 +473,27 @@ public partial class Interpreter : Node
                         }
                     }
 
-                    message = TargetResolution.NormalizeTargetString(message);
-                    message = message.Replace("\"", "");
+                    message = await Integrity.CheckIntegrityForAudio(message, "speakAsGhost");
+
+                    message = new string(
+                        message
+                            .Where(
+                                c =>
+                                    char.IsLetterOrDigit(c)
+                                    || c == ' '
+                                    || c == ','
+                                    || c == '.'
+                                    || c == '!'
+                                    || c == '?'
+                                    || c == '\''
+                            )
+                            .ToArray()
+                    );
+
+                    // message = ghostData
+                    //     .Call("StripGhostTypesAndFeedback", message, "speakAsGhost")
+                    //     `.ToString();
+
                     message = message.Replace("-", "");
                     message = message.Replace("player", "");
 
