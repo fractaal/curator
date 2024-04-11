@@ -339,7 +339,7 @@ public partial class SpiritBox : Holdable
         string binForMacOS = "/opt/homebrew/bin/espeak";
         string binForWindows = "espeak-ng";
 
-        string command = $"\"{text}\" -s 130 -p 20 -g 15 -w \"{tempFilePath}\"";
+        string command = $"\"{text}\" -s 130 -p 20 -g 6 -w \"{tempFilePath}\"";
 
         try
         {
