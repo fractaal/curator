@@ -47,7 +47,13 @@ public partial class EventBus : Node
     public delegate void NotableEventOccurredEventHandler(string message);
 
     [Signal]
+    public delegate void NotableEventOccurredSpecificTimeEventHandler(string message, ulong time);
+
+    [Signal]
     public delegate void SystemFeedbackEventHandler(string message);
+
+    [Signal]
+    public delegate void AmendSystemFeedbackEventHandler(string message);
 
     [Signal]
     public delegate void VoiceRecognitionEventHandler(bool isPartial, string message);
@@ -60,6 +66,9 @@ public partial class EventBus : Node
 
     [Signal]
     public delegate void PlayerDecidedGhostTypeEventHandler(string message);
+
+    [Signal]
+    public delegate void PlayerTalkedEventHandler(string message);
 
     [Signal]
     public delegate void GameWonEventHandler(string message);
