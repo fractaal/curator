@@ -11,7 +11,7 @@ public partial class Logger : Node
 
     private EventBus bus;
 
-    private int BufferSize = 1024;
+    private int BufferSize = 128;
 
     private void Write(string text)
     {
@@ -91,6 +91,16 @@ public partial class Logger : Node
             Write($"LLMLastResponseChunk");
         };
 
+        bus.LLMFullResponse += (string message) =>
+        {
+            Write($"LLMFullResponse|{message}");
+        };
+
+        bus.PlayerTalked += (string message) =>
+        {
+            Write($"PlayerTalked|{message}");
+        };
+
         bus.InterpreterCommandRecognized += (string command) =>
         {
             Write($"InterpreterCommandRecognized|{command}");
@@ -101,9 +111,19 @@ public partial class Logger : Node
             Write($"NotableEventOccurred|{message}");
         };
 
+        bus.NotableEventOccurredSpecificTime += (string message, ulong time) =>
+        {
+            Write($"NotableEventOccurredSpecificTime|{message}| (TRUE TIME: {time}) ");
+        };
+
         bus.SystemFeedback += (string message) =>
         {
             Write($"SystemFeedback|{message}");
+        };
+
+        bus.AmendSystemFeedback += (string message) =>
+        {
+            Write($"AmendSystemFeedback|{message}");
         };
 
         bus.GhostBackstory += (string message) =>
