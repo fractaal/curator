@@ -5,6 +5,10 @@ var LogManager = load("res://Scripts/LogManager.cs");
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	EventBus.VoiceRecognition.connect(_on_capture_stream_to_text_transcribed_msg)
+	
+	while true:
+		await get_tree().create_timer(10).timeout
+		placeholder_text = "Press ENTER to say something..."
 
 func _input(event):
 	if (event.is_action_pressed("FocusSaySomething") and get_viewport().gui_get_focus_owner() == null):
@@ -16,7 +20,8 @@ func _input(event):
 			release_focus()
 			return
 
-		EventBus.emit_signal("NotableEventOccurred", "Player said: \"" + text.strip_edges() + "\"");
+		# EventBus.emit_signal("NotableEventOccurred", "Player said: \"" + text.strip_edges() + "\"");
+		EventBus.emit_signal("PlayerTalked", text.strip_edges());
 		
 		clear()
 		release_focus()
@@ -35,7 +40,8 @@ func _on_capture_stream_to_text_transcribed_msg(is_partial, new_text):
 	else:
 		# Here, check if new_text is a complete sentence and not just ellipses
 		if _is_complete_sentence(new_text):
-			EventBus.emit_signal("NotableEventOccurred", "Player said: \"" + new_text.strip_edges() + "\"")
+			# EventBus.emit_signal("NotableEventOccurred", "Player said: \"" + new_text.strip_edges() + "\"")
+			EventBus.emit_signal("PlayerTalked", new_text.strip_edges());
 			completed_text = "" # Reset the completed_text since it's already handled
 			partial_text = "" # Clear partial text as well
 			update_text("You said - " + new_text)
