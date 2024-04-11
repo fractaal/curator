@@ -14,11 +14,14 @@ public partial class TargetResolution : Node
     private static readonly List<string> delimiters = new() { ":", "=" };
 
     private static readonly List<string> prepositions =
-        new() { "on ", "at ", "near ", "around ", "nearby " };
+        new() { "on ", "at ", "near ", "around ", "nearby ", "the " };
 
     public static string NormalizeTargetString(string target)
     {
         target = target.Trim().ToLower();
+
+        target = target.Replace("*", "");
+        target = target.Replace("\"", "");
 
         target = prepositions.Aggregate(
             target,
@@ -46,6 +49,38 @@ public partial class TargetResolution : Node
             target = target.Split(split)[1].Trim();
         }
         return target.Trim();
+    }
+
+    public static bool IsValidTarget(string target)
+    {
+        target = NormalizeTargetString(target);
+
+        if (target == "all")
+        {
+            return true;
+        }
+
+        if (target == "player")
+        {
+            return true;
+        }
+
+        if (target == "ghost")
+        {
+            return true;
+        }
+
+        var rooms = instance.GetTree().GetNodesInGroup("rooms");
+
+        foreach (Node room in rooms)
+        {
+            if (room.Name.ToString().ToLower().StripEdges().Contains(target))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static Node GetTarget(string target)
