@@ -13,15 +13,18 @@ config_version=5
 config/name="ReasoningEngine"
 run/main_scene="res://levels/node_3d.tscn"
 config/features=PackedStringArray("4.2", "C#", "Forward Plus")
+boot_splash/bg_color=Color(0.141176, 0.141176, 0.141176, 1)
+boot_splash/image="res://Splash.png"
 
 [audio]
 
 driver/enable_input=true
-driver/mix_rate=16000
+driver/mix_rate=44000
 
 [autoload]
 
 EventBus="*res://Scripts/EventBus.cs"
+Config="*res://Scripts/Config.cs"
 Curator="*res://Curator/Curator.tscn"
 LatencyStatistics="*res://Scripts/LatencyStatistics.cs"
 LLMInterface="*res://DeclarativeGameInterface/LLMInterface.cs"
@@ -32,6 +35,9 @@ EndgameHandler="*res://Scripts/EndgameHandler.cs"
 Logger="*res://Scripts/Logger.cs"
 ToastNotifications="*res://Scripts/ToastNotifications.cs"
 InteractableRegistry="*res://Scripts/InteractableRegistry.cs"
+GhostData="*res://Scripts/GhostData.gd"
+NarrativeIntegrity="*res://Scripts/NarrativeIntegrity.cs"
+AltEnter="*res://AltEnter.gd"
 
 [display]
 
@@ -157,6 +163,11 @@ ToggleVoiceRecognition={
 ShowHelp={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194332,"key_label":0,"unicode":0,"echo":false,"script":null)
+]
+}
+ToggleFullscreen={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":true,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194309,"key_label":0,"unicode":0,"echo":false,"script":null)
 ]
 }
 
