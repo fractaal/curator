@@ -1,10 +1,12 @@
-extends VBoxContainer
+extends GridContainer
 
 var buttonChildren: Array[Node]
 
-@export var confirmLabel: RichTextLabel
+@export var confirmLabel: Label
 
 var evidenceDepositor: Node
+
+var decided = false
 
 func _ready():
 	buttonChildren = find_children("*", "Button", true) as Array[Node]
@@ -36,8 +38,13 @@ func _on_button_down(text):
 			print("Player has not selected a ghost type")
 			confirmLabel.text = "Select a ghost type first"
 			await get_tree().create_timer(2).timeout
-			confirmLabel.text = ""
+			confirmLabel.text = "[SELECTED GHOST TYPE HERE]"
 		else:
+			if decided:
+				confirmLabel.text = "You have already decided"
+				return
+
+			decided = true
 			print("Player has selected", selectedGhost)
 			
 			EventBus.emit_signal("PlayerDecidedGhostType", selectedGhost)
