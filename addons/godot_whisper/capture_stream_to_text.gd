@@ -42,7 +42,7 @@ func _get_configuration_warnings():
 @onready var _idx = AudioServer.get_bus_index(record_bus)
 @onready var _effect_capture := AudioServer.get_bus_effect(_idx, audio_effect_capture_index) as AudioEffectCapture
 
-var thread: Thread
+var thread : Thread
 
 func _ready():
 	if Engine.is_editor_hint():
@@ -57,32 +57,32 @@ func transcribe_thread():
 	var last_token_count := 0
 	while recording:
 		var start_time = Time.get_ticks_msec()
-		_accumulated_frames.append_array(_effect_capture.get_buffer(_effect_capture.get_frames_available()))
+		_accumulated_frames.append_array(_effect_capture.get_buffer(_effect_capture.get_frames_available()))		
 		var resampled = resample(_accumulated_frames, SpeechToText.SRC_SINC_FASTEST)
 		if resampled.size() <= 0:
 			OS.delay_msec(transcribe_interval * 1000)
 			continue
-		var total_time: float = (resampled.size() as float) / SpeechToText.SPEECH_SETTING_SAMPLE_RATE
-		var audio_ctx: int = total_time * 1500 / 30 + 128
+		var total_time : float= (resampled.size() as float) / SpeechToText.SPEECH_SETTING_SAMPLE_RATE
+		var audio_ctx : int = total_time * 1500 / 30 + 128
 		if !use_dynamic_audio_context:
 			audio_ctx = 0
 		var tokens := transcribe(resampled, initial_prompt, audio_ctx)
 		if tokens.is_empty():
 			push_warning("No tokens generated")
 			return
-		var full_text: String = tokens.pop_front()
-		var mix_rate: int = ProjectSettings.get_setting("audio/driver/mix_rate")
+		var full_text : String = tokens.pop_front()
+		var mix_rate : int = ProjectSettings.get_setting("audio/driver/mix_rate")
 		var finish_sentence = false
 		if total_time > maximum_sentence_time:
 			finish_sentence = true
 		var no_activity := voice_activity_detection(resampled)
-		var text: String
+		var text : String
 		for token in tokens:
 			text += token["text"]
 		text = _remove_special_characters(text)
-		if _has_terminating_characters(text, punctuation_characters)||no_activity:
+		if _has_terminating_characters(text, punctuation_characters) || no_activity:
 			finish_sentence = true
-		if total_time < minimum_sentence_time||abs(tokens.size() - last_token_count) > halucinating_count:
+		if total_time < minimum_sentence_time || abs(tokens.size() - last_token_count) > halucinating_count:
 			finish_sentence = false
 		if finish_sentence:
 			_accumulated_frames = _accumulated_frames.slice(_accumulated_frames.size() - (0.2 * mix_rate))
@@ -91,7 +91,7 @@ func transcribe_thread():
 		last_token_count = tokens.size()
 		#print(text)
 		print(full_text)
-		print("Transcribe " + str(time_processing / 1000.0) + " s")
+		print("Transcribe " + str(time_processing/ 1000.0) + " s")
 		# Sleep remaining time
 		var interval_sleep = transcribe_interval * 1000 - time_processing
 		if interval_sleep > 0:
@@ -105,19 +105,19 @@ func _has_terminating_characters(message: String, characters: String):
 
 func _remove_special_characters(message: String):
 	var special_characters = [ \
-		{"start": "[", "end": "]"}, \
-		{"start": "<", "end": ">"}, \
-		{"start": "♪", "end": "♪"}]
+		{ "start": "[", "end": "]" }, \
+		{ "start": "<", "end": ">" }, \
+		{ "start": "♪", "end": "♪" }]
 	for special_character in special_characters:
-		while (message.find(special_character["start"]) != - 1):
+		while(message.find(special_character["start"]) != -1):
 			var begin_character := message.find(special_character["start"])
 			var end_character := message.find(special_character["end"])
-			if end_character != - 1:
+			if end_character != -1:
 				message = message.substr(0, begin_character) + message.substr(end_character + 1)
 
 	var hallucinatory_character = [". you."]
 	for special_character in hallucinatory_character:
-		while (message.find(special_character) != - 1):
+		while(message.find(special_character) != -1):
 			var begin_character := message.find(special_character)
 			var end_character = begin_character + len(special_character)
 			message = message.substr(0, begin_character) + message.substr(end_character + 1)

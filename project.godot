@@ -19,7 +19,6 @@ boot_splash/image="res://Splash.png"
 [audio]
 
 driver/enable_input=true
-driver/mix_rate=44000
 
 [autoload]
 
@@ -51,7 +50,11 @@ project/assembly_name="G4fps"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godot_whisper/plugin.cfg")
+enabled=PackedStringArray()
+
+[filesystem]
+
+import/blender/enabled=false
 
 [input]
 

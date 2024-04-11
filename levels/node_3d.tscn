@@ -55,7 +55,6 @@
 [ext_resource type="PackedScene" uid="uid://bbnqukgldh7ba" path="res://Desk.tscn" id="53_w40i5"]
 [ext_resource type="PackedScene" uid="uid://qadd3ea7f3ag" path="res://Bookcase.tscn" id="54_qwnpb"]
 [ext_resource type="PackedScene" uid="uid://vpyvcf4tm560" path="res://models/Jar.tscn" id="54_t4qqa"]
-[ext_resource type="WhisperResource" path="res://addons/godot_whisper/models/gglm-tiny.en.bin" id="55_euiet"]
 [ext_resource type="PackedScene" uid="uid://tcpgunomg5at" path="res://models/Roadblock/Roadblock.tscn" id="56_2818y"]
 [ext_resource type="PackedScene" uid="uid://bl2ue6w66xymv" path="res://Cabinet.tscn" id="56_x7gpu"]
 [ext_resource type="PackedScene" uid="uid://chdkq52kt5idp" path="res://models/Bookshelf.tscn" id="57_5l7gu"]
@@ -65,6 +64,7 @@
 [ext_resource type="PackedScene" uid="uid://dd4gu5lfmicur" path="res://models/Seat.tscn" id="60_jk8wx"]
 [ext_resource type="FontFile" uid="uid://dhvoljulm758p" path="res://Fonts/JetBrains Mono Regular Nerd Font Complete Mono.ttf" id="61_etk1b"]
 [ext_resource type="FontFile" uid="uid://b2twsdkyswbmf" path="res://Fonts/JetBrains Mono Extra Bold Nerd Font Complete Mono.ttf" id="62_l181e"]
+[ext_resource type="WhisperResource" path="res://addons/godot_whisper/models/gglm-tiny.en.bin" id="63_760ct"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6g5uc"]
 sky_top_color = Color(0, 0.0156863, 0.0392157, 1)
@@ -1835,7 +1835,7 @@ stream = SubResource("AudioStreamMicrophone_pqhwn")
 bus = &"Record"
 
 [node name="CaptureStreamToText" type="SpeechToText" parent="CaptureStreamToText"]
-language_model = ExtResource("55_euiet")
+language_model = ExtResource("63_760ct")
 script = ExtResource("38_3vk56")
 recording = false
 transcribe_interval = 2.0
