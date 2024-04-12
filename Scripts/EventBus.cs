@@ -81,9 +81,6 @@ public partial class EventBus : Node
 
     // Some game-specific signals
     [Signal]
-    public delegate void PlayerHPChangedEventHandler(int hp);
-
-    [Signal]
     public delegate void ChaseStartedEventHandler();
 
     [Signal]
