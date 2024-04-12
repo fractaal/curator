@@ -244,7 +244,7 @@ public partial class Sensors : Node
 
             bus.EmitSignal(
                 EventBus.SignalName.NotableEventOccurredSpecificTime,
-                "AI Director Reasoning: " + response,
+                "Train of Thought / Intentions: " + response,
                 aiReasoningTime
             );
         };
