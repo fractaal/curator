@@ -32,6 +32,13 @@ public partial class NarrativeIntegrity : Node
         "-",
         "volume",
         "filter",
+        "distorted",
+        "voice",
+        "room",
+        "resolve",
+        "target",
+        "arg",
+        "param",
     };
 
     public override void _Ready()
