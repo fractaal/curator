@@ -152,6 +152,7 @@ func chase(arguments):
 	if chasing or gameEnded:
 		return
 
+	EventBus.emit_signal("ChaseStarted")
 	chasing_EntireSequence = true
 	chasing = true
 	skeleton.visible = true
@@ -204,6 +205,7 @@ func chase(arguments):
 
 	chasing_EntireSequence = false
 
+	EventBus.emit_signal("ChaseEnded")
 	EventBus.emit_signal("ObjectInteraction", "unlock", "doors", "all")
 
 var sameLocationCheckInterval = 0.5
