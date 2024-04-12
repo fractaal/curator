@@ -12,6 +12,8 @@ func _ready():
 		get_viewport().scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
 		get_viewport().scaling_3d_scale = 0.25
 		get_viewport().scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR2
+
+		Engine.max_fps = 20
 		
 		environment.environment.sdfgi_enabled = false
 		environment.environment.volumetric_fog_enabled = false
