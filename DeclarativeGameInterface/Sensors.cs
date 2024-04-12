@@ -17,6 +17,7 @@ public partial class Sensors : Node
     private List<EventMessage> PlayerSpeech = new();
 
     private Node3D player;
+    private Node3D ghost;
 
     private EventBus bus;
 
@@ -106,8 +107,15 @@ public partial class Sensors : Node
         player = GetTree().CurrentScene.GetNode<Node3D>("Player");
         playerStats = player.GetNode<PlayerStats>("PlayerStats");
 
+        ghost = GetTree().CurrentScene.GetNode<Node3D>("Ghost");
+
         llmInterface = GetNode<LLMInterface>("/root/LLMInterface");
         ghostData = GetNode<Node>("/root/GhostData");
+
+        bus.ChaseEnded += () =>
+        {
+            lastTimeChased = Time.GetTicksMsec();
+        };
 
         bus.PlayerTalked += (message) =>
         {
@@ -261,15 +269,7 @@ public partial class Sensors : Node
             new List<Message>
             {
                 new Message { role = "system", content = backstoryPrompt },
-                new Message
-                {
-                    role = "user",
-                    content = GetTree()
-                        .CurrentScene
-                        .GetNode("Ghost")
-                        .Call("getStatusStateless")
-                        .ToString()
-                }
+                new Message { role = "user", content = ghost.Call("getStatusStateless").ToString() }
             }
         );
 
@@ -402,6 +402,8 @@ public partial class Sensors : Node
 
     private bool loopCompleted = true;
 
+    private ulong lastTimeChased = 0;
+
     private ulong lastTimePoked = 0;
 
     private bool aiEnabled = false;
@@ -479,6 +481,34 @@ public partial class Sensors : Node
         }
     }
 
+    public string GetContextualAttentionMarkers()
+    {
+        string markers = "";
+
+        if (ghost.Get("chasing").AsBool())
+        {
+            markers +=
+                "### 💥 GHOST IS CHASING PLAYER! GO CRAZY! - USE EVERYTHING IN YOUR ARSENAL! THROW OBJECTS! EXPLODE LIGHTS! BE CREATIVE! 💥 ###\n";
+        }
+        else if (
+            !ghost.Get("chasing").AsBool()
+            && (Time.GetTicksMsec() - lastTimeChased) < 30000
+            && lastTimeChased != 0
+        )
+        {
+            markers +=
+                "### 🛑 A CHASE HAS JUST ENDED - COOL OFF AND LET THE PLAYER BREATH FOR A MOMENT 🛑 ###\n";
+        }
+
+        if (player.GetNode("Locator").Get("Room").AsString() == "None")
+        {
+            markers +=
+                "### 🤚 PLAYER IS OUTSIDE THE HOUSE - GHOST CANNOT CHASE OUTSIDE THE HOUSE - BE SUBTLER, REFUSE TO ENGAGE, LURE PLAYER BACK IN ✋ ###\n";
+        }
+
+        return markers;
+    }
+
     public string GetAllRoomInformation()
     {
         string info = "";
@@ -523,19 +553,11 @@ public partial class Sensors : Node
 
         string ghostStatus = "";
 
-        string ghostChasingDecoration = GetTree()
-            .CurrentScene
-            .GetNode("Ghost")
-            .Get("chasing")
-            .AsBool()
-            ? "### ⚠ GHOST IS CHASING PLAYER! GO CRAZY! - USE EVERYTHING IN YOUR ARSENAL! THROW OBJECTS! EXPLODE LIGHTS! BE CREATIVE! ⚠ ###"
-            : "";
-
         string playerSpeech = "";
 
         try
         {
-            ghostStatus = GetTree().CurrentScene.GetNode("Ghost").Call("getStatus").ToString();
+            ghostStatus = ghost.Call("getStatus").ToString();
         }
         catch (Exception e)
         {
@@ -544,49 +566,49 @@ public partial class Sensors : Node
 
         return $@"<GAME_INFO>
 CURRENT TIME: {time}s
-{ghostChasingDecoration} 
 
 <GHOST_BACKSTORY>
 {ghostBackstory}
 </GHOST_BACKSTORY>
 
-{ghostChasingDecoration} 
+{GetContextualAttentionMarkers()} 
 
 <ROOMS>
 {GetAllRoomInformation()}
 </ROOMS>
 
-{ghostChasingDecoration} 
+{GetContextualAttentionMarkers()} 
 
 <GHOST>
 {ghostStatus}
 </GHOST>
 
-{ghostChasingDecoration} 
+{GetContextualAttentionMarkers()} 
 
 <PLAYER>
 {playerStats.getStatus()}
 </PLAYER>
 
-{ghostChasingDecoration} 
+{GetContextualAttentionMarkers()} 
 
 <EVENTS>
 {EventMessagesToNaturalLanguage(NotableEvents)}
 </EVENTS>
 
-{ghostChasingDecoration} 
+{GetContextualAttentionMarkers()} 
 
 <PLAYER_SPEECH> (Take care to listen and respond - or not! Your choice!)
 {EventMessagesToNaturalLanguage(PlayerSpeech)}
 </PLAYER_SPEECH>
 
-{ghostChasingDecoration} 
+{GetContextualAttentionMarkers()} 
+
 
 <SYSTEM_FEEDBACK> (Take appropriate action, then amend with amendSystemFeedback(keyword).)
 {EventMessagesToNaturalLanguageSimple(SystemFeedback)}
 </SYSTEM_FEEDBACK>
 
-{ghostChasingDecoration}
+{GetContextualAttentionMarkers()} 
 ";
     }
 }
