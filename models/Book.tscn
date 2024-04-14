@@ -110,7 +110,7 @@ normal_scale = 0.01
 normal_texture = ExtResource("2_e72xp")
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_kppfg"]
-size = Vector3(0.245148, 0.0615234, 0.357956)
+size = Vector3(0.245148, 0.0856323, 0.357956)
 
 [node name="Book" type="RigidBody3D"]
 collision_layer = 128
@@ -126,7 +126,7 @@ skeleton = NodePath("")
 surface_material_override/0 = SubResource("StandardMaterial3D_ngm71")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00907898, 0.00219727, -0.000236511)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00907898, 0.00027467, -0.000236511)
 shape = SubResource("BoxShape3D_kppfg")
 
 [node name="Interactable" type="Node" parent="."]
