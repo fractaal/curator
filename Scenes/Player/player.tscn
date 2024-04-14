@@ -56,10 +56,10 @@ transform = Transform3D(2.98023e-08, 0, 1, 0, 1, 0, -1, 0, 2.98023e-08, 0, -0.00
 target_position = Vector3(60, 0, 0)
 
 [node name="ItemAttachmentPointRight" type="Node3D" parent="Head/Camera3d"]
-transform = Transform3D(-0.920553, -0.369081, 0.127914, 2.86279e-08, 0.327465, 0.944863, -0.390619, 0.869796, -0.301449, 0.170599, -0.158181, -0.264357)
+transform = Transform3D(-0.798163, -0.569225, 0.197279, 1.01279e-08, 0.327465, 0.944863, -0.602443, 0.754154, -0.261371, 0.170599, -0.158181, -0.264357)
 
 [node name="ItemAttachmentPointLeft" type="Node3D" parent="Head/Camera3d"]
-transform = Transform3D(-0.913759, 0.383859, -0.133036, 5.02373e-09, 0.327465, 0.944863, 0.406258, 0.863376, -0.299224, -0.207489, -0.185765, -0.286766)
+transform = Transform3D(-0.940265, 0.321675, -0.111485, 2.31914e-09, 0.327465, 0.944863, 0.340445, 0.888421, -0.307904, -0.173224, -0.213447, -0.305659)
 
 [node name="OmniLight3D" type="OmniLight3D" parent="Head"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.775055, -0.444192)
