@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using FuzzySharp;
 using Godot;
 
 public partial class TargetResolution : Node
@@ -48,6 +49,17 @@ public partial class TargetResolution : Node
         {
             target = target.Split(split)[1].Trim();
         }
+
+        var rooms = instance.GetTree().GetNodesInGroup("rooms");
+
+        foreach (Node room in rooms)
+        {
+            if (Fuzz.PartialRatio(room.Name.ToString().ToLower().StripEdges(), target) > 80)
+            {
+                target = room.Name.ToString().ToLower();
+            }
+        }
+
         return target.Trim();
     }
 
