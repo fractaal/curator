@@ -23,7 +23,7 @@ func _ready():
 	viewport.set_process_input(true)
 
 func _physics_process(_delta):
-	if (player.global_position - display.global_position).length() > 5:
+	if (player.global_position - display.global_position).length() > 7.5:
 		mouse_entered = false
 	
 func _unhandled_input(event):
