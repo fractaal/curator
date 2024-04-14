@@ -146,10 +146,7 @@ public partial class EvidenceDepositor : Node
             evidence.GlobalPosition = Locator.RoomObject?.GetRandomPosition() ?? Vector3.Zero;
             EventBus
                 .Get()
-                .EmitSignal(
-                    EventBus.SignalName.NotableEventOccurred,
-                    "Evidence deposited: " + chosenEvidence
-                );
+                .EmitSignal(EventBus.SignalName.NotableEventOccurred, "Ghost evidence deposited");
         }
         else
         {
