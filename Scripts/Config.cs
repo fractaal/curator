@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 public partial class Config : Node
@@ -49,7 +50,15 @@ public partial class Config : Node
             foreach (var line in lines)
             {
                 var parts = line.Split("=");
-                settings[parts[0].Trim()] = parts[1].Trim();
+
+                if (parts.Count() > 1)
+                {
+                    settings[parts[0].Trim()] = parts[1].Trim();
+                }
+                else
+                {
+                    GD.PushWarning("Line in config file is not in the format key=value: " + line);
+                }
             }
 
             SettingsFileMissing = false;
