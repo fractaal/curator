@@ -71,6 +71,9 @@ public partial class EventBus : Node
     public delegate void PlayerTalkedEventHandler(string message);
 
     [Signal]
+    public delegate void GhostTalkedEventHandler(string message);
+
+    [Signal]
     public delegate void GameWonEventHandler(string message);
 
     [Signal]
