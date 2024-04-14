@@ -87,6 +87,8 @@ Command Recognized Count    {interpreterCommandRecognizedCount}"
 
         CurrentTime = GetTree().CurrentScene.GetNode<RichTextLabel>("DebugUI/CurrentTime");
 
+        originalCurrentTimePosition = CurrentTime.Position;
+
         bus.GameDataRead += (data) =>
         {
             Reset();
@@ -150,6 +152,8 @@ Command Recognized Count    {interpreterCommandRecognizedCount}"
     private int DesiredProgressBarWidth = 0;
     private int ActualProgressBarWidth = 0;
 
+    private Vector2 originalCurrentTimePosition = new();
+
     private bool ProgressBarTickIndicator = false;
 
     public override void _Process(double delta)
@@ -195,7 +199,10 @@ Command Recognized Count    {interpreterCommandRecognizedCount}"
                 "[right]"
                 + ((Time.GetTicksMsec() - loopStartTime) / 1000f).ToString("F")
                 + "s[/right]";
-            CurrentTime.Position = new Vector2(730, 50 + (ActualProgressBarWidth * 7));
+            CurrentTime.Position = new Vector2(
+                originalCurrentTimePosition.X,
+                50 + (ActualProgressBarWidth * 7)
+            );
         }
     }
 
