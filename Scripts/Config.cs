@@ -17,7 +17,7 @@ public partial class Config : Node
         {
             return settings[key];
         }
-        return null;
+        return "";
     }
 
     public static void Set(string key, string value)
@@ -49,6 +49,21 @@ public partial class Config : Node
 
             foreach (var line in lines)
             {
+                if (line.StartsWith("[")) // Section marker, ignore
+                {
+                    continue;
+                }
+
+                if (line.StartsWith("#")) // Comment, ignore
+                {
+                    continue;
+                }
+
+                if (line.Trim() == "") // Empty line, ignore
+                {
+                    continue;
+                }
+
                 var parts = line.Split("=");
 
                 if (parts.Count() > 1)
