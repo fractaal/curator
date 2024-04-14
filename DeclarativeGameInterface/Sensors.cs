@@ -14,7 +14,9 @@ public partial class Sensors : Node
     private List<EventMessage> NotableEvents = new();
 
     private List<EventMessage> SystemFeedback = new();
-    private List<EventMessage> PlayerSpeech = new();
+    private List<EventMessage> Dialogue = new();
+
+    private List<string> TrainOfThoughts = new();
 
     private Node3D player;
     private Node3D ghost;
@@ -37,6 +39,7 @@ public partial class Sensors : Node
     }
 
     private ulong aiReasoningTime = 0;
+    private bool DoneSummarizing = true;
 
     private Node ghostData;
 
@@ -117,17 +120,30 @@ public partial class Sensors : Node
             lastTimeChased = Time.GetTicksMsec();
         };
 
-        bus.PlayerTalked += (message) =>
+        bus.GhostTalked += (message) =>
         {
-            PlayerSpeech.Add(
+            Dialogue.Add(
                 new()
                 {
-                    content = message,
+                    content = "GHOST: " + message,
                     count = 1,
                     time = Time.GetTicksMsec()
                 }
             );
-            PlayerSpeech = PlayerSpeech.TakeLast(15).ToList();
+            Dialogue = Dialogue.TakeLast(15).ToList();
+        };
+
+        bus.PlayerTalked += (message) =>
+        {
+            Dialogue.Add(
+                new()
+                {
+                    content = "PLAYER: " + message,
+                    count = 1,
+                    time = Time.GetTicksMsec()
+                }
+            );
+            Dialogue = Dialogue.TakeLast(15).ToList();
         };
 
         bus.NotableEventOccurredSpecificTime += (message, time) =>
@@ -199,15 +215,15 @@ public partial class Sensors : Node
             );
         };
 
-        bus.LLMFirstResponseChunk += (chunk) =>
-        {
-            aiReasoningTime = Time.GetTicksMsec();
+        bus.LLMFirstResponseChunk += (chunk) => {
+            // aiReasoningTime = Time.GetTicksMsec();
         };
 
         bus.LLMLastResponseChunk += (chunk) =>
         {
             loopCompleted = true;
             loopCount++;
+            aiReasoningTime = Time.GetTicksMsec();
         };
 
         bus.GameWon += (string message) =>
@@ -225,12 +241,14 @@ public partial class Sensors : Node
             if (!aiEnabled)
             {
                 GD.Print("AI disabled, skipping LLM summarization.");
+                DoneSummarizing = true;
                 return;
             }
 
             if (message == "")
             {
                 GD.Print("Empty message, skipping LLM summarization.");
+                DoneSummarizing = true;
                 return;
             }
 
@@ -244,9 +262,13 @@ public partial class Sensors : Node
 
             bus.EmitSignal(
                 EventBus.SignalName.NotableEventOccurredSpecificTime,
-                "Train of Thought / Intentions: " + response,
+                "AI Train of Thought / Intentions: " + response,
                 aiReasoningTime
             );
+
+            TrainOfThoughts.Add(response);
+
+            DoneSummarizing = true;
         };
 
         await ToSignal(GetTree().CreateTimer(1), "timeout");
@@ -452,27 +474,38 @@ public partial class Sensors : Node
             sensorReadElapsed = 0;
             // return;
 
+            if (!DoneSummarizing)
+            {
+                GD.Print("Summarizing in progress, skipping sensor read.");
+                sensorReadElapsed = sensorReadInterval - 1;
+                return;
+            }
+
             if (!aiEnabled)
             {
                 GD.Print("AI disabled, skipping sensor read.");
+                sensorReadElapsed = sensorReadInterval - 1;
                 return;
             }
 
             if (player.Get("dead").AsBool())
             {
                 GD.Print("Player dead, skipping sensor read.");
+                sensorReadElapsed = sensorReadInterval - 1;
                 return;
             }
 
             if (gameEnded)
             {
                 GD.Print("Game ended, skipping sensor read.");
+                sensorReadElapsed = sensorReadInterval - 1;
                 return;
             }
 
             if (!loopCompleted)
             {
                 GD.Print("Loop not completed yet, skipping sensor read.");
+                sensorReadElapsed = sensorReadInterval - 1;
                 return;
             }
 
@@ -503,7 +536,7 @@ public partial class Sensors : Node
         if (player.GetNode("Locator").Get("Room").AsString() == "None")
         {
             markers +=
-                "### 🤚 PLAYER IS OUTSIDE THE HOUSE - GHOST CANNOT CHASE OUTSIDE THE HOUSE - BE SUBTLER, REFUSE TO ENGAGE, LURE PLAYER BACK IN ✋ ###\n";
+                "### 🤚 PLAYER IS OUTSIDE THE HOUSE - GHOST CANNOT CHASE OUTSIDE THE HOUSE - BE SUBTLER, REFUSE TO ENGAGE, LURE PLAYER BACK IN, DON'T LOCK ENTRANCE DOOR ✋ ###\n";
         }
 
         return markers;
@@ -591,24 +624,22 @@ CURRENT TIME: {time}s
 
 {GetContextualAttentionMarkers()} 
 
-<EVENTS>
-{EventMessagesToNaturalLanguage(NotableEvents)}
-</EVENTS>
-
-{GetContextualAttentionMarkers()} 
-
-<PLAYER_SPEECH> (Take care to listen and respond - or not! Your choice!)
-{EventMessagesToNaturalLanguage(PlayerSpeech)}
-</PLAYER_SPEECH>
-
-{GetContextualAttentionMarkers()} 
-
-
 <SYSTEM_FEEDBACK> (Take appropriate action, then amend with amendSystemFeedback(keyword).)
 {EventMessagesToNaturalLanguageSimple(SystemFeedback)}
 </SYSTEM_FEEDBACK>
 
 {GetContextualAttentionMarkers()} 
+
+<TIMELINE>
+{EventMessagesToNaturalLanguage(NotableEvents)}
+</TIMELINE>
+
+{GetContextualAttentionMarkers()} 
+
+<DIALOGUE> (Player-Ghost dialogue. Take care to listen and respond - or not! Your choice!)
+{EventMessagesToNaturalLanguage(Dialogue)}
+</DIALOGUE>
+
 ";
     }
 }
