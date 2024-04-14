@@ -1,4 +1,4 @@
-[gd_scene load_steps=104 format=3 uid="uid://ctahsvj88g1om"]
+[gd_scene load_steps=106 format=3 uid="uid://ctahsvj88g1om"]
 
 [ext_resource type="Script" path="res://levels/node_3d.gd" id="1_7plsp"]
 [ext_resource type="PackedScene" uid="uid://7gv6q50fuutj" path="res://Scenes/Player/player.tscn" id="1_eisjc"]
@@ -72,6 +72,8 @@
 [ext_resource type="PackedScene" uid="uid://bmij6yeunyuy2" path="res://models/Stove.tscn" id="68_khgnh"]
 [ext_resource type="PackedScene" uid="uid://dlu0qla0pb2o5" path="res://models/Plate/Plate.tscn" id="69_wfyxf"]
 [ext_resource type="PackedScene" uid="uid://dt5d3woepamaa" path="res://models/CuttingBoard.tscn" id="71_su2b8"]
+[ext_resource type="PackedScene" uid="uid://26xawlqggyub" path="res://models/Can/Can.tscn" id="73_waol4"]
+[ext_resource type="PackedScene" uid="uid://2ghyrom7p4ag" path="res://models/Workbench/Workbench.tscn" id="74_1v032"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6g5uc"]
 sky_top_color = Color(0, 0.0156863, 0.0392157, 1)
@@ -102,7 +104,6 @@ ssao_detail = 1.0
 ssil_enabled = true
 sdfgi_enabled = true
 sdfgi_use_occlusion = true
-sdfgi_bounce_feedback = 0.4
 sdfgi_cascades = 6
 sdfgi_min_cell_size = 0.4
 sdfgi_energy = 0.5
@@ -762,24 +763,6 @@ material_override = SubResource("StandardMaterial3D_xq2m0")
 use_collision = true
 size = Vector3(2.82611, 0.190247, 5.33125)
 
-[node name="CSGBox3D51" type="CSGBox3D" parent="NavigationRegion3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.583, 0.831219, 9.46814)
-material_override = ExtResource("11_ysb1m")
-use_collision = true
-size = Vector3(2.49218, 1.69389, 1.30167)
-
-[node name="CSGBox3D52" type="CSGBox3D" parent="NavigationRegion3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.506, 1.6258, 9.40899)
-material_override = SubResource("StandardMaterial3D_xq2m0")
-use_collision = true
-size = Vector3(2.82611, 0.190247, 1.81895)
-
-[node name="SpotLight3D" type="SpotLight3D" parent="NavigationRegion3D/CSGBox3D52"]
-transform = Transform3D(0.473584, 0.662476, -0.580382, -0.41883, 0.749083, 0.51328, 0.77479, 0, 0.632219, -1.70232, 1.14338, 1.14713)
-light_color = Color(0.772549, 0.509804, 0.419608, 1)
-light_energy = 0.5
-spot_range = 3.823
-
 [node name="CSGBox3D42" type="CSGBox3D" parent="NavigationRegion3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.4857, 4.83433, 5.47767)
 use_collision = true
@@ -1342,12 +1325,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.8754, 5.43809, 14.8194)
 [node name="Node3D26" parent="NavigationRegion3D" instance=ExtResource("52_pikqh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.76879, 5.43809, 14.3252)
 
-[node name="CSGBox3D58" type="CSGBox3D" parent="NavigationRegion3D"]
-transform = Transform3D(-0.707106, 0, -0.707107, 0, 1, 0, 0.707107, 0, -0.707106, -10.4448, 1.08793, 7.99851)
-size = Vector3(0.478394, 2.45361, 0.316895)
-
 [node name="Node3D27" parent="NavigationRegion3D" instance=ExtResource("59_5ftby")]
-transform = Transform3D(-0.707106, 0, -0.707107, 0, 1, 0, 0.707107, 0, -0.707106, -10.2192, 1.81474, 8.25601)
+transform = Transform3D(-0.350681, 0, -0.936495, 0, 1, 0, 0.936495, 0, -0.350681, -10.0192, 1.68102, 9.07443)
 
 [node name="Switch7" parent="NavigationRegion3D" instance=ExtResource("18_1u6af")]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 3.60725, 6.55556, 10.838)
@@ -1657,7 +1636,6 @@ placeholder_text = "Command Here"
 script = ExtResource("6_l450q")
 
 [node name="PromptDebug" type="RichTextLabel" parent="DebugUI"]
-visible = false
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -1668,12 +1646,12 @@ offset_right = -351.0
 offset_bottom = 739.0
 grow_horizontal = 0
 focus_mode = 2
-theme_override_fonts/normal_font = ExtResource("43_ff5h2")
+theme_override_fonts/normal_font = ExtResource("61_etk1b")
+theme_override_fonts/bold_font = ExtResource("62_l181e")
 theme_override_font_sizes/normal_font_size = 8
 theme_override_font_sizes/bold_font_size = 8
 bbcode_enabled = true
-text = "..."
-fit_content = true
+text = "PROMPT DEBUG"
 scroll_following = true
 selection_enabled = true
 
@@ -1995,9 +1973,10 @@ LatencyStatisticsUI = NodePath("../DebugUI/LatencyStatistics")
 LLMResponseUI = NodePath("../DebugUI/LLMResponse")
 LLMModelUI = NodePath("../DebugUI/LLMModel")
 
-[node name="Sensors" type="Node" parent="." node_paths=PackedStringArray("DebugView")]
+[node name="Sensors" type="Node" parent="." node_paths=PackedStringArray("DebugView", "PromptDebugView")]
 script = ExtResource("16_73gw5")
 DebugView = NodePath("../DebugUI/SensorsDebug")
+PromptDebugView = NodePath("../DebugUI/PromptDebug")
 
 [node name="Ambiance" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("20_dpm6p")
@@ -2005,13 +1984,13 @@ volume_db = -20.0
 autoplay = true
 
 [node name="EmfReader" parent="." instance=ExtResource("23_5fppm")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5413, 1.90092, 9.82324)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5413, 1.61131, 8.94504)
 
 [node name="EmfReader2" parent="." instance=ExtResource("22_06xlt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.1332, 2.05175, 9.21164)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.1332, 1.76214, 7.86272)
 
 [node name="SpiritBox" parent="." instance=ExtResource("23_5qaef")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.6019, 1.98119, 9.07265)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.2669, 1.69158, 8.55443)
 
 [node name="Debug" type="Node" parent="." node_paths=PackedStringArray("DebugUI")]
 script = ExtResource("25_wy030")
@@ -2162,3 +2141,21 @@ transform = Transform3D(0.003, 0, 0, 0, 0.003, 0, 0, 0, 0.003, 4.06689, 6.45135,
 
 [node name="wall_lamp_02" parent="." instance=ExtResource("5_2hejl")]
 transform = Transform3D(0.003, 0, 0, 0, 0.003, 0, 0, 0, 0.003, -1.04516, 6.45135, 4.52456)
+
+[node name="Can" parent="." instance=ExtResource("73_waol4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.73344, 1.74812, 3.18789)
+
+[node name="Can2" parent="." node_paths=PackedStringArray("can") instance=ExtResource("73_waol4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.73344, 1.74812, 3.3184)
+can = NodePath("../Can/Cylinder")
+
+[node name="Can3" parent="." node_paths=PackedStringArray("can") instance=ExtResource("73_waol4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.60632, 1.74812, 3.3184)
+can = NodePath("../Can/Cylinder")
+
+[node name="Can4" parent="." node_paths=PackedStringArray("can") instance=ExtResource("73_waol4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6214, 1.74812, 3.20026)
+can = NodePath("../Can/Cylinder")
+
+[node name="Workbench" parent="." instance=ExtResource("74_1v032")]
+transform = Transform3D(-0.26559, 0, -0.964086, 0, 1, 0, 0.964086, 0, -0.26559, -11.4638, -0.0396956, 8.67806)
