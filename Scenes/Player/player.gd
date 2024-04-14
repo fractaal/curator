@@ -95,8 +95,8 @@ func _physics_process(delta):
 
 	if not dead:
 		# Handle Jump.
-		# if Input.is_action_pressed("Jump") and is_on_floor() and not hasFocusOnGui:
-		# 	velocity.y = JUMP_VELOCITY
+		if Input.is_action_pressed("Jump") and is_on_floor() and not hasFocusOnGui:
+			velocity.y = JUMP_VELOCITY
 
 		# Handle Shooting
 		if Input.is_action_just_pressed("Shoot") and not hasFocusOnGui:
