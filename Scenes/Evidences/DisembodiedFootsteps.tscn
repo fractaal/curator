@@ -35,4 +35,4 @@ script = ExtResource("5_leqex")
 
 [node name="Footsteps" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("6_rhl0o")
-volume_db = -10.0
+volume_db = -30.0
