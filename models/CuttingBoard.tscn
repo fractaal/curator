@@ -1,7 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://dt5d3woepamaa"]
+[gd_scene load_steps=9 format=3 uid="uid://dt5d3woepamaa"]
 
 [ext_resource type="Texture2D" uid="uid://ccjgalbu3jm38" path="res://models/CuttingBoard/CuttingBoard_wood_light_sunlight_texture.jpg" id="1_i6yt4"]
 [ext_resource type="Texture2D" uid="uid://d1f4oeqej8ooi" path="res://models/CuttingBoard/CuttingBoard_wood_light_sunlight_texture_1.png" id="2_4b5g0"]
+[ext_resource type="Script" path="res://models/PhysicsObject.gd" id="3_gc602"]
+[ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="3_vgh8b"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nunls"]
 resource_name = "Material"
@@ -50,6 +52,8 @@ shadow_mesh = SubResource("ArrayMesh_lpu7y")
 size = Vector3(0.446838, 0.036499, 0.650024)
 
 [node name="CuttingBoard" type="RigidBody3D"]
+collision_layer = 128
+collision_mask = 143
 
 [node name="Cube" type="MeshInstance3D" parent="."]
 mesh = SubResource("ArrayMesh_bg7fp")
@@ -58,3 +62,9 @@ skeleton = NodePath("")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00228882, 0.00177002, -0.000671387)
 shape = SubResource("BoxShape3D_6xc7k")
+
+[node name="RoomLocator" type="Node" parent="."]
+script = ExtResource("3_vgh8b")
+
+[node name="Interactable" type="Node" parent="."]
+script = ExtResource("3_gc602")
