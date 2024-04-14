@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://brpdqgs5ewc7u"]
+
+[ext_resource type="Material" uid="uid://bae666dm00ky3" path="res://textures/Wood/Wood.tres" id="1_0d7d2"]
+
+[node name="KitchenCounterCabinet" type="CSGBox3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.1878, 0.831219, 4.15715)
+material_override = ExtResource("1_0d7d2")
+use_collision = true
+size = Vector3(2.49218, 1.69389, 12.6823)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.574219, -0.307373, 0.0387573)
+operation = 2
+size = Vector3(2.14844, 1.61475, 12.1449)
