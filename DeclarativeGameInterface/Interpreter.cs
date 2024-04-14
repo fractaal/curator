@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using FuzzySharp;
 using Godot;
 
 public struct Command
@@ -48,6 +49,10 @@ public partial class Interpreter : Node
         Integrity = (NarrativeIntegrity)GetTree().Root.GetNode("NarrativeIntegrity");
 
         GD.Print("Initialized interpreter with values player: ", player, " ghost: ", ghost);
+
+        AllVerbs.AddRange(objectInteractionVerbs);
+        AllVerbs.AddRange(ghostActionVerbs);
+        AllVerbs.AddRange(internalVerbs);
 
         EventBus bus = EventBus.Get();
 
@@ -256,6 +261,8 @@ public partial class Interpreter : Node
             "depositevidenceasghost"
         };
 
+    private List<string> AllVerbs = new();
+
     private List<string> internalVerbs = new() { "amendsystemfeedback" };
 
     private string accumulatedText = "";
@@ -292,6 +299,32 @@ public partial class Interpreter : Node
                 var value = match.Value;
                 var separatedString = value.Split("(");
                 var verb = separatedString[0].ToLower();
+
+                if (AllVerbs.Contains(verb) == false)
+                {
+                    // Attempt fuzzy matching
+                    var bestMatch = AllVerbs.FindAll(v => Fuzz.PartialRatio(v, verb) > 80);
+
+                    if (bestMatch.Count > 0)
+                    {
+                        GD.Print(
+                            "Parser: command verb "
+                                + verb
+                                + " not found, but a viable best match is "
+                                + bestMatch[0]
+                        );
+                        verb = bestMatch[0];
+                    }
+                    else
+                    {
+                        GD.Print(
+                            "Parser: command verb "
+                                + verb
+                                + " not found, and no viable best match found."
+                        );
+                        continue;
+                    }
+                }
 
                 var argumentString = separatedString[1].Substring(0, separatedString[1].Length - 1);
                 var arguments = argumentString
