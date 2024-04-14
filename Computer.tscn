@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://h5v8lv5lfktd"]
+[gd_scene load_steps=8 format=3 uid="uid://h5v8lv5lfktd"]
 
 [ext_resource type="Script" path="res://UI.gd" id="1_6wciu"]
 [ext_resource type="PackedScene" uid="uid://c67gfivc3tneg" path="res://models/UI.tscn" id="1_ekhru"]
@@ -14,6 +14,9 @@ albedo_texture = SubResource("ViewportTexture_t3ye3")
 [sub_resource type="PlaneMesh" id="PlaneMesh_ijymo"]
 size = Vector2(1.8, 1.013)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qpbv2"]
+albedo_color = Color(0.0784314, 0.0784314, 0.0784314, 1)
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_3x0am"]
 size = Vector3(1.797, 1.019, 0.268195)
 
@@ -28,6 +31,7 @@ skeleton = NodePath("../CSGBox3D")
 
 [node name="CSGBox3D" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0197754, 0.4782, 0.473616)
+material_override = SubResource("StandardMaterial3D_qpbv2")
 use_collision = true
 size = Vector3(2.153, 1.239, 0.28)
 
