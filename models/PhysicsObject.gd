@@ -31,13 +31,13 @@ func _ready():
 	joltSfx.panning_strength = 2.5;
 	throwSfx.panning_strength = 2.5;
 
-	add_child(shiftSfx)
-	add_child(joltSfx)
-	add_child(throwSfx)
-
 	rigidBody = get_parent() as RigidBody3D
 	locator = get_parent().get_node("RoomLocator")
 	player = get_tree().current_scene.get_node("Player")
+
+	rigidBody.add_child.call_deferred(shiftSfx)
+	rigidBody.add_child.call_deferred(joltSfx)
+	rigidBody.add_child.call_deferred(throwSfx)
 	
 	originalRotation = rigidBody.global_rotation_degrees
 
@@ -80,7 +80,7 @@ func throw():
 	direction = direction.normalized()
 	# Adjust the magnitude of the impulse as necessary. 
 	# You might want to experiment with different values for different effects.
-	var impulse_strength = 6
+	var impulse_strength = 8
 	var impulse = direction * impulse_strength * rigidBody.mass
 	
 	rigidBody.apply_impulse(impulse)
