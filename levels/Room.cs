@@ -214,4 +214,16 @@ public partial class Room : Area3D
     {
         return Room.GetRooms();
     }
+
+    public static string GetAllRoomInformation()
+    {
+        string info = "";
+
+        foreach (var room in GetRooms())
+        {
+            info += room.GetInformation() + "\n";
+        }
+
+        return info;
+    }
 }
