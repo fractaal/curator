@@ -1,0 +1,26 @@
+[remap]
+
+importer="3d_texture"
+type="CompressedTexture3D"
+uid="uid://dvb27bbktotnl"
+path="res://.godot/imported/environment_adjustments_3d_lut_template.png-4bdd584d639912877d83e7004c24ddef.ctex3d"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://textures/environment_adjustments_3d_lut_template.png"
+dest_files=["res://.godot/imported/environment_adjustments_3d_lut_template.png-4bdd584d639912877d83e7004c24ddef.ctex3d"]
+
+[params]
+
+compress/mode=0
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/hdr_compression=1
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+slices/horizontal=33
+slices/vertical=1
