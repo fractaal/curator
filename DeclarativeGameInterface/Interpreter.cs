@@ -151,7 +151,7 @@ public partial class Interpreter : Node
             {
                 bus.EmitSignal(
                     EventBus.SignalName.SystemFeedback,
-                    "ERROR: AI director performed no commands! This is UNACCEPTABLE! PLEASE remember to invoke commands using the appropriate syntax to enact change in the game world!"
+                    "ERROR: ⁉ AI director performed no commands! This is UNACCEPTABLE! PLEASE remember to invoke commands using the appropriate syntax to enact change in the game world!"
                 );
             }
 
@@ -159,7 +159,7 @@ public partial class Interpreter : Node
             {
                 bus.EmitSignal(
                     EventBus.SignalName.SystemFeedback,
-                    "WARNING: AI director has not deposited evidence in a while. This UNDERMINES PLAYER AGENCY! Please deposit evidence to progress the game."
+                    "WARNING: ⚠ AI director has not deposited evidence in a while. This UNDERMINES PLAYER AGENCY! Please deposit evidence to progress the game."
                 );
                 CyclesSinceLastEvidenceDeposit = 0;
                 GhostDepositedEvidence = false;
@@ -169,7 +169,7 @@ public partial class Interpreter : Node
             {
                 bus.EmitSignal(
                     EventBus.SignalName.SystemFeedback,
-                    "WARNING: AI director did not start ghost chase in a while. This MAKES THE GAME BORING! Use `chasePlayerAsGhost` to reinforce the horror element!"
+                    "### ❗❗❗ AI director did not start ghost chase in a while. This MAKES THE GAME BORING! Use `chasePlayerAsGhost` to reinforce the horror element! ❗❗❗ ###"
                 );
                 CyclesSinceLastChase = 0;
                 GhostHasChased = false;
@@ -506,10 +506,17 @@ public partial class Interpreter : Node
                     command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()
                 );
 
-                bus.EmitSignal(
-                    EventBus.SignalName.NotableEventOccurred,
-                    $"Ghost action - {command.Verb}({command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()})"
-                );
+                if (command.Verb == "speakasghost")
+                {
+                    bus.EmitSignal(EventBus.SignalName.GhostTalked, command.Arguments[0]);
+                }
+                else
+                {
+                    bus.EmitSignal(
+                        EventBus.SignalName.NotableEventOccurred,
+                        $"Ghost action - {command.Verb}({command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()})"
+                    );
+                }
 
                 AddToRecentCommands(
                     $"{command.Verb}({command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()})"
