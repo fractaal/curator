@@ -23,6 +23,8 @@ public partial class PlayerStats : Node3D
     [Export]
     public RoomLocator locator;
 
+    private string LastRoom = "None";
+
     public bool HasPlayerSteppedInsideHouse { get; private set; }
 
     public override void _Ready()
@@ -51,6 +53,25 @@ public partial class PlayerStats : Node3D
                 RoomHistory.Add(
                     new RoomEnterTime { room = room, time = Time.GetTicksMsec() / 1000f }
                 );
+
+                if (room == "Outside The House")
+                {
+                    EventBus
+                        .Get()
+                        .EmitSignal(
+                            EventBus.SignalName.NotableEventOccurred,
+                            "PLAYER location change - is now " + room
+                        );
+                }
+                else
+                {
+                    EventBus
+                        .Get()
+                        .EmitSignal(
+                            EventBus.SignalName.NotableEventOccurred,
+                            "PLAYER location change - is now in " + room
+                        );
+                }
             }
         }
     }
@@ -206,8 +227,7 @@ public partial class PlayerStats : Node3D
 
         // Convert speeds to units per second and compile the status message
         string status =
-            getRoomHistory()
-            + "\n---\nCurrent Room: "
+            "Current Room: "
             + room
             + "\n"
             + $"Current Speed: {currentSpeedNatural} ({currentSpeed:F1}u/s)\n"
