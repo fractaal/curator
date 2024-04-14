@@ -30,6 +30,16 @@ public partial class LLMInterface : Node
     private string AUX_MODEL = "";
     private float AUX_MODEL_TEMPERATURE = 1.0f;
 
+    private float MODEL_FREQUENCY_PENALTY = 1f;
+    private float MODEL_PRESENCE_PENALTY = 1f;
+    private float MODEL_REPETITION_PENALTY = 0f;
+
+    private float AUX_MODEL_FREQUENCY_PENALTY = 1f;
+    private float AUX_MODEL_PRESENCE_PENALTY = 1f;
+    private float AUX_MODEL_REPETITION_PENALTY = 0f;
+
+    private int RESPONSE_MAX_TOKENS = 750;
+
     private bool SettingsFileMissing = false;
 
     // private readonly string MODEL = "cohere/command-r";
@@ -57,19 +67,21 @@ public partial class LLMInterface : Node
         try
         {
             MODEL_TEMPERATURE = float.Parse(Config.Get("MODEL_TEMPERATURE"));
-        }
-        catch (Exception e)
-        {
-            GD.PrintErr("Failed to parse MODEL_TEMPERATURE: " + e.Message);
-        }
-
-        try
-        {
             AUX_MODEL_TEMPERATURE = float.Parse(Config.Get("AUX_MODEL_TEMPERATURE"));
+
+            MODEL_FREQUENCY_PENALTY = float.Parse(Config.Get("MODEL_FREQUENCY_PENALTY"));
+            MODEL_PRESENCE_PENALTY = float.Parse(Config.Get("MODEL_PRESENCE_PENALTY"));
+            MODEL_REPETITION_PENALTY = float.Parse(Config.Get("MODEL_REPETITION_PENALTY"));
+
+            AUX_MODEL_FREQUENCY_PENALTY = float.Parse(Config.Get("AUX_MODEL_FREQUENCY_PENALTY"));
+            AUX_MODEL_PRESENCE_PENALTY = float.Parse(Config.Get("AUX_MODEL_PRESENCE_PENALTY"));
+            AUX_MODEL_REPETITION_PENALTY = float.Parse(Config.Get("AUX_MODEL_REPETITION_PENALTY"));
+
+            RESPONSE_MAX_TOKENS = int.Parse(Config.Get("RESPONSE_MAX_TOKENS"));
         }
         catch (Exception e)
         {
-            GD.PrintErr("Failed to parse AUX_MODEL_TEMPERATURE: " + e.Message);
+            GD.PrintErr("Failed to parse model parameters in settings.txt: " + e.Message);
         }
 
         _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + Config.Get("API_KEY"));
@@ -145,7 +157,11 @@ public partial class LLMInterface : Node
                     {
                         model = AUX_MODEL,
                         messages = messages.ToArray(),
-                        temperature = AUX_MODEL_TEMPERATURE
+                        temperature = AUX_MODEL_TEMPERATURE,
+                        frequency_penalty = AUX_MODEL_FREQUENCY_PENALTY,
+                        presence_penalty = AUX_MODEL_PRESENCE_PENALTY,
+                        repetition_penalty = AUX_MODEL_REPETITION_PENALTY,
+                        max_tokens = RESPONSE_MAX_TOKENS
                     }
                 );
 
@@ -195,7 +211,11 @@ public partial class LLMInterface : Node
                         temperature = MODEL_TEMPERATURE,
                         stream = true,
                         model = MODEL,
-                        messages = messages.ToArray()
+                        messages = messages.ToArray(),
+                        frequency_penalty = MODEL_FREQUENCY_PENALTY,
+                        presence_penalty = MODEL_PRESENCE_PENALTY,
+                        repetition_penalty = MODEL_REPETITION_PENALTY,
+                        max_tokens = RESPONSE_MAX_TOKENS
                     }
                 );
 
