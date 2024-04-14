@@ -54,10 +54,7 @@ public partial class Prompter : Node
                 previousResponses = "No previous responses\n";
             }
 
-            string prompt =
-                // "-- PREVIOUS RESPONSES --\n"
-                // + previousResponses.Trim()
-                "" + "\n" + data + "\n -- YOUR RESPONSE? -- \n\n";
+            string prompt = "\n" + data + "\n";
 
             List<Message> messages = new List<Message>
             {
