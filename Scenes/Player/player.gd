@@ -7,7 +7,7 @@ var mouseSensibility = 1200
 var mouse_relative_x = 0
 var mouse_relative_y = 0
 var SPEED = 4.0
-const JUMP_VELOCITY = 4.5
+const JUMP_VELOCITY = 3.25
 
 var target_velocity = Vector3()
 var spring_k = 10 # Spring constant
