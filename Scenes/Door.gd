@@ -99,6 +99,9 @@ func toggle():
 var lockTime = 0
 
 func lock():
+	if locked:
+		return
+		
 	lockSFX.seek(0)
 	lockSFX.play()
 
@@ -113,7 +116,7 @@ func _physics_process(delta):
 	var time := Time.get_ticks_msec()
 
 	if locked and (time - lockTime) > 30000 and not ghost.chasing:
-		EventBus.emit_signal("SystemFeedback", "Door in " + locator.Room + " was locked for too long. Avoid locking out doors for long periods of time. This UNDERMINES PLAYER AGENCY.")
+		# EventBus.emit_signal("SystemFeedback", "Door in " + locator.Room + " was locked for too long. Avoid locking out doors for long periods of time. This UNDERMINES PLAYER AGENCY.")
 		unlock()
 
 func unlock():

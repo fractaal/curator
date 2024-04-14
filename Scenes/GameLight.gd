@@ -132,7 +132,7 @@ func _ready():
 
 	for node in nodesWithEmission:
 		defaultIntensities[node.name] = node.material.emission_energy_multiplier
-		
+
 	await get_tree().create_timer(2).timeout
 
 func setEnergiesToDefault():

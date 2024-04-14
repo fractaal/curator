@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://b4y50lhr65yom"]
+[gd_scene load_steps=12 format=3 uid="uid://b4y50lhr65yom"]
 
 [ext_resource type="Script" path="res://Scenes/GameLight.gd" id="1_b56ph"]
 [ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="2_fb62t"]
@@ -6,12 +6,10 @@
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1mxpj"]
 albedo_color = Color(0, 0, 0, 1)
 
-[sub_resource type="AnimatedTexture" id="AnimatedTexture_igjsw"]
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o4cw2"]
+resource_local_to_scene = true
 emission_enabled = true
 emission = Color(1, 1, 1, 1)
-emission_texture = SubResource("AnimatedTexture_igjsw")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_x6ici"]
 emission_enabled = true

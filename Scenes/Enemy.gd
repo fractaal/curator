@@ -253,6 +253,12 @@ func _physics_process(delta):
 	# _animator.play("mixamocom", -1, (last_location - current_location).normalized().length())
 	move_and_slide()
 	
+	# for i in get_slide_collision_count():
+	# 	var c = get_slide_collision(i)
+	# 	if c.get_collider() is RigidBody3D:
+	# 		var obj := c.get_collider() as RigidBody3D
+	# 		obj.apply_central_impulse( - c.get_normal() * 10)
+	
 	last_location = current_location
 
 	sameLocationCheckElapsed += delta
