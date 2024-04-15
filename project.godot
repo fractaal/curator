@@ -25,7 +25,6 @@ driver/enable_input=true
 EventBus="*res://Scripts/EventBus.cs"
 Config="*res://Scripts/Config.cs"
 Curator="*res://Curator/Curator.tscn"
-LatencyStatistics="*res://Scripts/LatencyStatistics.cs"
 LLMInterface="*res://DeclarativeGameInterface/LLMInterface.cs"
 TargetResolution="*res://Scripts/TargetResolution.cs"
 VoiceWebServer="*res://Scripts/VoiceWebServer.cs"
