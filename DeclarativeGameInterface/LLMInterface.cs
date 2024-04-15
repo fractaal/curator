@@ -45,6 +45,8 @@ public partial class LLMInterface : Node
     // private readonly string MODEL = "cohere/command-r";
     // private readonly string MODEL = "lizpreciatior/lzlv-70b-fp16-hf";
 
+    private EventBus Bus;
+
     public LLMInterface()
     {
         string paramsFile = Path.Combine(
@@ -90,7 +92,7 @@ public partial class LLMInterface : Node
 
     public override void _Ready()
     {
-        // Send("Respond with the 'the quick brown fox' test message 5 times, if understood");
+        Bus = EventBus.Get();
 
         LogManager.UpdateLog(
             "llmModel",
@@ -106,19 +108,29 @@ public partial class LLMInterface : Node
         }
     }
 
+    public void _emitLLMPrompted()
+    {
+        Bus.EmitSignal(EventBus.SignalName.LLMPrompted);
+    }
+
     public void _emitLLMResponseChunk(string chunk)
     {
-        EventBus.Get().EmitSignal(EventBus.SignalName.LLMResponseChunk, chunk);
+        Bus.EmitSignal(EventBus.SignalName.LLMResponseChunk, chunk);
     }
 
     public void _emitLLMFirstResponseChunk(string chunk)
     {
-        EventBus.Get().EmitSignal(EventBus.SignalName.LLMFirstResponseChunk, chunk);
+        Bus.EmitSignal(EventBus.SignalName.LLMFirstResponseChunk, chunk);
     }
 
     public void _emitLLMLastResponseChunk(string chunk)
     {
-        EventBus.Get().EmitSignal(EventBus.SignalName.LLMLastResponseChunk, chunk);
+        Bus.EmitSignal(EventBus.SignalName.LLMLastResponseChunk, chunk);
+    }
+
+    public void EmitLLMPrompted()
+    {
+        CallDeferred(nameof(_emitLLMPrompted));
     }
 
     public void EmitLLMResponseChunk(string chunk)
@@ -144,6 +156,7 @@ public partial class LLMInterface : Node
         };
 
         thread.Start();
+        EmitLLMPrompted();
     }
 
     public async Task<string> SendIsolated(List<Message> messages)
