@@ -2,6 +2,13 @@ extends CharacterBody3D
 
 @onready var gunRay = $Head/Camera3d/RayCast3d as RayCast3D
 @onready var Cam = $Head/Camera3d as Camera3D
+
+@export var footstepAudios: Array[AudioStreamWAV]
+@export var stamina_exhausted: AudioStreamPlayer3D
+@export var stamina_indicator: TextureRect
+var footstepSounds: Array[AudioStreamPlayer3D] = []
+
+
 # @export var _bullet_scene: PackedScene
 var mouseSensibility = 1200
 var mouse_relative_x = 0
@@ -65,11 +72,37 @@ func _ready():
 
 	worldEnvironment = get_tree().current_scene.get_node("WorldEnvironment") as WorldEnvironment
 	
+	for footstep in footstepAudios:
+		var player = AudioStreamPlayer3D.new()
+		player.stream = footstep
+		player.volume_db = -40
+
+		footstepSounds.append(player)
+		
+		add_child(player)
+	
 	ghostHead = get_tree().current_scene.get_node("Ghost/Head")
 
 var interactableUICheckInterval = 0.05
 var interactableUICheckElapsed = 0
 
+var footstep_interval = 0.7
+var running_footstep_interval = 0.4
+var footstep_elapsed = 0
+var recovery_time := 0.0
+
+var stamina: float = 100
+var stamina_was_exhausted = false
+
+func play_footstep():
+	var footstep = footstepSounds[randi() % footstepSounds.size()]
+	
+	footstep.pitch_scale = randf_range(0.9,1.1)
+	footstep.play(0)
+
+func _process(delta):
+	stamina_indicator.modulate = Color(1,1,1,pow(1 - (stamina/100), 3))
+ 
 func _physics_process(delta):
 	hasFocusOnGui = true if get_viewport().gui_get_focus_owner() != null else false
 
@@ -97,6 +130,7 @@ func _physics_process(delta):
 		# Handle Jump.
 		if Input.is_action_pressed("Jump") and is_on_floor() and not hasFocusOnGui:
 			velocity.y = JUMP_VELOCITY
+			stamina -= 25
 
 		# Handle Shooting
 		if Input.is_action_just_pressed("Shoot") and not hasFocusOnGui:
@@ -104,13 +138,29 @@ func _physics_process(delta):
 
 		if Input.is_action_just_pressed("SecondaryInteract") and not hasFocusOnGui:
 			secondaryInteract()
-			
-		if Input.is_action_pressed("Sprint") and not hasFocusOnGui:
+		
+		if Input.is_action_pressed("Sprint") and not hasFocusOnGui and stamina > 0 and not stamina_was_exhausted:
 			SPEED = 7.5
+			if (velocity.length() > 2):
+				stamina -= 25 * delta
 			isRunning = true
+			recovery_time = 0
+			if stamina <= 0:
+				stamina_exhausted.play(0)
+				stamina_was_exhausted = true
 		else:
 			SPEED = 4
+			recovery_time += delta
+			var recovery_factor = 5 + 20 * recovery_time
+			stamina += recovery_factor * delta
 			isRunning = false
+		
+		if stamina < 0:
+			stamina = 0
+		elif stamina > 100:
+			stamina_was_exhausted = false
+			stamina = 100
+		
 			
 		if Input.is_action_just_pressed("ToggleFlashlight") and not hasFocusOnGui:
 			isFlashlightOn = !isFlashlightOn
@@ -131,6 +181,18 @@ func _physics_process(delta):
 	else:
 		target_velocity.x = move_toward(velocity.x, 0, 0.3)
 		target_velocity.z = move_toward(velocity.z, 0, 0.3)
+		
+	# Footstep sounds
+	if velocity.length() > 2:
+		footstep_elapsed += delta;
+		if isRunning:
+			if footstep_elapsed > running_footstep_interval:
+				footstep_elapsed = 0
+				play_footstep()
+		else:
+			if footstep_elapsed > footstep_interval:
+				footstep_elapsed = 0
+				play_footstep()
 	
 	if not dead:
 		$Head/Camera3d.position.y = 0.845 + sin(Time.get_ticks_msec() * (0.015 if isRunning else 0.01)) * velocity.length() * 0.01
