@@ -37,6 +37,7 @@ public partial class Sensors : Node
     private bool GameEnded = false;
 
     private ulong LLMFirstResponseChunkTime = 0;
+    private ulong LLMPromptedTime = 0;
 
     private ulong AIReasoningTime = 0;
     private bool DoneSummarizing = true;
@@ -52,6 +53,11 @@ public partial class Sensors : Node
     private ulong LastTimeChased = 0;
 
     private bool AIEnabled = false;
+
+    private int MAX_HISTORY = 10;
+
+    private ulong TimeSinceLastChase = 0;
+    private ulong TimeSinceLastEvidenceDeposit = 0;
 
     private string GhostBackstory = "No backstory yet...";
 
@@ -77,6 +83,30 @@ public partial class Sensors : Node
         )
         .GetAsText();
 
+    private string GetTimeSinceLastChase()
+    {
+        string result = "TIME SINCE LAST CHASE: ";
+
+        if (LastTimeChased == 0)
+        {
+            result += "No chase has occurred yet.";
+            return result;
+        }
+
+        var difference = (Time.GetTicksMsec() - LastTimeChased) / 1000f;
+
+        if (difference > 100)
+        {
+            result += $"‼‼ {difference}s ‼‼ -- Now is the time to go crazy!";
+        }
+        else
+        {
+            result += $"{difference}s";
+        }
+
+        return result;
+    }
+
     private string GetGameInfo()
     {
         return $@"Room Information:
@@ -92,19 +122,17 @@ Ghost Backstory:
 
         var events =
             from EventMessage e in NotableEvents
-            where e.time > LLMFirstResponseChunkTime
+            where e.time > LLMPromptedTime
             where e.content.ToLower().Contains("player")
             select e;
 
         var systemFeedback =
             from EventMessage e in SystemFeedback
-            where e.time > LLMFirstResponseChunkTime
+            where e.time > LLMPromptedTime
             select e;
 
         result =
-            $@"CURRENT TIME {Time.GetTicksMsec() / 1000f}s
-
-{GetContextualAttentionMarkers()}
+            $@"TIME {Time.GetTicksMsec() / 1000f}s
 
 <SYSTEM_FEEDBACK>
 {EventMessagesToNaturalLanguageSimple(systemFeedback.ToList())}
@@ -114,7 +142,7 @@ Ghost Backstory:
 {EventMessagesToNaturalLanguageSimple(events.ToList())}
 </TIMELINE>
 
-{GetContextualAttentionMarkers()}
+{GetTimeSinceLastChase()}
 ";
         return result;
     }
@@ -125,13 +153,13 @@ Ghost Backstory:
 
         var events =
             from EventMessage e in NotableEvents
-            where e.time > LLMFirstResponseChunkTime
+            where e.time > LLMPromptedTime
             where e.content.ToLower().Contains("player")
             select e;
 
         var systemFeedback =
             from EventMessage e in SystemFeedback
-            where e.time > LLMFirstResponseChunkTime
+            where e.time > LLMPromptedTime
             select e;
 
         result =
@@ -143,17 +171,25 @@ Ghost Backstory:
 {EventMessagesToNaturalLanguageSimple(systemFeedback.ToList())}
 </SYSTEM_FEEDBACK>
 
+{GetContextualAttentionMarkers()}
+
 <GHOST>
 {Ghost.Call("getStatus").AsString()}
 </GHOST>
+
+{GetContextualAttentionMarkers()}
 
 <PLAYER>
 {Player.Call("getStatus").AsString()}
 </PLAYER>
 
+{GetContextualAttentionMarkers()}
+
 <TIMELINE>
 {EventMessagesToNaturalLanguageSimple(events.ToList())}
 </TIMELINE>
+
+{GetTimeSinceLastChase()}
 
 {GetContextualAttentionMarkers()}
 ";
@@ -171,7 +207,7 @@ Ghost Backstory:
                 new Message { role = "system", content = GetGameInfo() },
             };
 
-        messages.AddRange(History.TakeLast(10).ToList());
+        messages.AddRange(History.TakeLast(MAX_HISTORY).ToList());
 
         messages.AddRange(
             new List<Message>
@@ -194,8 +230,9 @@ Ghost Backstory:
 
         History.Add(new Message { role = "user", content = GetNextPrompt() });
 
-        Bus.EmitSignal(EventBus.SignalName.GameDataRead);
+        Bus.EmitSignal(EventBus.SignalName.GameDataRead, "");
 
+        LLMPromptedTime = Time.GetTicksMsec();
         Interface.Send(messages);
     }
 
@@ -203,6 +240,11 @@ Ghost Backstory:
     {
         const ulong FiveSeconds = 5 * 1000; // Assuming time is in milliseconds
         int count = 1; // Starting with 1 for the current event
+
+        if (message.ToLower().Contains("deposited evidence"))
+        {
+            TimeSinceLastEvidenceDeposit = time;
+        }
 
         // Find the last event of the same type
         EventMessage lastEvent =
@@ -270,6 +312,16 @@ Ghost Backstory:
     // Called when the node enters the scene tree for the first time.
     public override async void _Ready()
     {
+        try
+        {
+            MAX_HISTORY = int.Parse(Config.Get("MAX_HISTORY"));
+        }
+        catch (Exception e)
+        {
+            GD.PrintErr("Failed to parse MAX_HISTORY: " + e.Message);
+            MAX_HISTORY = 10;
+        }
+
         SummarizerPrompt = FileAccess
             .Open(
                 "res://DeclarativeGameInterface/prompts/SummarizerPrompt.txt",
@@ -392,6 +444,11 @@ Ghost Backstory:
             SystemFeedback.RemoveAll(
                 _event => words.Any(word => _event.content.ToLower().Contains(word.ToLower()))
             );
+        };
+
+        Bus.ChaseStarted += () =>
+        {
+            LastTimeChased = Time.GetTicksMsec();
         };
 
         Bus.LLMFirstResponseChunk += (chunk) =>
@@ -605,7 +662,7 @@ Ghost Backstory:
         if (Ghost.Get("chasing").AsBool())
         {
             markers +=
-                "### 💥 GHOST IS CHASING PLAYER! GO CRAZY! - USE EVERYTHING IN YOUR ARSENAL! THROW OBJECTS! EXPLODE LIGHTS! BE CREATIVE! 💥 ###\n";
+                "### 💥💥💥 GHOST IS CHASING PLAYER! GO CRAZY! - **INVOKE COMMANDS WITH RECKLESS ABANDON!** THROW OBJECTS! EXPLODE LIGHTS! **BE CREATIVE!** 💥💥💥 ###\n";
         }
         else if (
             !Ghost.Get("chasing").AsBool()
