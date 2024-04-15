@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://bbhrmf5ph6a17"]
+[gd_scene load_steps=35 format=3 uid="uid://bbhrmf5ph6a17"]
 
 [ext_resource type="Texture2D" uid="uid://shc2f632i4e" path="res://models/Walking-3e31920b44c6b00154392f6ae2735c79_zombie_body_diffuse.png" id="1_dwbvp"]
 [ext_resource type="Script" path="res://Scenes/Ghost/EvidenceDepositor.cs" id="2_6rpkm"]
@@ -21,6 +21,7 @@
 [ext_resource type="AudioStream" uid="uid://dag3ws4xcpkrq" path="res://Audio/Jumpscare.wav" id="9_s742j"]
 [ext_resource type="AudioStream" uid="uid://by7nioypx7l46" path="res://Audio/HuntGracePeriod.wav" id="14_ha30a"]
 [ext_resource type="AudioStream" uid="uid://dt0noc8tlhd4p" path="res://Audio/PianoHit.wav" id="15_s42hg"]
+[ext_resource type="FontFile" uid="uid://dg4fvw3nd4p4u" path="res://Fonts/FantasqueSansMono-Bold.ttf" id="21_exfhr"]
 [ext_resource type="FontFile" uid="uid://cvunybceg2xmx" path="res://Fonts/JetBrains Mono Bold Nerd Font Complete Mono.ttf" id="21_we6bf"]
 [ext_resource type="Script" path="res://Scenes/EndgameSummaryReceiver.gd" id="22_2jgki"]
 [ext_resource type="FontFile" uid="uid://b2twsdkyswbmf" path="res://Fonts/JetBrains Mono Extra Bold Nerd Font Complete Mono.ttf" id="22_htyet"]
@@ -1188,6 +1189,7 @@ offset_right = 451.0
 offset_bottom = -76.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_fonts/font = ExtResource("21_exfhr")
 theme_override_font_sizes/font_size = 70
 text = "THE GHOST WAS A DEMON"
 horizontal_alignment = 1
