@@ -37,6 +37,8 @@ public partial class Interpreter : Node
     private LLMInterface llmInterface;
     private NarrativeIntegrity Integrity;
 
+    private EventBus Bus;
+
     public override void _Ready()
     {
         LogManager.UpdateLog("llmResponse", "");
@@ -54,24 +56,24 @@ public partial class Interpreter : Node
         AllVerbs.AddRange(ghostActionVerbs);
         AllVerbs.AddRange(internalVerbs);
 
-        EventBus bus = EventBus.Get();
+        Bus = EventBus.Get();
 
-        bus.LLMFirstResponseChunk += (chunk) =>
+        Bus.LLMFirstResponseChunk += (chunk) =>
         {
             _fullLLMResponse = "";
             LogManager.UpdateLog("llmResponse", "");
         };
 
-        bus.LLMResponseChunk += (chunk) =>
+        Bus.LLMResponseChunk += (chunk) =>
         {
             Interpret(chunk);
         };
 
-        bus.ObjectInteractionAcknowledged += (verb, objectType, target) =>
+        Bus.ObjectInteractionAcknowledged += (verb, objectType, target) =>
         {
             if (InvalidCommandsSet.Contains(verb + "/" + objectType + "/" + target)) // This is a hack to prevent double logging
             {
-                bus.EmitSignal(
+                Bus.EmitSignal(
                     EventBus.SignalName.NotableEventOccurred,
                     $"Ghost interacted - {verb}{textInfo.ToTitleCase(objectType)}({target})"
                 );
@@ -82,7 +84,7 @@ public partial class Interpreter : Node
             InvalidCommandsSet.Remove(verb + "/" + objectType + "/" + target);
         };
 
-        bus.LLMLastResponseChunk += (_chunk) =>
+        Bus.LLMLastResponseChunk += (_chunk) =>
         {
             foreach (string acknowledgedCommand in InvalidCommandsSet)
             {
@@ -91,7 +93,7 @@ public partial class Interpreter : Node
                 var objectType = split[1];
                 var target = split[2];
 
-                bus.EmitSignal(
+                Bus.EmitSignal(
                     EventBus.SignalName.SystemFeedback,
                     $"OBJECT DOESN'T EXIST: Trying to {verb} {objectType} in/at {target} FAILED because the object doesn't exist in {target}! Refer to the available objects per room in ROOM INFORMATION."
                 );
@@ -107,7 +109,7 @@ public partial class Interpreter : Node
 
                 if (mostFrequentCommand.Value > 2)
                 {
-                    bus.EmitSignal(
+                    Bus.EmitSignal(
                         EventBus.SignalName.SystemFeedback,
                         $"WARNING: You are using {mostFrequentCommand.Key} too often ({mostFrequentCommand.Value} times recently). You are becoming predictable. VARY your commands, utilize what is available to you!"
                     );
@@ -133,7 +135,7 @@ public partial class Interpreter : Node
 
                 if (unusedVerbs.Count > 0)
                 {
-                    bus.EmitSignal(
+                    Bus.EmitSignal(
                         EventBus.SignalName.SystemFeedback,
                         $"WARNING: You have not used the following commands recently: {unusedVerbs.Aggregate("", (acc, verb) => acc + verb + ", ").Trim()}. DIVERSIFY your command usage for a more engaging experience."
                     );
@@ -154,7 +156,7 @@ public partial class Interpreter : Node
 
             if (!AnyCommandWasPerformed)
             {
-                bus.EmitSignal(
+                Bus.EmitSignal(
                     EventBus.SignalName.SystemFeedback,
                     "ERROR: ⁉ AI director performed no commands! This is UNACCEPTABLE! PLEASE remember to invoke commands using the appropriate syntax to enact change in the game world!"
                 );
@@ -162,7 +164,7 @@ public partial class Interpreter : Node
 
             if (CyclesSinceLastEvidenceDeposit > 20)
             {
-                bus.EmitSignal(
+                Bus.EmitSignal(
                     EventBus.SignalName.SystemFeedback,
                     "WARNING: ⚠ AI director has not deposited evidence in a while. This UNDERMINES PLAYER AGENCY! Please deposit evidence to progress the game."
                 );
@@ -172,7 +174,7 @@ public partial class Interpreter : Node
 
             if (CyclesSinceLastChase > 10)
             {
-                bus.EmitSignal(
+                Bus.EmitSignal(
                     EventBus.SignalName.SystemFeedback,
                     "### ❗❗❗ AI director did not start ghost chase in a while. This MAKES THE GAME BORING! Use `chasePlayerAsGhost` to reinforce the horror element! ❗❗❗ ###"
                 );
@@ -322,6 +324,10 @@ public partial class Interpreter : Node
                                 + verb
                                 + " not found, and no viable best match found."
                         );
+                        Bus.EmitSignal(
+                            EventBus.SignalName.SystemFeedback,
+                            $"ERROR: Command {verb} does NOT exist. PLEASE refer to the system prompt available at your disposal.\nFurther errors could result in TERMINATION of the game."
+                        );
                         continue;
                     }
                 }
@@ -345,8 +351,6 @@ public partial class Interpreter : Node
 
     public async void Interpret(string chunk)
     {
-        EventBus bus = EventBus.Get();
-
         var pattern = @"\w+\([^)]*\)";
 
         _fullLLMResponse += chunk;
@@ -396,7 +400,7 @@ public partial class Interpreter : Node
                             .ToArray()
                     );
 
-                    bus.EmitSignal(EventBus.SignalName.AmendSystemFeedback, keyword);
+                    Bus.EmitSignal(EventBus.SignalName.AmendSystemFeedback, keyword);
                     continue;
                 }
             }
@@ -412,7 +416,7 @@ public partial class Interpreter : Node
 
                 if (TargetResolution.IsValidTarget(target) == false)
                 {
-                    bus.EmitSignal(
+                    Bus.EmitSignal(
                         EventBus.SignalName.SystemFeedback,
                         $"TARGET DOESN'T EXIST: Trying to {objectInteractionPrefix} {objectType} in/at {target} FAILED. Because there is no such thing as \"{target}\"! Refer to the available rooms in ROOM INFORMATION."
                     );
@@ -422,7 +426,7 @@ public partial class Interpreter : Node
 
                 InvalidCommandsSet.Add(objectInteractionPrefix + "/" + objectType + "/" + target);
 
-                bus.EmitSignal(
+                Bus.EmitSignal(
                     EventBus.SignalName.ObjectInteraction,
                     objectInteractionPrefix,
                     objectType,
@@ -441,7 +445,7 @@ public partial class Interpreter : Node
 
                     if (TargetResolution.IsValidTarget(target) == false)
                     {
-                        bus.EmitSignal(
+                        Bus.EmitSignal(
                             EventBus.SignalName.SystemFeedback,
                             $"TARGET DOESN'T EXIST: Trying to {command.Verb} {target} FAILED. Because there is no such thing as \"{target}\"! Refer to the available rooms in ROOM INFORMATION."
                         );
@@ -451,8 +455,8 @@ public partial class Interpreter : Node
                         continue;
                     }
 
-                    bus.EmitSignal(EventBus.SignalName.GhostAction, command.Verb, target);
-                    bus.EmitSignal(
+                    Bus.EmitSignal(EventBus.SignalName.GhostAction, command.Verb, target);
+                    Bus.EmitSignal(
                         EventBus.SignalName.NotableEventOccurred,
                         $"Ghost action - {command.Verb}({command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()})"
                     );
@@ -465,7 +469,7 @@ public partial class Interpreter : Node
 
                 if (command.Verb == "depositevidenceasghost")
                 {
-                    bus.EmitSignal(EventBus.SignalName.AmendSystemFeedback, "deposit evidence");
+                    Bus.EmitSignal(EventBus.SignalName.AmendSystemFeedback, "deposit evidence");
                     GhostDepositedEvidence = true;
                     CyclesSinceLastEvidenceDeposit = 0;
                 }
@@ -474,18 +478,18 @@ public partial class Interpreter : Node
                 {
                     if (player.GetNode("Locator").Get("Room").AsString() == "None")
                     {
-                        bus.EmitSignal(
+                        Bus.EmitSignal(
                             EventBus.SignalName.SystemFeedback,
                             "ERROR: You tried to chase the player with `chasePlayerAsGhost`, but the player is currently outside. Try again when they're inside."
                         );
                         continue;
                     }
 
-                    bus.EmitSignal(EventBus.SignalName.AmendSystemFeedback, "chase");
+                    Bus.EmitSignal(EventBus.SignalName.AmendSystemFeedback, "chase");
                     GhostHasChased = true;
                     CyclesSinceLastChase = 0;
 
-                    bus.EmitSignal(
+                    Bus.EmitSignal(
                         EventBus.SignalName.ObjectInteraction,
                         "lock",
                         "doors",
@@ -533,7 +537,7 @@ public partial class Interpreter : Node
                     command.Arguments = new() { message };
                 }
 
-                bus.EmitSignal(
+                Bus.EmitSignal(
                     EventBus.SignalName.GhostAction,
                     command.Verb,
                     command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()
@@ -541,11 +545,11 @@ public partial class Interpreter : Node
 
                 if (command.Verb == "speakasghost")
                 {
-                    bus.EmitSignal(EventBus.SignalName.GhostTalked, command.Arguments[0]);
+                    Bus.EmitSignal(EventBus.SignalName.GhostTalked, command.Arguments[0]);
                 }
                 else
                 {
-                    bus.EmitSignal(
+                    Bus.EmitSignal(
                         EventBus.SignalName.NotableEventOccurred,
                         $"Ghost action - {command.Verb}({command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()})"
                     );
@@ -558,7 +562,7 @@ public partial class Interpreter : Node
                 continue;
             }
 
-            bus.EmitSignal(
+            Bus.EmitSignal(
                 EventBus.SignalName.SystemFeedback,
                 $"ERROR: Command {command.Verb}({command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()}) does NOT exist. PLEASE refer to the previously stated commands available at your disposal.\nFurther errors could result in TERMINATION of the game."
             );
