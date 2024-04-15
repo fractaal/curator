@@ -47,12 +47,16 @@ var random: RandomNumberGenerator = RandomNumberGenerator.new()
 
 var objectType := "radio"
 
+func connect_to_event_bus():
+	await get_tree().create_timer(3).timeout
+	EventBus.ObjectInteraction.connect(_on_object_interact)
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	registry.Register(objectType)
 	_updateStatusLabel()
 
-	EventBus.ObjectInteraction.connect(_on_object_interact)
+	connect_to_event_bus.call_deferred()
 
 var elapsed = 0
 

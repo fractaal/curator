@@ -39,10 +39,15 @@ func _on_object_interact(verb: String, type: String, target: String):
 
 var objectType := "door"
 
+func connect_to_event_bus():
+	await get_tree().create_timer(3).timeout
+	EventBus.ObjectInteraction.connect(_on_object_interact)
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	registry.Register(objectType)
-	EventBus.ObjectInteraction.connect(_on_object_interact)
+	
+	connect_to_event_bus.call_deferred()
 
 	ghost = get_tree().current_scene.get_node("Ghost")
 

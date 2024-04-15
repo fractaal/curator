@@ -41,6 +41,10 @@ func _ready():
 	
 	originalRotation = rigidBody.global_rotation_degrees
 
+	connect_to_event_bus.call_deferred()
+
+func connect_to_event_bus():
+	await get_tree().create_timer(3).timeout
 	EventBus.ObjectInteraction.connect(_on_object_interact)
 
 func _on_object_interact(verb: String, type: String, target: String):

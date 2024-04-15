@@ -125,7 +125,7 @@ func _ready():
 	noise.seed = position.x + position.y + position.z
 	lights = parent.find_children("*", "Light3D")
 
-	EventBus.ObjectInteraction.connect(_on_object_interact)
+	connect_to_event_bus.call_deferred()
 
 	for light in lights:
 		defaultIntensities[light.name] = light.light_energy
@@ -134,6 +134,10 @@ func _ready():
 		defaultIntensities[node.name] = node.material.emission_energy_multiplier
 
 	await get_tree().create_timer(2).timeout
+
+func connect_to_event_bus():
+	await get_tree().create_timer(3).timeout
+	EventBus.ObjectInteraction.connect(_on_object_interact)
 
 func setEnergiesToDefault():
 	for light in lights:
