@@ -72,6 +72,10 @@ public partial class EndgameHandler : Node
                         + " but ghost is "
                         + ghost.Get("GhostType").AsString().Trim()
                 );
+                bus.EmitSignal(
+                    EventBus.SignalName.NotableEventOccurred,
+                    "Because the player chose wrong, the ghost has become unbound from the house, allowing it to manifest outside!"
+                );
 
                 ghost.GlobalPosition = GetTree()
                     .CurrentScene
