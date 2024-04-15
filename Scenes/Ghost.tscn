@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://bbhrmf5ph6a17"]
+[gd_scene load_steps=34 format=3 uid="uid://bbhrmf5ph6a17"]
 
 [ext_resource type="Texture2D" uid="uid://shc2f632i4e" path="res://models/Walking-3e31920b44c6b00154392f6ae2735c79_zombie_body_diffuse.png" id="1_dwbvp"]
 [ext_resource type="Script" path="res://Scenes/Ghost/EvidenceDepositor.cs" id="2_6rpkm"]
@@ -19,9 +19,11 @@
 [ext_resource type="AudioStream" uid="uid://cngpajcqv5gbs" path="res://Audio/HuntStart.wav" id="8_vcikg"]
 [ext_resource type="AudioStream" uid="uid://dtc068n1xelto" path="res://Audio/HuntTension.wav" id="9_ndn7o"]
 [ext_resource type="AudioStream" uid="uid://dag3ws4xcpkrq" path="res://Audio/Jumpscare.wav" id="9_s742j"]
-[ext_resource type="Texture2D" uid="uid://cxq1s8os4v31i" path="res://textures/Black.png" id="11_12dif"]
 [ext_resource type="AudioStream" uid="uid://by7nioypx7l46" path="res://Audio/HuntGracePeriod.wav" id="14_ha30a"]
 [ext_resource type="AudioStream" uid="uid://dt0noc8tlhd4p" path="res://Audio/PianoHit.wav" id="15_s42hg"]
+[ext_resource type="FontFile" uid="uid://cvunybceg2xmx" path="res://Fonts/JetBrains Mono Bold Nerd Font Complete Mono.ttf" id="21_we6bf"]
+[ext_resource type="Script" path="res://Scenes/EndgameSummaryReceiver.gd" id="22_2jgki"]
+[ext_resource type="FontFile" uid="uid://b2twsdkyswbmf" path="res://Fonts/JetBrains Mono Extra Bold Nerd Font Complete Mono.ttf" id="22_htyet"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bla45"]
 resource_name = "ZombieGirl_body_Material"
@@ -1160,21 +1162,16 @@ offset_top = 424.0
 offset_right = 453.0
 offset_bottom = 464.0
 
-[node name="Black" type="TextureRect" parent="."]
+[node name="Black" type="ColorRect" parent="."]
 modulate = Color(1, 1, 1, 0)
 material = SubResource("CanvasItemMaterial_05ybm")
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -960.0
-offset_top = -540.0
-offset_right = 2040.0
-offset_bottom = 1960.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("11_12dif")
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
 
 [node name="EndText" type="Label" parent="Black"]
 modulate = Color(1, 1, 1, 0)
@@ -1186,15 +1183,34 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -451.0
-offset_top = -62.0
+offset_top = -200.0
 offset_right = 451.0
-offset_bottom = 62.0
+offset_bottom = -76.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 70
 text = "THE GHOST WAS A DEMON"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="EndgameSummary" type="RichTextLabel" parent="Black"]
+top_level = true
+custom_minimum_size = Vector2(2.08165e-12, 2.08165e-12)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -375.0
+offset_top = -75.0
+offset_right = 375.0
+offset_bottom = 266.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/normal_font = ExtResource("21_we6bf")
+theme_override_fonts/bold_font = ExtResource("22_htyet")
+script = ExtResource("22_2jgki")
 
 [node name="Ghost" type="Node3D" parent="." groups=["ghost"]]
 
