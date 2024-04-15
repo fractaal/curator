@@ -17,7 +17,7 @@ var speed = 2.5
 @export var disappearSFX: AudioStreamPlayer3D;
 @export var huntGracePeriodSFX: AudioStreamPlayer
 	
-@export var blackTexture: TextureRect
+@export var blackTexture: ColorRect
 
 @export var evidenceDepositor: Node
 
@@ -180,7 +180,9 @@ func chase(arguments):
 		if (length < 1.25):
 			jumpscareSFX.play(0)
 			player.kill()
+			# if arguments != "end":
 			EventBus.emit_signal("GameLost", "Player was caught by the ghost")
+			EventBus.emit_signal("NotableEventOccurred", "Game Lost - Player was caught by the ghost!")
 			break
 
 		await get_tree().create_timer(0.1).timeout
@@ -192,6 +194,7 @@ func chase(arguments):
 		skeleton.visible = false
 
 	if player.dead:
+		blackTexture.visible = true
 		var tween = create_tween()
 
 		endRevealText.text = "THE GHOST WAS A " + GhostType.to_upper();
