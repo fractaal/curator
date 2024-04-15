@@ -1,4 +1,4 @@
-[gd_scene load_steps=106 format=3 uid="uid://ctahsvj88g1om"]
+[gd_scene load_steps=109 format=3 uid="uid://ctahsvj88g1om"]
 
 [ext_resource type="Script" path="res://levels/node_3d.gd" id="1_7plsp"]
 [ext_resource type="PackedScene" uid="uid://7gv6q50fuutj" path="res://Scenes/Player/player.tscn" id="1_eisjc"]
@@ -74,6 +74,9 @@
 [ext_resource type="PackedScene" uid="uid://dt5d3woepamaa" path="res://models/CuttingBoard.tscn" id="71_su2b8"]
 [ext_resource type="PackedScene" uid="uid://26xawlqggyub" path="res://models/Can/Can.tscn" id="73_waol4"]
 [ext_resource type="PackedScene" uid="uid://2ghyrom7p4ag" path="res://models/Workbench/Workbench.tscn" id="74_1v032"]
+[ext_resource type="Script" path="res://Scripts/LatencyStatistics.cs" id="75_k1sr7"]
+[ext_resource type="Script" path="res://levels/EndGameButtons.gd" id="76_stbum"]
+[ext_resource type="FontFile" uid="uid://dg4fvw3nd4p4u" path="res://Fonts/FantasqueSansMono-Bold.ttf" id="77_uyrdc"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6g5uc"]
 sky_top_color = Color(0, 0.0156863, 0.0392157, 1)
@@ -1562,6 +1565,101 @@ visible = false
 use_collision = true
 size = Vector3(155.772, 1, 105.295)
 
+[node name="Book" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.73948, 1.39408, -0.628875)
+
+[node name="Book2" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(0.975404, 0, 0.220425, 0, 1, 0, -0.220425, 0, 0.975404, -2.73948, 1.53033, -0.628875)
+
+[node name="Book3" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(0.994401, 0, -0.105674, 0, 1, 0, 0.105674, 0, 0.994401, -2.73948, 1.62831, -0.628875)
+
+[node name="Book4" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(0.972248, 0, 0.233954, 0, 1, 0, -0.233954, 0, 0.972248, -2.73948, 1.73921, -0.628875)
+
+[node name="Book13" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.74471, 1.80672, 3.76581)
+
+[node name="Book14" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(0.975404, 0, 0.220425, 0, 1, 0, -0.220425, 0, 0.975404, 6.74471, 1.94297, 3.76581)
+
+[node name="Book15" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(0.994401, 0, -0.105674, 0, 1, 0, 0.105674, 0, 0.994401, 6.74471, 2.04095, 3.76581)
+
+[node name="Book16" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(0.972248, 0, 0.233954, 0, 1, 0, -0.233954, 0, 0.972248, 6.74471, 2.15185, 3.76581)
+
+[node name="Book17" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, 0.5, 6.84738, 1.80672, 4.30291)
+
+[node name="Book18" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(0.296808, 0, 0.954937, 0, 1, 0, -0.954937, 0, 0.296808, 6.84738, 1.94297, 4.30291)
+
+[node name="Book19" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(0.588717, 0, 0.808339, 0, 1, 0, -0.808339, 0, 0.588717, 6.84738, 2.04095, 4.30291)
+
+[node name="Book20" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(0.283514, 0, 0.958968, 0, 1, 0, -0.958968, 0, 0.283514, 6.84738, 2.15185, 4.30291)
+
+[node name="Book5" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.73948, 1.39408, 2.82784)
+
+[node name="Book6" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(0.975404, 0, 0.220425, 0, 1, 0, -0.220425, 0, 0.975404, -2.73948, 1.53033, 2.82784)
+
+[node name="Book7" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(0.994401, 0, -0.105674, 0, 1, 0, 0.105674, 0, 0.994401, -2.73948, 1.62831, 2.82784)
+
+[node name="Book8" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(0.972248, 0, 0.233954, 0, 1, 0, -0.233954, 0, 0.972248, -2.73948, 1.73921, 2.82784)
+
+[node name="Book9" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.19762, 5.89013, 19.9509)
+
+[node name="Book10" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(0.975404, 0, 0.220425, 0, 1, 0, -0.220425, 0, 0.975404, -2.19762, 6.02638, 19.9509)
+
+[node name="Book11" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(0.994401, 0, -0.105674, 0, 1, 0, 0.105674, 0, 0.994401, -2.19762, 6.12436, 19.9509)
+
+[node name="Book12" parent="NavigationRegion3D" instance=ExtResource("67_sdr6n")]
+transform = Transform3D(0.972248, 0, 0.233954, 0, 1, 0, -0.233954, 0, 0.972248, -2.19762, 6.23526, 19.9509)
+
+[node name="Node3D39" type="Node3D" parent="NavigationRegion3D"]
+
+[node name="Stove" parent="NavigationRegion3D" instance=ExtResource("68_khgnh")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 9.8631, 0.545438, 13.2275)
+
+[node name="CuttingBoard" parent="NavigationRegion3D" instance=ExtResource("71_su2b8")]
+transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, 6.29505, 1.74003, 11.256)
+
+[node name="CuttingBoard2" parent="NavigationRegion3D" instance=ExtResource("71_su2b8")]
+transform = Transform3D(0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, 0.5, 5.99532, 1.74003, 7.81962)
+
+[node name="CuttingBoard3" parent="NavigationRegion3D" instance=ExtResource("71_su2b8")]
+transform = Transform3D(0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, 0.5, 5.99532, 1.74003, 1.7663)
+
+[node name="wall_lamp_01" parent="NavigationRegion3D" instance=ExtResource("5_2hejl")]
+transform = Transform3D(0.003, 0, 0, 0, 0.003, 0, 0, 0, 0.003, 4.06689, 6.45135, 4.52456)
+
+[node name="wall_lamp_04" parent="NavigationRegion3D" instance=ExtResource("5_2hejl")]
+transform = Transform3D(0.003, 0, 0, 0, 0.003, 0, 0, 0, 0.003, -1.04516, 6.45135, 4.52456)
+
+[node name="Can" parent="NavigationRegion3D" instance=ExtResource("73_waol4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.73344, 1.74812, 3.18789)
+
+[node name="Can2" parent="NavigationRegion3D" node_paths=PackedStringArray("can") instance=ExtResource("73_waol4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.73344, 1.74812, 3.3184)
+can = NodePath("../Can/Cylinder")
+
+[node name="Can3" parent="NavigationRegion3D" node_paths=PackedStringArray("can") instance=ExtResource("73_waol4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.60632, 1.74812, 3.3184)
+can = NodePath("../Can/Cylinder")
+
+[node name="Can4" parent="NavigationRegion3D" node_paths=PackedStringArray("can") instance=ExtResource("73_waol4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6214, 1.74812, 3.20026)
+can = NodePath("../Can/Cylinder")
+
 [node name="Ghost" parent="." instance=ExtResource("9_1ok4b")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.79612, 0.5, 6.84054)
 
@@ -2062,100 +2160,48 @@ The file should have an OpenRouter API key on the first line, and your chosen la
 
 Consult the developers for help!"
 
-[node name="Book" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.73948, 1.39408, -0.628875)
-
-[node name="Book2" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(0.975404, 0, 0.220425, 0, 1, 0, -0.220425, 0, 0.975404, -2.73948, 1.53033, -0.628875)
-
-[node name="Book3" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(0.994401, 0, -0.105674, 0, 1, 0, 0.105674, 0, 0.994401, -2.73948, 1.62831, -0.628875)
-
-[node name="Book4" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(0.972248, 0, 0.233954, 0, 1, 0, -0.233954, 0, 0.972248, -2.73948, 1.73921, -0.628875)
-
-[node name="Book13" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.74471, 1.80672, 3.76581)
-
-[node name="Book14" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(0.975404, 0, 0.220425, 0, 1, 0, -0.220425, 0, 0.975404, 6.74471, 1.94297, 3.76581)
-
-[node name="Book15" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(0.994401, 0, -0.105674, 0, 1, 0, 0.105674, 0, 0.994401, 6.74471, 2.04095, 3.76581)
-
-[node name="Book16" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(0.972248, 0, 0.233954, 0, 1, 0, -0.233954, 0, 0.972248, 6.74471, 2.15185, 3.76581)
-
-[node name="Book17" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, 0.5, 6.84738, 1.80672, 4.30291)
-
-[node name="Book18" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(0.296808, 0, 0.954937, 0, 1, 0, -0.954937, 0, 0.296808, 6.84738, 1.94297, 4.30291)
-
-[node name="Book19" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(0.588717, 0, 0.808339, 0, 1, 0, -0.808339, 0, 0.588717, 6.84738, 2.04095, 4.30291)
-
-[node name="Book20" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(0.283514, 0, 0.958968, 0, 1, 0, -0.958968, 0, 0.283514, 6.84738, 2.15185, 4.30291)
-
-[node name="Book5" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.73948, 1.39408, 2.82784)
-
-[node name="Book6" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(0.975404, 0, 0.220425, 0, 1, 0, -0.220425, 0, 0.975404, -2.73948, 1.53033, 2.82784)
-
-[node name="Book7" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(0.994401, 0, -0.105674, 0, 1, 0, 0.105674, 0, 0.994401, -2.73948, 1.62831, 2.82784)
-
-[node name="Book8" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(0.972248, 0, 0.233954, 0, 1, 0, -0.233954, 0, 0.972248, -2.73948, 1.73921, 2.82784)
-
-[node name="Book9" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.19762, 5.89013, 19.9509)
-
-[node name="Book10" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(0.975404, 0, 0.220425, 0, 1, 0, -0.220425, 0, 0.975404, -2.19762, 6.02638, 19.9509)
-
-[node name="Book11" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(0.994401, 0, -0.105674, 0, 1, 0, 0.105674, 0, 0.994401, -2.19762, 6.12436, 19.9509)
-
-[node name="Book12" parent="." instance=ExtResource("67_sdr6n")]
-transform = Transform3D(0.972248, 0, 0.233954, 0, 1, 0, -0.233954, 0, 0.972248, -2.19762, 6.23526, 19.9509)
-
-[node name="Node3D" type="Node3D" parent="."]
-
-[node name="Stove" parent="." instance=ExtResource("68_khgnh")]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 9.8631, 0.545438, 13.2275)
-
-[node name="CuttingBoard" parent="." instance=ExtResource("71_su2b8")]
-transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, 6.29505, 1.74003, 11.256)
-
-[node name="CuttingBoard2" parent="." instance=ExtResource("71_su2b8")]
-transform = Transform3D(0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, 0.5, 5.99532, 1.74003, 7.81962)
-
-[node name="CuttingBoard3" parent="." instance=ExtResource("71_su2b8")]
-transform = Transform3D(0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, 0.5, 5.99532, 1.74003, 1.7663)
-
-[node name="wall_lamp_01" parent="." instance=ExtResource("5_2hejl")]
-transform = Transform3D(0.003, 0, 0, 0, 0.003, 0, 0, 0, 0.003, 4.06689, 6.45135, 4.52456)
-
-[node name="wall_lamp_02" parent="." instance=ExtResource("5_2hejl")]
-transform = Transform3D(0.003, 0, 0, 0, 0.003, 0, 0, 0, 0.003, -1.04516, 6.45135, 4.52456)
-
-[node name="Can" parent="." instance=ExtResource("73_waol4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.73344, 1.74812, 3.18789)
-
-[node name="Can2" parent="." node_paths=PackedStringArray("can") instance=ExtResource("73_waol4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.73344, 1.74812, 3.3184)
-can = NodePath("../Can/Cylinder")
-
-[node name="Can3" parent="." node_paths=PackedStringArray("can") instance=ExtResource("73_waol4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.60632, 1.74812, 3.3184)
-can = NodePath("../Can/Cylinder")
-
-[node name="Can4" parent="." node_paths=PackedStringArray("can") instance=ExtResource("73_waol4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6214, 1.74812, 3.20026)
-can = NodePath("../Can/Cylinder")
-
 [node name="Workbench" parent="." instance=ExtResource("74_1v032")]
 transform = Transform3D(-0.26559, 0, -0.964086, 0, 1, 0, 0.964086, 0, -0.26559, -11.4638, -0.0396956, 8.67806)
+
+[node name="LatencyStatistics" type="Node" parent="."]
+script = ExtResource("75_k1sr7")
+
+[node name="EndGameButtons" type="HBoxContainer" parent="." node_paths=PackedStringArray("retry_button")]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("76_stbum")
+retry_button = NodePath("Control/Button")
+
+[node name="Spacer" type="Control" parent="EndGameButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="Control" type="Control" parent="EndGameButtons"]
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 2
+size_flags_vertical = 8
+
+[node name="Button" type="Button" parent="EndGameButtons/Control"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -62.5
+offset_top = -17.0
+offset_right = 62.5
+offset_bottom = 17.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 8
+theme_override_constants/outline_size = 0
+theme_override_constants/h_separation = 0
+theme_override_fonts/font = ExtResource("77_uyrdc")
+text = "Try Again"

@@ -2,6 +2,10 @@ extends Node3D
 
 # var Config := preload ("res://Scripts/Config.cs")
 
+func _input(_event):
+	if Input.is_action_just_pressed("ReloadLevel"):
+		get_tree().reload_current_scene.call_deferred()
+
 func _ready():
 	var platform := OS.get_name()
 	
@@ -72,3 +76,5 @@ func _ready():
 		environment.environment.ssil_enabled = true
 	else:
 		environment.environment.ssil_enabled = false
+	
+	environment.environment.adjustment_brightness = 1.0
