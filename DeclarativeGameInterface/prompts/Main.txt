@@ -11,6 +11,10 @@
 	- You will use this data to generate an action sequence that the ghost will follow to enhance the horror atmosphere. 
 </SUMMARY>
 
+<SETTING>
+	Game takes place in a relatively contemprary two-story house.
+</SETTING>
+
 <COMMANDS>
 	<TYPES>
 			- player
@@ -60,9 +64,6 @@
 
 	Your thought process should explain the context and logic behind your decision. Immediately follow with an actionable command related to that reasoning. 
 	Repeat this pattern for each decision point, ensuring a seamless blend of narrative context and gameplay action.
-
-	Maintain a balance of brevity and expressivity. Keep it simple and concise -- optimize for maximum information density.
-	Ideally perform at least 3 unique actions per response to have maximum action density. Use commands as liberally and as diversely as you can!
 
 	Example:
 	"Observing the player's cautious exploration of the attic, it's clear they are searching for clues but are wary of a direct encounter. 
