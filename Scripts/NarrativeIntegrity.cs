@@ -39,6 +39,8 @@ public partial class NarrativeIntegrity : Node
         "target",
         "arg",
         "param",
+        "whisper",
+        "message"
     };
 
     public override void _Ready()
@@ -91,16 +93,78 @@ public partial class NarrativeIntegrity : Node
                 new List<Message>()
                 {
                     new() { content = SanitizerPrompt, role = "system" },
+                    new()
+                    {
+                        content = "\"I see you.\", voice=distorted, filter=low, distant.",
+                        role = "user"
+                    },
+                    new()
+                    {
+                        content =
+                            "VERDICT: Hallucinated configuration parameters. Text should *just be natural language.*\nI see you.",
+                        role = "assistant"
+                    },
+                    new() { content = "Whispered message", role = "user", },
+                    new()
+                    {
+                        content =
+                            "VERDICT: Vague, roleplaying, descriptive prose - nonsensical or out of context in the context of in-universe speech.",
+                        role = "assistant"
+                    },
+                    new() { content = "Low, growling, whispered message", role = "user", },
+                    new()
+                    {
+                        content =
+                            "VERDICT: Vague, roleplaying, descriptive prose - nonsensical or out of context in the context of in-universe speech.",
+                        role = "assistant"
+                    },
+                    new() { content = "*Laughing.* You think you can catch me?", role = "user", },
+                    new()
+                    {
+                        content =
+                            "VERDICT: Roleplaying - nonsensical or out of context in the context of in-universe speech.\nYou think you can catch me?",
+                        role = "assistant"
+                    },
+                    new() { content = "I am a demon.", role = "user", },
+                    new()
+                    {
+                        content =
+                            "VERDICT: **Divulged ghost type**! Breaks narrative integrity by revealing ghost type.\nHow pitiful.",
+                        role = "assistant"
+                    },
+                    new() { content = "Do you feel my gaze upon you?", role = "user", },
+                    new() { content = "Do you feel my gaze upon you?", role = "assistant", },
                     new() { content = message, role = "user" }
                 }
             );
 
+            string reason = "";
+            string sanitizedMessage = "";
+
+            foreach (string line in sanitized.Split("\n"))
+            {
+                if (line.Contains("VERDICT"))
+                {
+                    reason = line.Split(":")[1].Trim();
+                }
+                else
+                {
+                    sanitizedMessage += line + "\n";
+                }
+            }
+
+            if (reason == "")
+            {
+                GD.PushWarning("Sanitizer did not return a verdict.");
+                return sanitizedMessage;
+            }
+
             Bus.EmitSignal(
                 EventBus.SignalName.SystemFeedback,
-                $"NARRATIVE INTEGRITY FAILURE: During {action}, you generated a message - \"{message}\" containing {problemSubstrings.Aggregate("", (acc, curr) => acc + curr + ", ").Trim()}. Symbols/phrases/straight room IDs/ghost types that break the narrative are not allowed in {action}. You need to maintain narrative-prose context during {action}. Your message has been amended to {sanitized}. Please follow the example of the amended message"
+                $"NARRATIVE INTEGRITY FAILURE: During {action}, you generated \"{message}\" as output. This is not allowed, because of **{reason}.** Your message has been amended to \"{sanitizedMessage}\" Please take note of this in the future and follow the example of the amended message."
             );
 
-            return sanitized;
+            return sanitizedMessage;
         }
 
         return message;
