@@ -70,6 +70,13 @@ public partial class Sensors : Node
         )
         .GetAsText();
 
+    private string ENDGAME_SUMMARY_PROMPT = FileAccess
+        .Open(
+            "res://DeclarativeGameInterface/prompts/EndGameSummaryPrompt.txt",
+            FileAccess.ModeFlags.Read
+        )
+        .GetAsText();
+
     private string GetGameInfo()
     {
         return $@"Room Information:
@@ -187,6 +194,8 @@ Ghost Backstory:
 
         History.Add(new Message { role = "user", content = GetNextPrompt() });
 
+        Bus.EmitSignal(EventBus.SignalName.GameDataRead);
+
         Interface.Send(messages);
     }
 
@@ -229,6 +238,33 @@ Ghost Backstory:
                 time = time
             }
         );
+    }
+
+    public async void EndgameSummarization()
+    {
+        string allEvents = "";
+
+        foreach (EventMessage e in NotableEvents)
+        {
+            allEvents += $"{e.time / 1000} - {e.content} ({e.count} times)\n";
+        }
+
+        var additionalGameInfo = "GAME INFORMATION:\n\n";
+
+        additionalGameInfo += Ghost.Call("getStatusStateless").AsString() + "\n\n";
+        additionalGameInfo += GetGameInfo() + "\n\n";
+
+        var response = await Interface.SendIsolated(
+            new List<Message>()
+            {
+                new Message { content = ENDGAME_SUMMARY_PROMPT, role = "system" },
+                new Message { content = additionalGameInfo, role = "system" },
+                new Message { content = "Events to summarize to follow: ", role = "system" },
+                new Message { content = allEvents, role = "user" }
+            }
+        );
+
+        Bus.EmitSignal(EventBus.SignalName.EndgameSummary, response);
     }
 
     // Called when the node enters the scene tree for the first time.
@@ -378,6 +414,7 @@ Ghost Backstory:
         Bus.GameLost += (string message) =>
         {
             GameEnded = true;
+            EndgameSummarization();
         };
 
         Bus.LLMFullResponse += async (message) =>
