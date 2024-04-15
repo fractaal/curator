@@ -1,12 +1,22 @@
-[gd_scene load_steps=11 format=3 uid="uid://7gv6q50fuutj"]
+[gd_scene load_steps=21 format=3 uid="uid://7gv6q50fuutj"]
 
 [ext_resource type="Script" path="res://Scenes/Player/player.gd" id="1_1w47b"]
 [ext_resource type="Script" path="res://Scenes/Player/SmoothFlashlight.gd" id="1_h2o6c"]
+[ext_resource type="AudioStream" uid="uid://dy18n61ormvbi" path="res://Audio/Footstep1.wav" id="2_i74wg"]
+[ext_resource type="AudioStream" uid="uid://bpdgu2t1yehfn" path="res://Audio/Footstep2.wav" id="3_18cdt"]
 [ext_resource type="Texture2D" uid="uid://i14u4rcieiwl" path="res://textures/flashlight4.png" id="3_huk2y"]
+[ext_resource type="AudioStream" uid="uid://5t4u48q8dfia" path="res://Audio/Footstep3.wav" id="4_8aeeq"]
 [ext_resource type="Script" path="res://Scenes/Player/PlayerStats.cs" id="4_s72cy"]
+[ext_resource type="AudioStream" uid="uid://bqn6orm05puir" path="res://Audio/Footstep4.wav" id="5_6alv8"]
 [ext_resource type="AudioStream" uid="uid://cg1cen26lapox" path="res://Audio/switch.wav" id="5_u3p80"]
+[ext_resource type="AudioStream" uid="uid://cqylqw8xhcwyb" path="res://Audio/Footstep5.wav" id="6_c3fbo"]
 [ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="6_m48wj"]
 [ext_resource type="FontFile" uid="uid://dhvoljulm758p" path="res://Fonts/JetBrains Mono Regular Nerd Font Complete Mono.ttf" id="7_kgd6m"]
+[ext_resource type="AudioStream" uid="uid://bwcrswjf7xw50" path="res://Audio/Footstep6.wav" id="7_rrtms"]
+[ext_resource type="AudioStream" uid="uid://e0eryeko6vve" path="res://Audio/Footstep7.wav" id="8_s4b1o"]
+[ext_resource type="AudioStream" uid="uid://dltu00noh7eld" path="res://Audio/Footstep8.wav" id="9_eqffb"]
+[ext_resource type="AudioStream" uid="uid://334i4s2k1ub2" path="res://Audio/StaminaExhausted.wav" id="14_0gdvl"]
+[ext_resource type="Texture2D" uid="uid://bt6d1761ia44k" path="res://textures/StaminaVignette.png" id="17_cle2a"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_emkox"]
 radius = 0.25
@@ -19,10 +29,13 @@ line_spacing = 0.0
 outline_size = 10
 outline_color = Color(0, 0, 0, 0.392157)
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("flashlightAudio", "playerStats") groups=["player"]]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("stamina_exhausted", "stamina_indicator", "flashlightAudio", "playerStats") groups=["player"]]
 collision_layer = 2
 collision_mask = 9
 script = ExtResource("1_1w47b")
+footstepAudios = Array[AudioStreamWAV]([ExtResource("2_i74wg"), ExtResource("3_18cdt"), ExtResource("4_8aeeq"), ExtResource("5_6alv8"), ExtResource("6_c3fbo"), ExtResource("7_rrtms"), ExtResource("8_s4b1o"), ExtResource("9_eqffb")])
+stamina_exhausted = NodePath("StaminaExhausted")
+stamina_indicator = NodePath("Stamina")
 flashlightAudio = NodePath("FlashlightSFX")
 playerStats = NodePath("PlayerStats")
 metadata/isPlayer = true
@@ -81,6 +94,10 @@ locator = NodePath("../Locator")
 [node name="FlashlightSFX" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("5_u3p80")
 
+[node name="StaminaExhausted" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("14_0gdvl")
+volume_db = -15.0
+
 [node name="Locator" type="Node" parent="."]
 script = ExtResource("6_m48wj")
 
@@ -106,3 +123,14 @@ text = "[INTERACT]
 label_settings = SubResource("LabelSettings_cawmj")
 horizontal_alignment = 1
 vertical_alignment = 2
+
+[node name="Stamina" type="TextureRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(960, 0)
+mouse_filter = 2
+texture = ExtResource("17_cle2a")
+expand_mode = 1
