@@ -27,7 +27,6 @@ Config="*res://Scripts/Config.cs"
 Curator="*res://Curator/Curator.tscn"
 LatencyStatistics="*res://Scripts/LatencyStatistics.cs"
 LLMInterface="*res://DeclarativeGameInterface/LLMInterface.cs"
-Prompter="res://DeclarativeGameInterface/Prompter.cs"
 TargetResolution="*res://Scripts/TargetResolution.cs"
 VoiceWebServer="*res://Scripts/VoiceWebServer.cs"
 EndgameHandler="*res://Scripts/EndgameHandler.cs"
@@ -50,7 +49,7 @@ project/assembly_name="G4fps"
 
 [editor_plugins]
 
-enabled=PackedStringArray()
+enabled=PackedStringArray("res://addons/godot_whisper/plugin.cfg")
 
 [filesystem]
 
