@@ -64,12 +64,12 @@
 [ext_resource type="PackedScene" uid="uid://dd4gu5lfmicur" path="res://models/Seat.tscn" id="60_jk8wx"]
 [ext_resource type="FontFile" uid="uid://dhvoljulm758p" path="res://Fonts/JetBrains Mono Regular Nerd Font Complete Mono.ttf" id="61_etk1b"]
 [ext_resource type="FontFile" uid="uid://b2twsdkyswbmf" path="res://Fonts/JetBrains Mono Extra Bold Nerd Font Complete Mono.ttf" id="62_l181e"]
-[ext_resource type="WhisperResource" path="res://addons/godot_whisper/models/gglm-tiny.en.bin" id="63_760ct"]
 [ext_resource type="PackedScene" uid="uid://c1y54yeagvxr4" path="res://models/Chair/ChairPhysicsObject.tscn" id="66_e2mm6"]
 [ext_resource type="PackedScene" uid="uid://cdxp461uj80ip" path="res://models/Book.tscn" id="67_sdr6n"]
 [ext_resource type="PackedScene" uid="uid://dlc0kujmelwd8" path="res://models/Chair/Table.tscn" id="67_yfhxp"]
 [ext_resource type="PackedScene" uid="uid://bbojfyetqvi5a" path="res://models/Chair/Desk.tscn" id="68_06pkj"]
 [ext_resource type="PackedScene" uid="uid://bmij6yeunyuy2" path="res://models/Stove.tscn" id="68_khgnh"]
+[ext_resource type="WhisperResource" path="res://addons/godot_whisper/models/gglm-base.en.bin" id="68_vxe81"]
 [ext_resource type="PackedScene" uid="uid://dlu0qla0pb2o5" path="res://models/Plate/Plate.tscn" id="69_wfyxf"]
 [ext_resource type="PackedScene" uid="uid://dt5d3woepamaa" path="res://models/CuttingBoard.tscn" id="71_su2b8"]
 [ext_resource type="PackedScene" uid="uid://26xawlqggyub" path="res://models/Can/Can.tscn" id="73_waol4"]
@@ -2013,7 +2013,7 @@ stream = SubResource("AudioStreamMicrophone_pqhwn")
 bus = &"Record"
 
 [node name="CaptureStreamToText" type="SpeechToText" parent="CaptureStreamToText"]
-language_model = ExtResource("63_760ct")
+language_model = ExtResource("68_vxe81")
 script = ExtResource("38_3vk56")
 recording = false
 transcribe_interval = 2.0
