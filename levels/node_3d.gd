@@ -10,6 +10,8 @@ func _ready():
 	var environment: WorldEnvironment = $WorldEnvironment
 
 	var scaling_mode = Config.Get("SCALING_ALGORITHM").to_upper()
+	if scaling_mode == "":
+		scaling_mode = "FSR2"
 
 	if Viewport["SCALING_3D_MODE_" + scaling_mode]:
 		get_viewport().scaling_3d_mode = Viewport["SCALING_3D_MODE_" + scaling_mode]
