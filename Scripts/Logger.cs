@@ -145,5 +145,10 @@ public partial class Logger : Node
         {
             Write($"GameLost|" + message);
         };
+
+        bus.EndgameSummary += (string message) =>
+        {
+            Write($"EndgameSummary|" + message);
+        };
     }
 }
