@@ -142,7 +142,7 @@ func _physics_process(delta):
 		if Input.is_action_pressed("Sprint") and not hasFocusOnGui and stamina > 0 and not stamina_was_exhausted:
 			SPEED = 7.5
 			if (velocity.length() > 2):
-				stamina -= 25 * delta
+				stamina -= 17.5 * delta
 			isRunning = true
 			recovery_time = 0
 			if stamina <= 0:
