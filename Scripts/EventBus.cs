@@ -20,6 +20,9 @@ public partial class EventBus : Node
     public delegate void GhostActionEventHandler(string verb, string arguments);
 
     [Signal]
+    public delegate void PlayerEffectEventHandler(string verb, string arguments);
+
+    [Signal]
     public delegate void LogUpdatedEventHandler(string id, string message);
 
     [Signal]
