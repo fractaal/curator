@@ -93,7 +93,7 @@ public partial class SpiritBox : Holdable
         topCaption.Text = "SPECTRAL VOICE DETECTED";
         ghostSpeech.Text = text;
 
-        var tokenized = FakeTokenize(text);
+        var tokenized = FakeTokenize(RemoveNonAlphabetical(text));
 
         ghostSpeechText = "";
 
@@ -284,7 +284,7 @@ public partial class SpiritBox : Holdable
         string pattern = "[^a-zA-Z ]";
 
         // Replace matches of the pattern with an empty string.
-        string result = Regex.Replace(input, pattern, "");
+        string result = Regex.Replace(input, pattern, " ");
 
         return result;
     }
