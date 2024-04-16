@@ -116,7 +116,29 @@ Ghost Backstory:
 {GhostBackstory}";
     }
 
-    private string GetNextPrompt()
+    private string GetSystemFeedback()
+    {
+        var result = "";
+
+        var events = from EventMessage e in SystemFeedback where e.time > LLMPromptedTime select e;
+
+        result = EventMessagesToNaturalLanguageSimple(events.ToList());
+
+        if (!result.Contains("None yet"))
+        {
+            result =
+                "Some things went wrong or could be improved upon in your last response. Take care to amend these in the future:\n"
+                + result;
+        }
+        else
+        {
+            result = "";
+        }
+
+        return result;
+    }
+
+    private string GetArchivedPrompt()
     {
         var result = "";
 
@@ -126,22 +148,11 @@ Ghost Backstory:
             where e.content.ToLower().Contains("player")
             select e;
 
-        var systemFeedback =
-            from EventMessage e in SystemFeedback
-            where e.time > LLMPromptedTime
-            select e;
-
         result =
             $@"TIME {Time.GetTicksMsec() / 1000f}s
-
-<SYSTEM_FEEDBACK>
-{EventMessagesToNaturalLanguageSimple(systemFeedback.ToList())}
-</SYSTEM_FEEDBACK>
-
-<TIMELINE>
+# TIMELINE
 {EventMessagesToNaturalLanguageSimple(events.ToList())}
-</TIMELINE>
-
+---
 {GetTimeSinceLastChase()}
 ";
         return result;
@@ -167,27 +178,18 @@ Ghost Backstory:
 
 {GetContextualAttentionMarkers()}
 
-<SYSTEM_FEEDBACK>
-{EventMessagesToNaturalLanguageSimple(systemFeedback.ToList())}
-</SYSTEM_FEEDBACK>
-
-{GetContextualAttentionMarkers()}
-
-<GHOST>
+# GHOST
 {Ghost.Call("getStatus").AsString()}
-</GHOST>
 
 {GetContextualAttentionMarkers()}
 
-<PLAYER>
+# PLAYER
 {Player.Call("getStatus").AsString()}
-</PLAYER>
 
 {GetContextualAttentionMarkers()}
 
-<TIMELINE>
+# TIMELINE
 {EventMessagesToNaturalLanguageSimple(events.ToList())}
-</TIMELINE>
 
 {GetTimeSinceLastChase()}
 
@@ -199,21 +201,31 @@ Ghost Backstory:
     private void SendDataToLLM()
     {
         var allRoomInfo = Room.GetAllRoomInformation();
+        var systemFeedback = GetSystemFeedback();
 
         List<Message> messages =
             new()
             {
                 new Message { role = "system", content = SYSTEM_PROMPT },
-                new Message { role = "system", content = GetGameInfo() },
+                new Message { role = "user", content = GetGameInfo() },
             };
 
         messages.AddRange(History.TakeLast(MAX_HISTORY).ToList());
+
+        if (systemFeedback != "")
+        {
+            messages.Add(new Message { role = "user", content = systemFeedback });
+        }
+
+        var comprehensivePrompt =
+            "[!!!] IMPORTANT INSTRUCTION: Unlike your previous responses, for the next one, be concise, but *COMPREHENSIVE*. Show your solution. Your latest one should be detailed, following step-by-step train-of-thought reasoning, as explained to you previously. Execute commands in-line with your reasoning to minimize latency. When done with the actions you want to perform, put \"<END AI TICK>\".";
 
         messages.AddRange(
             new List<Message>
             {
                 new Message { role = "user", content = GetNextPromptWithPlayerAndGhostStatus() },
-                new Message { role = "system", content = BEHAVIOR_PROMPT }
+                new Message { role = "user", content = BEHAVIOR_PROMPT },
+                new Message { role = "user", content = comprehensivePrompt }
             }
         );
 
@@ -228,7 +240,11 @@ Ghost Backstory:
                 + "\n"
         );
 
-        History.Add(new Message { role = "user", content = GetNextPrompt() });
+        if (systemFeedback != "")
+        {
+            History.Add(new Message { role = "user", content = systemFeedback });
+        }
+        History.Add(new Message { role = "user", content = GetArchivedPrompt() });
 
         Bus.EmitSignal(EventBus.SignalName.GameDataRead, "");
 
@@ -300,8 +316,8 @@ Ghost Backstory:
             new List<Message>()
             {
                 new Message { content = ENDGAME_SUMMARY_PROMPT, role = "system" },
-                new Message { content = additionalGameInfo, role = "system" },
-                new Message { content = "Events to summarize to follow: ", role = "system" },
+                new Message { content = additionalGameInfo, role = "user" },
+                new Message { content = "Events to summarize to follow: ", role = "user" },
                 new Message { content = allEvents, role = "user" }
             }
         );
@@ -511,6 +527,7 @@ Ghost Backstory:
                     content =
                         $@"{response}
 
+Actions taken:
 {EventMessagesToNaturalLanguageSimple(events.ToList())}"
                 }
             );
@@ -677,7 +694,7 @@ Ghost Backstory:
         if (Player.GetNode("Locator").Get("Room").AsString() == "None")
         {
             markers +=
-                "### 🤚 PLAYER IS OUTSIDE THE HOUSE - GHOST CANNOT CHASE OUTSIDE THE HOUSE - BE SUBTLER, REFUSE TO ENGAGE, LURE PLAYER BACK IN, DON'T LOCK ENTRANCE DOOR ✋ ###\n";
+                "### 🤚 PLAYER IS OUTSIDE THE HOUSE - GHOST CANNOT CHASE OUTSIDE THE HOUSE - BE SUBTLER, MAKE THE HOUSE MORE APPEALING, LURE PLAYER BACK IN, DON'T LOCK ENTRANCE DOOR ✋ ###\n";
         }
 
         return markers;

@@ -47,6 +47,8 @@ public partial class LLMInterface : Node
 
     private EventBus Bus;
 
+    private string AccumulatedLLMResponse = "";
+
     public LLMInterface()
     {
         string paramsFile = Path.Combine(
@@ -106,6 +108,18 @@ public partial class LLMInterface : Node
                 .GetNode<RichTextLabel>("CenterContainer/SettingsFileMissingWarning")
                 .Visible = true;
         }
+
+        Bus.LLMResponseChunk += (chunk) =>
+        {
+            AccumulatedLLMResponse += chunk;
+        };
+
+        Bus.LLMLastResponseChunk += (chunk) =>
+        {
+            GD.Print("Last response chunk!");
+            Bus.EmitSignal(EventBus.SignalName.LLMFullResponse, AccumulatedLLMResponse);
+            AccumulatedLLMResponse = "";
+        };
     }
 
     public void _emitLLMPrompted()
@@ -174,7 +188,8 @@ public partial class LLMInterface : Node
                         frequency_penalty = AUX_MODEL_FREQUENCY_PENALTY,
                         presence_penalty = AUX_MODEL_PRESENCE_PENALTY,
                         repetition_penalty = AUX_MODEL_REPETITION_PENALTY,
-                        max_tokens = RESPONSE_MAX_TOKENS
+                        max_tokens = RESPONSE_MAX_TOKENS,
+                        stop = new string[] { "<END AI TICK>" }
                     }
                 );
 
@@ -189,12 +204,30 @@ public partial class LLMInterface : Node
                     var responseString = await response.Content.ReadAsStringAsync();
 
                     var json = JsonNode.Parse(responseString).AsObject();
-                    var message = json["choices"]
-                        .AsArray()[0]["message"]["content"]
-                        .AsValue()
-                        .ToString();
-                    GD.Print(message);
-                    return message;
+
+                    if (json.ContainsKey("choices"))
+                    {
+                        var choices = json["choices"].AsArray();
+
+                        if (choices.Count > 0)
+                        {
+                            var message = choices[0]["message"]["content"].AsValue().ToString();
+                            GD.Print(message);
+                            return message;
+                        }
+                        else
+                        {
+                            throw new Exception(
+                                "No choices in response. Response was: " + responseString
+                            );
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception(
+                            "No choices key in response. Response was: " + responseString
+                        );
+                    }
                 }
                 else
                 {
@@ -228,7 +261,8 @@ public partial class LLMInterface : Node
                         frequency_penalty = MODEL_FREQUENCY_PENALTY,
                         presence_penalty = MODEL_PRESENCE_PENALTY,
                         repetition_penalty = MODEL_REPETITION_PENALTY,
-                        max_tokens = RESPONSE_MAX_TOKENS
+                        max_tokens = RESPONSE_MAX_TOKENS,
+                        stop = new string[] { "<END AI TICK>" }
                     }
                 );
 
@@ -277,6 +311,9 @@ public partial class LLMInterface : Node
                                 //     "\n[b][color=\"#FF0000\"]<ERROR PARSING JSON DATA:[/color][/b] "
                                 //     + e.Message
                                 //     + "\n";
+
+                                GD.PrintErr("Failed to parse JSON data: " + e.Message);
+                                GD.PrintErr("Raw chunk: " + rawChunk);
                             }
                         }
                         else if (rawChunk.Contains("OPENROUTER PROCESSING"))
