@@ -2,10 +2,6 @@ extends Node3D
 
 # var Config := preload ("res://Scripts/Config.cs")
 
-func _input(_event):
-	if Input.is_action_just_pressed("ReloadLevel"):
-		get_tree().reload_current_scene.call_deferred()
-
 func _ready():
 	var platform := OS.get_name()
 	
