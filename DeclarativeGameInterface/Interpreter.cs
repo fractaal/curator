@@ -55,6 +55,7 @@ public partial class Interpreter : Node
         AllVerbs.AddRange(objectInteractionVerbs);
         AllVerbs.AddRange(ghostActionVerbs);
         AllVerbs.AddRange(internalVerbs);
+        AllVerbs.AddRange(playerEffectVerbs);
 
         Bus = EventBus.Get();
 
@@ -260,12 +261,16 @@ public partial class Interpreter : Node
             "chaseplayerasghost",
             "speakasghost",
             "appearasghost",
-            "depositevidenceasghost"
+            "depositevidenceasghost",
+            "emitsoundasghost",
+            "emitsoundinroom",
         };
 
-    private List<string> AllVerbs = new();
+    private List<string> playerEffectVerbs = new() { "pullplayertoghost", "dimPlayerFlashlight" };
 
     private List<string> internalVerbs = new() { "amendsystemfeedback" };
+
+    private List<string> AllVerbs = new();
 
     private string accumulatedText = "";
 
@@ -527,10 +532,6 @@ public partial class Interpreter : Node
                             .ToArray()
                     );
 
-                    // message = ghostData
-                    //     .Call("StripGhostTypesAndFeedback", message, "speakAsGhost")
-                    //     `.ToString();
-
                     message = message.Replace("-", "");
                     message = message.Replace("player", "");
 
@@ -560,6 +561,20 @@ public partial class Interpreter : Node
                 );
 
                 continue;
+            }
+
+            if (playerEffectVerbs.Contains(command.Verb))
+            {
+                Bus.EmitSignal(
+                    EventBus.SignalName.NotableEventOccurred,
+                    $"Ghost meddled with player - {command.Verb} {command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()}"
+                );
+
+                Bus.EmitSignal(
+                    EventBus.SignalName.PlayerEffect,
+                    command.Verb,
+                    command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()
+                );
             }
 
             Bus.EmitSignal(
