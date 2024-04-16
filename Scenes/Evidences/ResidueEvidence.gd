@@ -4,7 +4,7 @@ extends RigidBody3D
 
 func _ready():
 	var tween = create_tween()
-	tween.tween_property(decal, "modulate", Color(1,1,1,0), 20).set_delay(10)
+	tween.tween_property(decal, "modulate", Color(1, 1, 1, 0), 30).set_delay(30)
 	
 	await tween.finished
 	
