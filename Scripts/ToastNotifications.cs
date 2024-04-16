@@ -30,5 +30,7 @@ public partial class ToastNotifications : Node
             tween.TweenProperty(StatusView, "modulate", new Color(1, 1, 1, 0), 1);
             tween.Play();
         };
+
+        GD.Print("Toast Notifications initialized");
     }
 }
