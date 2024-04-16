@@ -1,4 +1,4 @@
-[gd_scene load_steps=109 format=3 uid="uid://ctahsvj88g1om"]
+[gd_scene load_steps=110 format=3 uid="uid://ctahsvj88g1om"]
 
 [ext_resource type="Script" path="res://levels/node_3d.gd" id="1_7plsp"]
 [ext_resource type="PackedScene" uid="uid://7gv6q50fuutj" path="res://Scenes/Player/player.tscn" id="1_eisjc"]
@@ -75,6 +75,7 @@
 [ext_resource type="PackedScene" uid="uid://26xawlqggyub" path="res://models/Can/Can.tscn" id="73_waol4"]
 [ext_resource type="PackedScene" uid="uid://2ghyrom7p4ag" path="res://models/Workbench/Workbench.tscn" id="74_1v032"]
 [ext_resource type="Script" path="res://Scripts/LatencyStatistics.cs" id="75_k1sr7"]
+[ext_resource type="Script" path="res://Scripts/ToastNotifications.cs" id="76_r0kne"]
 [ext_resource type="Script" path="res://levels/EndGameButtons.gd" id="76_stbum"]
 [ext_resource type="FontFile" uid="uid://dg4fvw3nd4p4u" path="res://Fonts/FantasqueSansMono-Bold.ttf" id="77_uyrdc"]
 
@@ -1746,8 +1747,8 @@ grow_horizontal = 0
 focus_mode = 2
 theme_override_fonts/normal_font = ExtResource("61_etk1b")
 theme_override_fonts/bold_font = ExtResource("62_l181e")
-theme_override_font_sizes/normal_font_size = 8
-theme_override_font_sizes/bold_font_size = 8
+theme_override_font_sizes/normal_font_size = 12
+theme_override_font_sizes/bold_font_size = 12
 bbcode_enabled = true
 text = "PROMPT DEBUG"
 scroll_following = true
@@ -2166,7 +2167,12 @@ transform = Transform3D(-0.26559, 0, -0.964086, 0, 1, 0, 0.964086, 0, -0.26559, 
 [node name="LatencyStatistics" type="Node" parent="."]
 script = ExtResource("75_k1sr7")
 
+[node name="ToastNotifications" type="Node" parent="." node_paths=PackedStringArray("StatusView")]
+script = ExtResource("76_r0kne")
+StatusView = NodePath("../CenterContainer/VBoxContainer/Label")
+
 [node name="EndGameButtons" type="HBoxContainer" parent="." node_paths=PackedStringArray("retry_button")]
+process_mode = 4
 visible = false
 anchors_preset = 15
 anchor_right = 1.0
