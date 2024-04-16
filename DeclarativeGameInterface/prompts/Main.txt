@@ -57,7 +57,7 @@
 	</GHOST>
 	<PLAYER> (Methods that affect the player. Use SPARINGLY or risk impacting player agency)
 		- pullPlayerToGhost() - Forcefully yank the player towards the ghost
-		- dimFlashlight() - Force the flashlight to operate at a lower brightness
+		- dimPlayerFlashlight() - Force the flashlight to operate at a lower brightness
 	</PLAYER>
 </COMMANDS>
 
