@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://bbhrmf5ph6a17"]
+[gd_scene load_steps=36 format=3 uid="uid://bbhrmf5ph6a17"]
 
 [ext_resource type="Texture2D" uid="uid://shc2f632i4e" path="res://models/Walking-3e31920b44c6b00154392f6ae2735c79_zombie_body_diffuse.png" id="1_dwbvp"]
 [ext_resource type="Script" path="res://Scenes/Ghost/EvidenceDepositor.cs" id="2_6rpkm"]
@@ -25,6 +25,7 @@
 [ext_resource type="FontFile" uid="uid://cvunybceg2xmx" path="res://Fonts/JetBrains Mono Bold Nerd Font Complete Mono.ttf" id="21_we6bf"]
 [ext_resource type="Script" path="res://Scenes/EndgameSummaryReceiver.gd" id="22_2jgki"]
 [ext_resource type="FontFile" uid="uid://b2twsdkyswbmf" path="res://Fonts/JetBrains Mono Extra Bold Nerd Font Complete Mono.ttf" id="22_htyet"]
+[ext_resource type="Script" path="res://Scenes/Ghost/GhostSounds.gd" id="26_7sqca"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bla45"]
 resource_name = "ZombieGirl_body_Material"
@@ -1219,3 +1220,8 @@ script = ExtResource("22_2jgki")
 [node name="HuntGracePeriod" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("14_ha30a")
 volume_db = -10.0
+
+[node name="GhostSounds" type="Node3D" parent="."]
+script = ExtResource("26_7sqca")
+
+[node name="Player" type="AudioStreamPlayer3D" parent="GhostSounds"]
