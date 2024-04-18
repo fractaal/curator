@@ -632,6 +632,8 @@ Actions taken:
             }
         );
 
+        sanitizedBackstory = GhostData.Call("StripGhostTypes", sanitizedBackstory).AsString();
+
         Bus.EmitSignal(EventBus.SignalName.GhostBackstory, sanitizedBackstory);
     }
 
