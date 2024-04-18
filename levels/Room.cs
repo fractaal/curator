@@ -169,8 +169,6 @@ public partial class Room : Area3D
                 {
                     string line = interactable.Call("getStatus").AsString();
 
-                    GD.Print("interactable ", interactable.GetParent().Name + " status: ", line);
-
                     if (info.Contains(line)) // Reduce redundancy
                     {
                         continue;
