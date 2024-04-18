@@ -8,11 +8,36 @@ var shiftSfx: AudioStreamPlayer3D
 var joltSfx: AudioStreamPlayer3D
 var throwSfx: AudioStreamPlayer3D
 
-var registry = preload ("res://Scripts/InteractableRegistry.cs")
-
 var originalRotation: Vector3
 
+var registry = preload ("res://Scripts/InteractableRegistry.cs")
 var objectType := "physics object"
+
+func connect_to_event_bus():
+	await get_tree().create_timer(3).timeout
+	EventBus.ObjectInteraction.connect(_on_object_interact)
+
+func _on_object_interact(verb: String, type: String, target: String):
+	if not type.to_lower().contains("object"):
+		return
+
+	target = target.strip_edges()
+
+	if target == "all":
+		self[verb].call()
+		EventBus.emit_signal("ObjectInteractionAcknowledged", verb, type, target)
+	else:
+		var targetRoom = target
+		if targetRoom.begins_with("in"):
+			targetRoom = targetRoom.substr(2)
+		if locator.IsInRoom(targetRoom):
+			self[verb].call()
+			EventBus.emit_signal("ObjectInteractionAcknowledged", verb, type, target)
+		else:
+			return
+
+func getStatus():
+	return "Physics Object"
 
 func _ready():
 	registry.Register(objectType)
@@ -43,29 +68,6 @@ func _ready():
 
 	connect_to_event_bus.call_deferred()
 
-func connect_to_event_bus():
-	await get_tree().create_timer(3).timeout
-	EventBus.ObjectInteraction.connect(_on_object_interact)
-
-func _on_object_interact(verb: String, type: String, target: String):
-	if not type.to_lower().contains("object"):
-		return
-
-	target = target.strip_edges()
-
-	if target == "all":
-		self[verb].call()
-		EventBus.emit_signal("ObjectInteractionAcknowledged", verb, type, target)
-	else:
-		var targetRoom = target
-		if targetRoom.begins_with("in"):
-			targetRoom = targetRoom.substr(2)
-		if locator.IsInRoom(targetRoom):
-			self[verb].call()
-			EventBus.emit_signal("ObjectInteractionAcknowledged", verb, type, target)
-		else:
-			return
-
 func jolt():
 	await get_tree().create_timer(randf_range(0.0, 1.5)).timeout
 	joltSfx.pitch_scale = randf_range(0.8, 1.2)
@@ -79,6 +81,7 @@ func jolt():
 func throw():
 	await get_tree().create_timer(randf_range(0.0, 1.5)).timeout
 	throwSfx.pitch_scale = randf_range(0.8, 1.2)
+	throwSfx.volume_db = -15
 	throwSfx.play(0)
 	var direction = player.global_transform.origin - rigidBody.global_transform.origin
 	direction = direction.normalized()
@@ -98,6 +101,3 @@ func shift():
 		randf(),
 		randf() * 0.25
 	) * rigidBody.mass)
-
-func getStatus():
-	return "Physics Object"

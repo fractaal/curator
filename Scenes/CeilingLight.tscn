@@ -24,7 +24,7 @@ emission_energy_multiplier = 20.68
 offsets = PackedFloat32Array(0, 0.795053, 1)
 colors = PackedColorArray(1, 1, 0.854902, 1, 0.976563, 0.909067, 0.6616, 1, 0.648371, 0.510475, 0, 0)
 
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_1hfgu"]
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_1rcbd"]
 gradient = SubResource("Gradient_6narq")
 use_hdr = true
 
@@ -37,7 +37,7 @@ initial_velocity_min = 5.0
 initial_velocity_max = 10.0
 angular_velocity_min = 250.0
 angular_velocity_max = 500.0
-color_ramp = SubResource("GradientTexture1D_1hfgu")
+color_ramp = SubResource("GradientTexture1D_1rcbd")
 turbulence_enabled = true
 turbulence_noise_scale = 0.01
 turbulence_influence_min = 0.01
@@ -45,7 +45,7 @@ collision_mode = 1
 collision_friction = 0.0
 collision_bounce = 0.0
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ge6xl"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6h8mk"]
 transparency = 2
 alpha_scissor_threshold = 0.5
 alpha_antialiasing_mode = 0
@@ -55,7 +55,7 @@ shading_mode = 0
 vertex_color_use_as_albedo = true
 
 [sub_resource type="BoxMesh" id="BoxMesh_8k1vn"]
-material = SubResource("StandardMaterial3D_ge6xl")
+material = SubResource("StandardMaterial3D_6h8mk")
 size = Vector3(0.015, 0.015, 0.015)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_c2myf"]

@@ -48,11 +48,13 @@ public partial class Logger : Node
     public override void _Ready()
     {
         bus = EventBus.Get();
-        string directory = System.IO.Path.GetDirectoryName(OS.GetExecutablePath());
-        logFilePath = System
-            .IO
-            .Path
-            .Combine(directory, "Game Log " + $"{DateTime.Now:yyyy-MM-dd HHmmss}" + ".txt");
+
+        string directory = Path.GetDirectoryName(OS.GetExecutablePath());
+        string subdirectory = "Game Logs";
+        string logFileName = "Game Log " + $"{DateTime.Now:yyyy-MM-dd HHmmss}" + ".txt";
+        string logDirectory = Path.Combine(directory, subdirectory);
+        logFilePath = Path.Combine(logDirectory, logFileName);
+        Directory.CreateDirectory(logDirectory);
 
         GD.Print("Logging to: " + logFilePath);
 
@@ -94,11 +96,13 @@ public partial class Logger : Node
         bus.LLMFullResponse += (string message) =>
         {
             Write($"LLMFullResponse|{message}");
+            Flush();
         };
 
         bus.PlayerTalked += (string message) =>
         {
             Write($"PlayerTalked|{message}");
+            Flush();
         };
 
         bus.InterpreterCommandRecognized += (string command) =>
@@ -119,6 +123,7 @@ public partial class Logger : Node
         bus.SystemFeedback += (string message) =>
         {
             Write($"SystemFeedback|{message}");
+            Flush();
         };
 
         bus.AmendSystemFeedback += (string message) =>
@@ -134,21 +139,25 @@ public partial class Logger : Node
         bus.PlayerDecidedGhostType += (string message) =>
         {
             Write($"PlayerDecidedGhostType|{message}");
+            Flush();
         };
 
         bus.GameWon += (string message) =>
         {
             Write($"GameWon|" + message);
+            Flush();
         };
 
         bus.GameLost += (string message) =>
         {
             Write($"GameLost|" + message);
+            Flush();
         };
 
         bus.EndgameSummary += (string message) =>
         {
             Write($"EndgameSummary|" + message);
+            Flush();
         };
     }
 }

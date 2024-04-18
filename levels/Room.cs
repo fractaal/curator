@@ -86,6 +86,7 @@ public partial class Room : Area3D
                 if (interactable != null)
                 {
                     Interactables.Add(interactable);
+                    GD.Print(Name, ": added " + body.Name + " to interactables");
                 }
             }
             catch (Exception) { }
@@ -167,6 +168,8 @@ public partial class Room : Area3D
                 if (interactable.HasMethod("getStatus"))
                 {
                     string line = interactable.Call("getStatus").AsString();
+
+                    GD.Print("interactable ", interactable.GetParent().Name + " status: ", line);
 
                     if (info.Contains(line)) // Reduce redundancy
                     {

@@ -1,8 +1,8 @@
-[gd_resource type="AudioBusLayout" load_steps=4 format=3 uid="uid://bc1rdlq7r7p6v"]
+[gd_resource type="AudioBusLayout" load_steps=6 format=3 uid="uid://bc1rdlq7r7p6v"]
 
 [sub_resource type="AudioEffectReverb" id="AudioEffectReverb_fwowd"]
 resource_name = "Reverb"
-room_size = 0.15
+room_size = 0.25
 wet = 0.25
 
 [sub_resource type="AudioEffectHighPassFilter" id="AudioEffectHighPassFilter_lnwvt"]
@@ -13,6 +13,19 @@ resonance = 1.0
 [sub_resource type="AudioEffectCapture" id="AudioEffectCapture_lmadd"]
 resource_name = "Capture"
 buffer_length = 5.0
+
+[sub_resource type="AudioEffectReverb" id="AudioEffectReverb_arygp"]
+resource_name = "Reverb"
+room_size = 0.1
+damping = 0.0
+hipass = 0.83
+dry = 0.75
+
+[sub_resource type="AudioEffectCompressor" id="AudioEffectCompressor_mse6m"]
+resource_name = "Compressor"
+threshold = -10.0
+ratio = 30.0
+gain = 10.0
 
 [resource]
 bus/0/effect/0/effect = SubResource("AudioEffectReverb_fwowd")
@@ -33,3 +46,13 @@ bus/2/volume_db = 0.0
 bus/2/send = &"Master"
 bus/2/effect/0/effect = SubResource("AudioEffectCapture_lmadd")
 bus/2/effect/0/enabled = true
+bus/3/name = &"GhostSFX"
+bus/3/solo = false
+bus/3/mute = false
+bus/3/bypass_fx = false
+bus/3/volume_db = 0.0
+bus/3/send = &"Master"
+bus/3/effect/0/effect = SubResource("AudioEffectReverb_arygp")
+bus/3/effect/0/enabled = true
+bus/3/effect/1/effect = SubResource("AudioEffectCompressor_mse6m")
+bus/3/effect/1/enabled = true

@@ -97,7 +97,7 @@ public partial class TargetResolution : Node
 
     public static Node GetTarget(string target)
     {
-        target = target.Trim().ToLower();
+        target = NormalizeTargetString(target);
 
         if (target == "player")
         {

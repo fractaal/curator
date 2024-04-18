@@ -264,9 +264,12 @@ public partial class Interpreter : Node
             "depositevidenceasghost",
             "emitsoundasghost",
             "emitsoundinroom",
+            "chimeclockwestminster",
+            "chimeclock"
         };
 
-    private List<string> playerEffectVerbs = new() { "pullplayertoghost", "dimPlayerFlashlight" };
+    private List<string> playerEffectVerbs =
+        new() { "pullplayertoghost", "throwplayeraround", "dimplayerflashlight" };
 
     private List<string> internalVerbs = new() { "amendsystemfeedback" };
 
@@ -385,15 +388,6 @@ public partial class Interpreter : Node
                     + command.Arguments.Aggregate("", (acc, arg) => acc + arg + " ").Trim()
             );
 
-            string objectInteractionPrefix = objectInteractionVerbPrefixes.FirstOrDefault(
-                prefix =>
-                {
-                    var result = command.Verb.Contains(prefix);
-                    return result;
-                },
-                null
-            );
-
             if (internalVerbs.Contains(command.Verb))
             {
                 if (command.Verb == "amendsystemfeedback")
@@ -410,8 +404,17 @@ public partial class Interpreter : Node
                 }
             }
 
-            if (objectInteractionPrefix != null)
+            if (objectInteractionVerbs.Contains(command.Verb))
             {
+                string objectInteractionPrefix = objectInteractionVerbPrefixes.FirstOrDefault(
+                    prefix =>
+                    {
+                        var result = command.Verb.Contains(prefix);
+                        return result;
+                    },
+                    null
+                );
+
                 AnyCommandWasPerformed = true;
                 string objectType = Regex
                     .Replace(command.Verb, objectInteractionPrefix, "")

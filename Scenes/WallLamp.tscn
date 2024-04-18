@@ -344,6 +344,7 @@ spot_angle = 60.0
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 32.7618, 6.53858)
+visible = false
 light_color = Color(0.956863, 0.670588, 0.407843, 1)
 light_energy = 0.25
 light_indirect_energy = 5.0

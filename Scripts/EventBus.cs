@@ -86,6 +86,9 @@ public partial class EventBus : Node
     public delegate void EndgameSummaryEventHandler(string message);
 
     [Signal]
+    public delegate void FearFactorChangedEventHandler(int fearFactor);
+
+    [Signal]
     public delegate void ToastNotificationEventHandler(string message);
 
     // Some game-specific signals

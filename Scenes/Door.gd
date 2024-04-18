@@ -117,7 +117,7 @@ func lock():
 
 	lockTime = Time.get_ticks_msec()
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	var time := Time.get_ticks_msec()
 
 	if locked and (time - lockTime) > 30000 and not ghost.chasing:

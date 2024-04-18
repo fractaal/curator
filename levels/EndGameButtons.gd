@@ -7,7 +7,7 @@ func connect_to_event_bus():
 	
 	EventBus.GameLost.connect(_on_game_lost)
 
-func _on_game_lost(reason):
+func _on_game_lost(_reason):
 	var tween = create_tween()
 	
 	visible = true

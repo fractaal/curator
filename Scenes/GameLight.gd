@@ -1,7 +1,9 @@
 extends Node
+class_name GameLight
 
 var lights = []
 @export var nodesWithEmission: Array[Node3D] = []
+@export var objectType := "light"
 
 var defaultIntensities = {}
 var noise: FastNoiseLite
@@ -34,7 +36,7 @@ var registry = preload ("res://Scripts/InteractableRegistry.cs")
 @export var Sparks: GPUParticles3D
 
 func _on_object_interact(verb: String, type: String, target: String):
-	if not type.to_lower().contains("light"):
+	if not type.to_lower().contains(objectType):
 		return
 
 	target = target.strip_edges()
@@ -77,8 +79,6 @@ func _process(delta):
 			setEnergy(lastChosenEnergy)
 		else:
 			setEnergy(clamp(lastChosenEnergy - (winSongElapsed / winSongBeatTime) * lastChosenEnergy, 0.5, 100))
-
-var objectType := "light"
 
 # Called when the node enters the scene tree for the first time.
 func _ready():

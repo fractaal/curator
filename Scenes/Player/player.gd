@@ -6,8 +6,12 @@ extends CharacterBody3D
 @export var footstepAudios: Array[AudioStreamWAV]
 @export var stamina_exhausted: AudioStreamPlayer3D
 @export var stamina_indicator: TextureRect
-var footstepSounds: Array[AudioStreamPlayer3D] = []
 
+@export var ghost_indicator: TextureRect
+@export var proximity_indicator: TextureRect
+@export var heartbeat_player: AudioStreamPlayer3D
+
+var footstepSounds: Array[AudioStreamPlayer3D] = []
 
 # @export var _bullet_scene: PackedScene
 var mouseSensibility = 1200
@@ -40,6 +44,7 @@ var hasFocusOnGui = false
 
 var dead = false
 
+var ghost: Node3D
 var ghostHead: Node3D
 
 var worldEnvironment: WorldEnvironment
@@ -47,6 +52,11 @@ var worldEnvironment: WorldEnvironment
 @export var flashlightAudio: AudioStreamPlayer3D
 
 @export var playerStats: Node3D
+
+var flashlight_dimmed = false
+@export var flashlight_dimmed_stream_player: AudioStreamPlayer3D
+@export var telekinesis_stream_player: AudioStreamPlayer3D
+@export var telekinesis_intense_stream_player: AudioStreamPlayer3D
 
 func kill():
 	dead = true
@@ -63,7 +73,47 @@ func kill():
 
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
+var ghost_meddle_modifier = 0.0
+func _show_ghost_vignette():
+	var tween = create_tween()
+
+	ghost_indicator.modulate = Color(1, 1, 1, 1)
+	tween.tween_property(ghost_indicator, "modulate", Color(1, 1, 1, 0), 0.5).set_delay(0.1)
+	
+	tween.play()
+
+func _on_player_effect(verb: String, arguments: String):
+	if verb == "pullplayertoghost":
+		_show_ghost_vignette()
+		telekinesis_intense_stream_player.pitch_scale = randf_range(0.9, 1.1)
+		telekinesis_intense_stream_player.volume_db = 7.5
+		telekinesis_intense_stream_player.play(0)
+		var impulse = (ghost.global_position - global_position).normalized()
+		velocity += impulse * 15
+
+	elif verb == "throwplayeraround":
+		_show_ghost_vignette()
+		telekinesis_stream_player.pitch_scale = randf_range(0.9, 1.1)
+		telekinesis_stream_player.volume_db = 2.5
+		telekinesis_stream_player.play(0)
+		var impulse = Vector3(randf_range( - 1, 1), randf_range(0, 0.25), randf_range( - 1, 1)).normalized()
+		velocity += impulse * 10
+
+	elif verb == "dimplayerflashlight":
+		_show_ghost_vignette()
+		flashlight_dimmed = true
+		flashlight_dimmed_stream_player.play(0)
+		await get_tree().create_timer(10).timeout
+		flashlight_dimmed_stream_player.stop()
+		flashlight_dimmed = false
+
+func connect_to_event_bus():
+	await get_tree().create_timer(3).timeout
+
+	EventBus.PlayerEffect.connect(_on_player_effect)
+
 func _ready():
+	connect_to_event_bus()
 	#Captures mouse and stops rgun from hitting yourself
 	gunRay.add_exception(self)
 	gunRay.set_collision_mask_value(4, true) # collide with doors
@@ -80,8 +130,9 @@ func _ready():
 		footstepSounds.append(player)
 		
 		add_child(player)
-	
-	ghostHead = get_tree().current_scene.get_node("Ghost/Head")
+
+	ghost = get_tree().current_scene.get_node("Ghost")
+	ghostHead = ghost.get_node("Head")
 
 var interactableUICheckInterval = 0.05
 var interactableUICheckElapsed = 0
@@ -97,11 +148,40 @@ var stamina_was_exhausted = false
 func play_footstep():
 	var footstep = footstepSounds[randi() % footstepSounds.size()]
 	
-	footstep.pitch_scale = randf_range(0.9,1.1)
+	footstep.pitch_scale = randf_range(0.9, 1.1)
 	footstep.play(0)
 
-func _process(delta):
-	stamina_indicator.modulate = Color(1,1,1,pow(1 - (stamina/100), 3))
+var heartbeat_elapsed = 0
+var heartbeat_interval = 1
+
+var has_just_shown_proximity_vignette = false
+
+func _process(_delta):
+	stamina_indicator.modulate = Color(1, 1, 1, pow(1 - (stamina / 100), 3))
+
+	var distance = (ghost.global_position - global_position).length()
+	
+	heartbeat_interval = 0.15 + (log(distance) / log(10))
+
+	var t = heartbeat_elapsed / heartbeat_interval
+
+	heartbeat_player.volume_db = -(3 * distance)
+	heartbeat_elapsed += _delta
+
+	var pulsing = 0.25 + (1 - pow(t, 2))
+
+	if ghost.get_node("Skeleton3D").visible and ghost.inLineOfSight and not dead:
+		if heartbeat_elapsed > heartbeat_interval:
+			heartbeat_player.play(0)
+			heartbeat_elapsed = 0
+		proximity_indicator.modulate = Color(1, 1, 1, 1 - distance / 10) * clamp(pulsing, 0, 1)
+		has_just_shown_proximity_vignette = true
+	else:
+		if has_just_shown_proximity_vignette:
+			has_just_shown_proximity_vignette = false
+			var tween = create_tween()
+			tween.tween_property(proximity_indicator, "modulate", Color(1, 1, 1, 0), 0.5).set_delay(0.1)
+			tween.play()
  
 func _physics_process(delta):
 	hasFocusOnGui = true if get_viewport().gui_get_focus_owner() != null else false
@@ -160,7 +240,6 @@ func _physics_process(delta):
 		elif stamina > 100:
 			stamina_was_exhausted = false
 			stamina = 100
-		
 			
 		if Input.is_action_just_pressed("ToggleFlashlight") and not hasFocusOnGui:
 			isFlashlightOn = !isFlashlightOn
@@ -224,10 +303,13 @@ func _physics_process(delta):
 	
 	move_and_slide()
 	
-	var unclampedIntensityNoise = 7 # + flashlightIntensityNoise.get_noise_1d(Time.get_ticks_msec() * 0.15) * 10
+	var unclampedIntensityNoise = flashlightIntensityNoise.get_noise_1d(Time.get_ticks_msec() * 0.5) * 10
 	var clampedIntensityNoise = clamp(unclampedIntensityNoise, 0, 10)
-	
-	$SpotLight3D.light_energy = clampedIntensityNoise
+
+	if flashlight_dimmed:
+		$SpotLight3D.light_energy = 0.5 + clampedIntensityNoise
+	else:
+		$SpotLight3D.light_energy = 8
 
 	interactableUICheckElapsed += delta
 	if interactableUICheckElapsed >= interactableUICheckInterval:

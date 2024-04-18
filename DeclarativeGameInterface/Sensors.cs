@@ -65,6 +65,8 @@ public partial class Sensors : Node
 
     private bool PerformedInitialSilentAIEnable = false;
 
+    private int FearFactor = 0;
+
     private string SYSTEM_PROMPT = FileAccess
         .Open("res://DeclarativeGameInterface/prompts/Main.txt", FileAccess.ModeFlags.Read)
         .GetAsText();
@@ -87,17 +89,11 @@ public partial class Sensors : Node
     {
         string result = "TIME SINCE LAST CHASE: ";
 
-        if (LastTimeChased == 0)
-        {
-            result += "No chase has occurred yet.";
-            return result;
-        }
-
         var difference = (Time.GetTicksMsec() - LastTimeChased) / 1000f;
 
         if (difference > 100)
         {
-            result += $"‼‼ {difference}s ‼‼ -- Now is the time to go crazy!";
+            result += $"‼‼ {difference}s ‼‼ -- Now is the time to START A CHASE!";
         }
         else
         {
@@ -111,6 +107,9 @@ public partial class Sensors : Node
     {
         return $@"Room Information:
 {Room.GetAllRoomInformation()}
+
+Ghost Sounds It Can Emit:
+{Ghost.GetNode<Node>("GhostSounds").Call("get_available_sound_names").AsString()}
 
 Ghost Backstory:
 {GhostBackstory}";
@@ -153,6 +152,7 @@ Ghost Backstory:
 # TIMELINE
 {EventMessagesToNaturalLanguageSimple(events.ToList())}
 ---
+{GetFearFactor()}
 {GetTimeSinceLastChase()}
 ";
         return result;
@@ -194,6 +194,8 @@ Ghost Backstory:
 {GetTimeSinceLastChase()}
 
 {GetContextualAttentionMarkers()}
+
+{GetFearFactor()}
 ";
         return result;
     }
@@ -210,6 +212,18 @@ Ghost Backstory:
                 new Message { role = "user", content = GetGameInfo() },
             };
 
+        var history = History.TakeLast(MAX_HISTORY);
+
+        while (history.Count() > 0 && history.First().role == "assistant")
+        {
+            history = history.Skip(1).ToList();
+        }
+
+        if (history.Count() == 0)
+        {
+            GD.PushError("History list was exhausted? This should not happen!!!");
+        }
+
         messages.AddRange(History.TakeLast(MAX_HISTORY).ToList());
 
         if (systemFeedback != "")
@@ -218,14 +232,19 @@ Ghost Backstory:
         }
 
         var comprehensivePrompt =
-            "[!!!] IMPORTANT INSTRUCTION: Unlike your previous responses, for the next one, be concise, but *COMPREHENSIVE*. Show your solution. Your latest one should be detailed, following step-by-step train-of-thought reasoning, as explained to you previously. Execute commands in-line with your reasoning to minimize latency. When done with the actions you want to perform, put \"<END AI TICK>\".";
+            "[!!!] IMPORTANT INSTRUCTION: Unlike your previous responses, for the next one, be concise, but *COMPREHENSIVE*. Show your solution. Your latest one should be detailed, following step-by-step train-of-thought reasoning, as explained to you previously. Execute commands in-line with your reasoning to minimize latency.";
 
         messages.AddRange(
             new List<Message>
             {
-                new Message { role = "user", content = GetNextPromptWithPlayerAndGhostStatus() },
                 new Message { role = "user", content = BEHAVIOR_PROMPT },
-                new Message { role = "user", content = comprehensivePrompt }
+                new Message { role = "user", content = GetNextPromptWithPlayerAndGhostStatus() },
+                new Message { role = "user", content = comprehensivePrompt },
+                new Message
+                {
+                    role = "user",
+                    content = GetContextualAttentionMarkers() + " " + GetFearFactor()
+                },
             }
         );
 
@@ -325,6 +344,38 @@ Ghost Backstory:
         Bus.EmitSignal(EventBus.SignalName.EndgameSummary, response);
     }
 
+    public string GetFearFactor()
+    {
+        var chase = "";
+
+        if (Ghost.Get("chasing").AsBool())
+        {
+            chase =
+                " THE GHOST IS CHASING! YOU **NEED** TO KEEP FEAR FACTOR AT MAXIMUM! EXPLODE LIGHTS, THROW OBJECTS, PULL PLAYER -- ANYTHING!";
+        }
+
+        if (FearFactor >= 85)
+        {
+            return $"‼ FEAR FACTOR: 🚀🚀 {FearFactor} 🚀🚀 (**TERRIFYING.** AMAZING! BE RELENTLESS!)";
+        }
+        else if (FearFactor >= 60)
+        {
+            return $"‼ FEAR FACTOR: 💥💥 {FearFactor} 💥💥 (SCARY! THAT'S CRAZY!)" + chase;
+        }
+        else if (FearFactor >= 40)
+        {
+            return $"‼ FEAR FACTOR: {FearFactor} (INTENSE. KEEP IT UP!)" + chase;
+        }
+        else if (FearFactor > 0)
+        {
+            return $"‼ FEAR FACTOR: {FearFactor} (DANGEROUSLY LOW. FIX THIS, NOW!)" + chase;
+        }
+        else
+        {
+            return "‼ FEAR FACTOR: 👎 0 (BORING. USE COMMANDS AT YOUR DISPOSAL!)" + chase;
+        }
+    }
+
     // Called when the node enters the scene tree for the first time.
     public override async void _Ready()
     {
@@ -364,6 +415,11 @@ Ghost Backstory:
         Interface = GetNode<LLMInterface>("/root/LLMInterface");
         GhostData = GetNode<Node>("/root/GhostData");
 
+        Bus.FearFactorChanged += (int value) =>
+        {
+            FearFactor = value;
+        };
+
         Bus.ChaseEnded += () =>
         {
             LastTimeChased = Time.GetTicksMsec();
@@ -386,7 +442,7 @@ Ghost Backstory:
             NotableEvents.Add(
                 new()
                 {
-                    content = "PLAYER TALKED: " + message,
+                    content = "🗣 (IMPORTANT!) PLAYER TALKED: " + message,
                     count = 1,
                     time = Time.GetTicksMsec()
                 }
@@ -537,6 +593,14 @@ Actions taken:
 
         await ToSignal(GetTree().CreateTimer(1), "timeout");
 
+        if (!Engine.IsEditorHint())
+        {
+            GenerateBackstory();
+        }
+    }
+
+    public async void GenerateBackstory()
+    {
         var backstoryPrompt = FileAccess
             .Open(
                 "res://DeclarativeGameInterface/prompts/BackstoryPrompt.txt",
@@ -594,6 +658,11 @@ Actions taken:
 
     public override void _PhysicsProcess(double delta)
     {
+        if (Input.IsActionJustPressed("GenerateBackstory"))
+        {
+            GenerateBackstory();
+        }
+
         if (Input.IsActionJustPressed("ToggleAI"))
         {
             AIEnabled = !AIEnabled;
@@ -679,7 +748,7 @@ Actions taken:
         if (Ghost.Get("chasing").AsBool())
         {
             markers +=
-                "### 💥💥💥 GHOST IS CHASING PLAYER! GO CRAZY! - **INVOKE COMMANDS WITH RECKLESS ABANDON!** THROW OBJECTS! EXPLODE LIGHTS! **BE CREATIVE!** 💥💥💥 ###\n";
+                "### 💥💥💥 GHOST IS CHASING PLAYER! GO CRAZY! - **INVOKE COMMANDS WITH RECKLESS ABANDON!** THROW OBJECTS! EXPLODE LIGHTS! **BE RELENTLESSLY AGGRESSIVE!**  **KEEP FEAR FACTOR AT 100!!!** 💥💥💥 ###\n";
         }
         else if (
             !Ghost.Get("chasing").AsBool()

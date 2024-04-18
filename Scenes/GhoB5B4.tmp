@@ -1,4 +1,4 @@
-[gd_scene load_steps=43 format=3 uid="uid://bbhrmf5ph6a17"]
+[gd_scene load_steps=42 format=3 uid="uid://bbhrmf5ph6a17"]
 
 [ext_resource type="Texture2D" uid="uid://shc2f632i4e" path="res://models/Walking-3e31920b44c6b00154392f6ae2735c79_zombie_body_diffuse.png" id="1_dwbvp"]
 [ext_resource type="Script" path="res://Scenes/Ghost/EvidenceDepositor.cs" id="2_6rpkm"]
@@ -14,7 +14,7 @@
 [ext_resource type="PackedScene" uid="uid://c8wpx70gwa0dr" path="res://Scenes/Evidences/ShadowMovement.tscn" id="5_rhk5u"]
 [ext_resource type="PackedScene" uid="uid://tiv2f7j8vguo" path="res://Scenes/Evidences/FreezingTemperatures.tscn" id="6_03h80"]
 [ext_resource type="Script" path="res://Scripts/RoomLocator.cs" id="6_fp6hn"]
-[ext_resource type="AudioStream" uid="uid://ch5h2ihqxtvro" path="res://Audio/Heartbeats.wav" id="7_6jmrm"]
+[ext_resource type="AudioStream" uid="uid://ch5h2ihqxtvro" path="res://Audio/Heartbeat.wav" id="7_6jmrm"]
 [ext_resource type="AudioStream" uid="uid://btw58lr0h8gpv" path="res://Audio/GhostDisappear.wav" id="7_7xtxq"]
 [ext_resource type="AudioStream" uid="uid://cngpajcqv5gbs" path="res://Audio/HuntStart.wav" id="8_vcikg"]
 [ext_resource type="AudioStream" uid="uid://dtc068n1xelto" path="res://Audio/HuntTension.wav" id="9_ndn7o"]
@@ -27,12 +27,11 @@
 [ext_resource type="FontFile" uid="uid://b2twsdkyswbmf" path="res://Fonts/JetBrains Mono Extra Bold Nerd Font Complete Mono.ttf" id="22_htyet"]
 [ext_resource type="Script" path="res://Scenes/Ghost/GhostSounds.gd" id="26_7sqca"]
 [ext_resource type="AudioStream" uid="uid://cwxu8xyp02wak" path="res://Audio/ChildlikeLaughter.wav" id="27_pg8gy"]
+[ext_resource type="AudioStream" uid="uid://6hru1ivq1dk5" path="res://Audio/ClockTicking.wav" id="28_jw5bd"]
 [ext_resource type="AudioStream" uid="uid://dbtjnmimdd6os" path="res://Audio/HeavyBreathing.wav" id="29_dgbca"]
 [ext_resource type="AudioStream" uid="uid://bq67nfhq4kysv" path="res://Audio/WomanScreaming.wav" id="30_stuqk"]
 [ext_resource type="AudioStream" uid="uid://dfpio2f7npvae" path="res://Audio/Scratching.wav" id="31_l3ocb"]
 [ext_resource type="AudioStream" uid="uid://bcsxa0842l4ag" path="res://Audio/MetalClang.wav" id="32_vxxqt"]
-[ext_resource type="AudioStream" uid="uid://c3l18whqf4wsf" path="res://Audio/Whispers.wav" id="33_meofu"]
-[ext_resource type="AudioStream" uid="uid://dgk8x64sq13as" path="res://Audio/GlottalThroatNoises.wav" id="34_qts6f"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bla45"]
 resource_name = "ZombieGirl_body_Material"
@@ -1230,8 +1229,6 @@ volume_db = -10.0
 
 [node name="GhostSounds" type="Node3D" parent="."]
 script = ExtResource("26_7sqca")
-sound_streams = Array[AudioStreamWAV]([ExtResource("27_pg8gy"), ExtResource("29_dgbca"), ExtResource("30_stuqk"), ExtResource("31_l3ocb"), ExtResource("32_vxxqt"), ExtResource("33_meofu"), ExtResource("34_qts6f")])
+sound_streams = Array[AudioStreamWAV]([ExtResource("27_pg8gy"), ExtResource("28_jw5bd"), ExtResource("29_dgbca"), ExtResource("30_stuqk"), ExtResource("31_l3ocb"), ExtResource("32_vxxqt")])
 
 [node name="Player" type="AudioStreamPlayer3D" parent="GhostSounds"]
-stream = ExtResource("31_l3ocb")
-bus = &"GhostSFX"

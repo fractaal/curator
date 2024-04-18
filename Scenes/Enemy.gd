@@ -16,6 +16,8 @@ var speed = 2.5
 @export var appearSFX: AudioStreamPlayer3D;
 @export var disappearSFX: AudioStreamPlayer3D;
 @export var huntGracePeriodSFX: AudioStreamPlayer
+
+@onready var ghost_sounds = $GhostSounds
 	
 @export var blackTexture: ColorRect
 
@@ -48,6 +50,8 @@ var FavoriteRoom
 var manifesting = false
 
 var gameEnded = false
+
+var inLineOfSight = false
 
 func _on_game_won(_reason):
 	gameEnded = true
@@ -106,21 +110,23 @@ func _on_ghost_action(verb, arguments):
 	verb = verb.to_lower()
 	
 	if verb == "moveasghost" or verb == "movetoasghost":
-		# if moveFlag:
-		# 	print("Ghost was going to path to " + arguments + " but is already pathing to something else");
-		# 	return
+
+		if manifesting:
+			return
 
 		print("Ghost now pathing to " + arguments)
 			
 		moveFlag = true
-		if manifesting:
-			return
 		var _position = TargetResolution.GetTargetPosition(arguments);
 
 		if _position == Vector3.ZERO:
 			return
 
 		update_target_location(_position)
+
+		await nav_agent.navigation_finished
+
+		moveFlag = false
 
 	if verb == "chaseplayerasghost":
 		chase(arguments)
@@ -138,11 +144,13 @@ func appear():
 		return
 	manifesting = true
 	appearSFX.pitch_scale = randf_range(0.75, 0.85)
-	appearSFX.play(0)
+	if inLineOfSight:
+		appearSFX.play(0)
 	skeleton.visible = true
 	await get_tree().create_timer(randf_range(3, 7)).timeout
-	disappearSFX.play(0)
-	await get_tree().create_timer(0.5).timeout
+	if inLineOfSight:
+		disappearSFX.play(0)
+	await get_tree().create_timer(0.6).timeout
 	manifesting = false
 	if chasing:
 		return
@@ -166,14 +174,18 @@ func chase(arguments):
 	else:
 		speed = 4
 
+	skeleton.visible = true
+
 	await get_tree().create_timer(5).timeout
 
 	if arguments == "end":
 		speed = 35
 
-	var huntTime = 25 if arguments != "end" else 9999
+	var huntTime = randf_range(30, 45) if arguments != "end" else 9999
+	EventBus.emit_signal("NotableEventOccurred", "Ghost chase started for " + str(huntTime) + " seconds. REMEMBER - TERRIFY THE PLAYER!")
 
 	for i in range(0, huntTime * 10):
+		skeleton.visible = true
 		update_target_location(player.global_transform.origin)
 		var length = (player.global_transform.origin - global_transform.origin).length()
 
@@ -210,12 +222,6 @@ func chase(arguments):
 
 	EventBus.emit_signal("ChaseEnded")
 	EventBus.emit_signal("ObjectInteraction", "unlock", "doors", "all")
-
-var sameLocationCheckInterval = 0.5
-var sameLocationCheckElapsed = 0
-var sameLocationCheckLast = Vector3.ZERO
-
-var inLineOfSight = false
 
 func _physics_process(delta):
 	LineOfSightCheck.look_at(player.global_position + Vector3(0, .75, 0))
@@ -264,27 +270,13 @@ func _physics_process(delta):
 	
 	last_location = current_location
 
-	sameLocationCheckElapsed += delta
-
-	if sameLocationCheckElapsed > sameLocationCheckInterval:
-		sameLocationCheckElapsed = 0
-
-		var length = (current_location - sameLocationCheckLast).length()
-		if (length) < 0.25 and moveFlag:
-			moveFlag = false
-			print("Ghost done pathing")
-
-		sameLocationCheckLast = current_location
-
 	if chasing:
 		$Skeleton3D/OmniLight3D.light_energy = randf_range(0.5, 1.5)
 
 		var distance = (player.global_transform.origin - global_transform.origin).length()
 
-		heartbeatSFX.volume_db = (-(distance * 2)) + 5
 		huntTensionSFX.volume_db = (-(distance * 2)) - 10
 
-		heartbeatSFX.pitch_scale = 0.75 + clamp((3 / distance), 0, 1.25)
 		huntTensionSFX.pitch_scale = 0.75 + clamp((1 / distance), 0, 1.25)
 
 	else:
@@ -315,6 +307,7 @@ func getStatus():
 	out += "IN LINE OF SIGHT? (WOULD THE PLAYER SEE THE GHOST IF IT MANIFESTS?): " + ("YES" if inLineOfSight else "NO") + "\n"
 	out += "CHASING PLAYER?: " + ("YES - GO CRAZY!" if chasing else "No") + "\n"
 	out += "VISIBLE?: " + ("Yes" if skeleton.visible else "No") + "\n"
+	out += "---\n"
 
 	return out
 
@@ -323,5 +316,6 @@ func getStatusStateless():
 	out += "Type: " + GhostType + "\n"
 	out += "Age: " + str(GhostAge) + "\n"
 	out += "Favorite Room: " + FavoriteRoom + "\n"
+	out += "---\n"
 
 	return out

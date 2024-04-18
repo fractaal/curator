@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://7gv6q50fuutj"]
+[gd_scene load_steps=27 format=3 uid="uid://7gv6q50fuutj"]
 
 [ext_resource type="Script" path="res://Scenes/Player/player.gd" id="1_1w47b"]
 [ext_resource type="Script" path="res://Scenes/Player/SmoothFlashlight.gd" id="1_h2o6c"]
@@ -16,7 +16,13 @@
 [ext_resource type="AudioStream" uid="uid://e0eryeko6vve" path="res://Audio/Footstep7.wav" id="8_s4b1o"]
 [ext_resource type="AudioStream" uid="uid://dltu00noh7eld" path="res://Audio/Footstep8.wav" id="9_eqffb"]
 [ext_resource type="AudioStream" uid="uid://334i4s2k1ub2" path="res://Audio/StaminaExhausted.wav" id="14_0gdvl"]
+[ext_resource type="Texture2D" uid="uid://cma006xpoqedh" path="res://textures/GhostVignette.png" id="17_4qwta"]
 [ext_resource type="Texture2D" uid="uid://bt6d1761ia44k" path="res://textures/StaminaVignette.png" id="17_cle2a"]
+[ext_resource type="Texture2D" uid="uid://d3d5ond14ia0t" path="res://textures/GhostProximity.png" id="17_rs466"]
+[ext_resource type="AudioStream" uid="uid://4qc18fb3fjij" path="res://Audio/Telekinesis.wav" id="18_3k1mk"]
+[ext_resource type="AudioStream" uid="uid://dw2r214ysddsy" path="res://Audio/FlashlightFlickering.wav" id="19_hojpj"]
+[ext_resource type="AudioStream" uid="uid://dv4dv66awhisd" path="res://Audio/TelekinesisIntense.wav" id="19_uprb1"]
+[ext_resource type="AudioStream" uid="uid://ddryedjdgy6so" path="res://Audio/Heartbeat.wav" id="22_qo0vg"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_emkox"]
 radius = 0.25
@@ -29,15 +35,21 @@ line_spacing = 0.0
 outline_size = 10
 outline_color = Color(0, 0, 0, 0.392157)
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("stamina_exhausted", "stamina_indicator", "flashlightAudio", "playerStats") groups=["player"]]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("stamina_exhausted", "stamina_indicator", "ghost_indicator", "proximity_indicator", "heartbeat_player", "flashlightAudio", "playerStats", "flashlight_dimmed_stream_player", "telekinesis_stream_player", "telekinesis_intense_stream_player") groups=["player"]]
 collision_layer = 2
 collision_mask = 9
 script = ExtResource("1_1w47b")
 footstepAudios = Array[AudioStreamWAV]([ExtResource("2_i74wg"), ExtResource("3_18cdt"), ExtResource("4_8aeeq"), ExtResource("5_6alv8"), ExtResource("6_c3fbo"), ExtResource("7_rrtms"), ExtResource("8_s4b1o"), ExtResource("9_eqffb")])
 stamina_exhausted = NodePath("StaminaExhausted")
 stamina_indicator = NodePath("Stamina")
+ghost_indicator = NodePath("GhostMeddleOverlay")
+proximity_indicator = NodePath("GhostProximityOverlay")
+heartbeat_player = NodePath("Heartbeat")
 flashlightAudio = NodePath("FlashlightSFX")
 playerStats = NodePath("PlayerStats")
+flashlight_dimmed_stream_player = NodePath("FlashlightFlickering")
+telekinesis_stream_player = NodePath("Telekinesis")
+telekinesis_intense_stream_player = NodePath("TelekinesisIntense")
 metadata/isPlayer = true
 
 [node name="SpotLight3D" type="SpotLight3D" parent="."]
@@ -124,6 +136,30 @@ label_settings = SubResource("LabelSettings_cawmj")
 horizontal_alignment = 1
 vertical_alignment = 2
 
+[node name="GhostProximityOverlay" type="TextureRect" parent="."]
+modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(960, 0)
+mouse_filter = 2
+texture = ExtResource("17_rs466")
+expand_mode = 1
+
+[node name="GhostMeddleOverlay" type="TextureRect" parent="."]
+modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(960, 0)
+mouse_filter = 2
+texture = ExtResource("17_4qwta")
+expand_mode = 1
+
 [node name="Stamina" type="TextureRect" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
@@ -134,3 +170,18 @@ pivot_offset = Vector2(960, 0)
 mouse_filter = 2
 texture = ExtResource("17_cle2a")
 expand_mode = 1
+
+[node name="Telekinesis" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("18_3k1mk")
+
+[node name="TelekinesisIntense" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("19_uprb1")
+
+[node name="Heartbeat" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("22_qo0vg")
+volume_db = -15.0
+
+[node name="FlashlightFlickering" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("19_hojpj")
+volume_db = -30.0
+pitch_scale = 0.9
