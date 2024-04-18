@@ -192,6 +192,11 @@ GenerateBackstory={
 3d_physics/layer_7="ghost collider"
 3d_physics/layer_8="physics object"
 
+[navigation]
+
+3d/default_cell_size=0.15
+3d/default_cell_height=0.15
+
 [physics]
 
 3d/run_on_separate_thread=true
