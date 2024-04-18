@@ -79,7 +79,7 @@
 [ext_resource type="Script" path="res://levels/EndGameButtons.gd" id="76_stbum"]
 [ext_resource type="Script" path="res://Scripts/FearFactor.cs" id="77_7fshy"]
 [ext_resource type="FontFile" uid="uid://dg4fvw3nd4p4u" path="res://Fonts/FantasqueSansMono-Bold.ttf" id="77_uyrdc"]
-[ext_resource type="PackedScene" path="res://models/Clock.tscn" id="80_yr6qh"]
+[ext_resource type="PackedScene" uid="uid://buarp2d3yiedg" path="res://models/Clock.tscn" id="80_yr6qh"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6g5uc"]
 sky_top_color = Color(0, 0.0156863, 0.0392157, 1)
