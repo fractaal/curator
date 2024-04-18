@@ -545,7 +545,7 @@ _surfaces = [{
 blend_shape_mode = 0
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_4r2yh"]
-radius = 0.3
+radius = 0.15
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_05ybm"]
 
@@ -1112,8 +1112,8 @@ shape = SubResource("CapsuleShape3D_4r2yh")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
 path_postprocessing = 1
-avoidance_enabled = true
 radius = 1.0
+debug_enabled = true
 
 [node name="LeftHandTarget" type="Node3D" parent="."]
 transform = Transform3D(-1, -2.62237e-15, -8.74228e-08, 2.01621e-08, -0.973042, -0.230627, -8.5066e-08, -0.230627, 0.973042, -0.32393, 1.15142, -0.179822)
