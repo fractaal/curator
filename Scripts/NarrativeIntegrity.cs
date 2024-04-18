@@ -30,6 +30,8 @@ public partial class NarrativeIntegrity : Node
         "\\",
         "+",
         "-",
+        "<",
+        ">",
         "volume",
         "filter",
         "distorted",
