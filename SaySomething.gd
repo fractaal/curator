@@ -2,9 +2,36 @@ extends TextEdit
 
 var LogManager = load("res://Scripts/LogManager.cs");
 
+var opacity_tween
+
+func _on_focus():
+	if opacity_tween:
+		opacity_tween.stop()
+
+	opacity_tween = create_tween()
+
+	opacity_tween.tween_property(self, "modulate", Color(1, 1, 1, 1), 0.5)
+	opacity_tween.play()
+
+func _on_focus_exit():
+	if opacity_tween:
+		opacity_tween.stop()
+
+	opacity_tween = create_tween()
+
+	opacity_tween.tween_property(self, "modulate", Color(1, 1, 1, 0), 0.5)
+	opacity_tween.play()
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	EventBus.VoiceRecognition.connect(_on_capture_stream_to_text_transcribed_msg)
+
+	opacity_tween = create_tween()
+	opacity_tween.tween_property(self, "modulate", Color(1, 1, 1, 0), 5).set_delay(5)
+	opacity_tween.play()
+
+	focus_entered.connect(_on_focus)
+	focus_exited.connect(_on_focus_exit)
 	
 	while true:
 		await get_tree().create_timer(10).timeout
