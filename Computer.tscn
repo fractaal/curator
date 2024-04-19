@@ -35,6 +35,12 @@ material_override = SubResource("StandardMaterial3D_qpbv2")
 use_collision = true
 size = Vector3(2.153, 1.239, 0.28)
 
+[node name="CSGBox3D2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0197754, -0.600214, 0.275239)
+material_override = SubResource("StandardMaterial3D_qpbv2")
+use_collision = true
+size = Vector3(0.923, 3.17636, 0.28)
+
 [node name="viewport" type="SubViewport" parent="."]
 scaling_3d_scale = 0.65
 size = Vector2i(960, 540)
