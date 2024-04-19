@@ -10,3 +10,4 @@ func _physics_process(_delta):
 		
 	DebugUI.visible = isVisible
 	get_tree().current_scene.get_node("Ghost").get_node("Label3D").visible = isVisible
+	get_tree().current_scene.get_node("Ghost").get_node("NavigationAgent3D").debug_enabled = isVisible
