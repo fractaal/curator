@@ -91,6 +91,9 @@ public partial class EventBus : Node
     [Signal]
     public delegate void ToastNotificationEventHandler(string message);
 
+    [Signal]
+    public delegate void CriticalMessageEventHandler(string message);
+
     // Some game-specific signals
     [Signal]
     public delegate void ChaseStartedEventHandler();
