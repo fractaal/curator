@@ -395,12 +395,13 @@ shape = SubResource("BoxShape3D_puiqd")
 [node name="Westminster" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("4_1cuw1")
 volume_db = -15.0
+pitch_scale = 0.9
 attenuation_filter_cutoff_hz = 20500.0
 
 [node name="Chime" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("5_piasc")
 volume_db = -10.0
-pitch_scale = 0.95
+pitch_scale = 0.85
 attenuation_filter_cutoff_hz = 20500.0
 
 [node name="Sparks" type="GPUParticles3D" parent="."]

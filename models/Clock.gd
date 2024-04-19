@@ -28,7 +28,7 @@ func _on_ghost_action(verb: String, arguments: String):
 		
 		for i in range(num_chimes):
 			bell_player.play(0)
-			await get_tree().create_timer(1.5).timeout
+			await get_tree().create_timer(2).timeout
 	elif verb == "chimeclockwestminster":
 		chime()
 
@@ -57,6 +57,8 @@ func _process(delta):
 		sound_index = (sound_index + 1) % tick_sounds.size()
 
 func chime():
+	if chiming:
+		return
 	print("Playing")
 	chiming = true
 	chime_player.play(0)
