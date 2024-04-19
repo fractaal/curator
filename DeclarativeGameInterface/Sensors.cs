@@ -442,7 +442,7 @@ Ghost Backstory:
             NotableEvents.Add(
                 new()
                 {
-                    content = "🗣 (IMPORTANT!) PLAYER TALKED: " + message,
+                    content = "🗣 (IMPORTANT!) PLAYER TALKED TO GHOST: " + message,
                     count = 1,
                     time = Time.GetTicksMsec()
                 }
