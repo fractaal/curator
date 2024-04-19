@@ -142,6 +142,11 @@ public partial class LLMInterface : Node
         Bus.EmitSignal(EventBus.SignalName.LLMLastResponseChunk, chunk);
     }
 
+    public void _emitCriticalMessage(string message)
+    {
+        Bus.EmitSignal(EventBus.SignalName.CriticalMessage, message);
+    }
+
     public void EmitLLMPrompted()
     {
         CallDeferred(nameof(_emitLLMPrompted));
@@ -160,6 +165,11 @@ public partial class LLMInterface : Node
     public void EmitLLMLastResponseChunk(string chunk)
     {
         CallDeferred(nameof(_emitLLMLastResponseChunk), chunk);
+    }
+
+    public void EmitCriticalMesage(string message)
+    {
+        CallDeferred(nameof(_emitCriticalMessage), message);
     }
 
     public void Send(List<Message> messages)
@@ -314,6 +324,10 @@ public partial class LLMInterface : Node
 
                                 GD.PrintErr("Failed to parse JSON data: " + e.Message);
                                 GD.PrintErr("Raw chunk: " + rawChunk);
+
+                                EmitCriticalMesage(
+                                    "[color=\"#FF0000\"]LLM didn't respond with the appropriate data schema - most likely flagged/censored. Do other things in-game to nudge it back into responding or restart.[/color]"
+                                );
                             }
                         }
                         else if (rawChunk.Contains("OPENROUTER PROCESSING"))
