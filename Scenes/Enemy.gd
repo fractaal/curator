@@ -169,10 +169,11 @@ func chase(arguments):
 
 	if arguments == "end":
 		speed = 0
+		chaseSpeed = "end"
 	elif arguments == "fast":
-		speed = 5.25
+		chaseSpeed = "fast"
 	else:
-		speed = 4
+		chaseSpeed = "slow"
 
 	skeleton.visible = true
 
@@ -279,6 +280,10 @@ func _physics_process(delta):
 
 		huntTensionSFX.pitch_scale = 0.75 + clamp((1 / distance), 0, 1.25)
 
+		if chaseSpeed == "fast":
+			speed = 2.5 + (log(distance) * 1.25)
+		elif chaseSpeed == "slow":
+			speed = 2.25 + log(distance)
 	else:
 		heartbeatSFX.volume_db = -80
 		huntTensionSFX.volume_db = -80
