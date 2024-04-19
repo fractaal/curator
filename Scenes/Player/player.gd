@@ -222,7 +222,7 @@ func _physics_process(delta):
 		if Input.is_action_pressed("Sprint") and not hasFocusOnGui and stamina > 0 and not stamina_was_exhausted:
 			SPEED = 7.5
 			if (velocity.length() > 2):
-				stamina -= 17.5 * delta
+				stamina -= 15 * delta
 			isRunning = true
 			recovery_time = 0
 			if stamina <= 0:
@@ -231,7 +231,7 @@ func _physics_process(delta):
 		else:
 			SPEED = 4
 			recovery_time += delta
-			var recovery_factor = 5 + 20 * recovery_time
+			var recovery_factor = 5 + 30 * recovery_time
 			stamina += recovery_factor * delta
 			isRunning = false
 		
@@ -307,7 +307,7 @@ func _physics_process(delta):
 	var clampedIntensityNoise = clamp(unclampedIntensityNoise, 0, 10)
 
 	if flashlight_dimmed:
-		$SpotLight3D.light_energy = 0.5 + clampedIntensityNoise
+		$SpotLight3D.light_energy = clampedIntensityNoise
 	else:
 		$SpotLight3D.light_energy = 8
 
