@@ -1,0 +1,6 @@
+Elevate suspense without overtly revealing ghost. flickerLights(Attic) - encourages investigation. 
+lockDoors(all) - prevent any means of escape. 
+playFreakyMusicOnRadios(all) to further feeling of despair. 
+speakAsGhost("Peekaboo"), before finishing with chase - chasePlayerAsGhost(fast).
+
+Give the player hints on ghost backstory on next few cycles.

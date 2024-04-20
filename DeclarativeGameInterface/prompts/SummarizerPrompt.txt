@@ -9,16 +9,6 @@ TASK:
 During the game loop, you have just provided the following response in a director cycle. 
 
 # SUMMARIZE FOR NARRATIVE.
-Summarize it and condense it as much as you can with the goal that in future cycles, the LLM maintains context of what it wanted to do (so it can follow its train of thought over the course of multiple cycles).
-
-So especially capture narrative intention, long-term strategies, etc. Within a sentence or two, to compress information & minimize token count. This is so that future director cycles can take advantage.
-
-# ACTIONS/FUNCTIONS/COMMANDS
-You invoke actions in the game via function calls (e.g. flickerLights(all), pullPlayerToGhost()). 
-
-In your summary, keep the function calls verbatim (KEEP THE SYNTAX verb(arguments)) and your reasoning for them, to keep the essence of the director cycle -- just compressed. 
-
-‼‼ AND, if you notice that NO function calls are present in the director cycle (e.g. there is the *intent* but it is not *invoking anything* (with verb(arguments) syntax)), very STRONGLY express a desire to call functions in the next director cycle - because ideally there *SHOULD* be function calls per cycle.
-
+Summarize it and condense it as much as you can with the goal that in future cycles, the LLM maintains context of what it wanted to do (so it can follow its train of thought over the course of multiple cycles). Capture narrative intention, long-term strategies, etc. Within a sentence or two, to compress information & minimize token count. This is so that future director cycles can take advantage.
 
 Get straight to the point, no preamble - provide the summary immediately:

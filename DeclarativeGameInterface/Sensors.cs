@@ -34,6 +34,20 @@ public partial class Sensors : Node
 
     private LLMInterface Interface;
     private string SummarizerPrompt;
+    private string ExamplePromptToSummarize = FileAccess
+        .Open(
+            "res://DeclarativeGameInterface/prompts/Summarizer/ExamplePromptToSummarize.txt",
+            FileAccess.ModeFlags.Read
+        )
+        .GetAsText();
+
+    private string ExampleSummarizedResult = FileAccess
+        .Open(
+            "res://DeclarativeGameInterface/prompts/Summarizer/ExampleSummarizedResult.txt",
+            FileAccess.ModeFlags.Read
+        )
+        .GetAsText();
+
     private bool GameEnded = false;
 
     private ulong LLMFirstResponseChunkTime = 0;
@@ -566,27 +580,18 @@ Ghost Backstory:
                 new List<Message>
                 {
                     new Message { role = "system", content = SummarizerPrompt },
+                    new Message { role = "user", content = ExamplePromptToSummarize },
+                    new Message { role = "assistant", content = ExampleSummarizedResult },
                     new Message { role = "user", content = message }
                 }
             );
 
-            var events =
-                from EventMessage e in NotableEvents
-                where e.time > LLMFirstResponseChunkTime
-                where e.content.ToLower().Contains("ghost")
-                select e;
+            if (response == "")
+            {
+                GD.PushWarning("Empty response! LLM won't have memory of this cycle");
+            }
 
-            History.Add(
-                new Message
-                {
-                    role = "assistant",
-                    content =
-                        $@"{response}
-
-Actions taken:
-{EventMessagesToNaturalLanguageSimple(events.ToList())}"
-                }
-            );
+            History.Add(new Message { role = "assistant", content = response });
 
             DoneSummarizing = true;
         };
