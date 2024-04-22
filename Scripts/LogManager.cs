@@ -56,6 +56,7 @@ public partial class LogManager : Node
         else if (id == "llmResponse")
         {
             LLMResponseUI.Text = message;
+            LLMResponseUI.ScrollToLine(LLMResponseUI.GetLineCount());
         }
         else if (id == "llmModel")
         {
