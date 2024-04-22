@@ -93,7 +93,7 @@ public partial class SpiritBox : Holdable
         topCaption.Text = "SPECTRAL VOICE DETECTED";
         ghostSpeech.Text = text;
 
-        var tokenized = FakeTokenize(RemoveNonAlphabetical(text));
+        var tokenized = FakeTokenize(text);
 
         ghostSpeechText = "";
 
