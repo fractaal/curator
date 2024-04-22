@@ -37,8 +37,39 @@ var chaseSpeed = "slow"
 
 var chasing_EntireSequence = false
 
-var FirstNames := ["John", "Jennifer", "Madison", "Mark", "Abrahm", "Dominic", "Kimi", "Shan", "Mariane", "Sofia", "Elijah", "Venj", "Chun-chun", "Raj", "Elden", "Ben"]
-var LastNames := ["Black", "Brown", "Jackson", "Peralta", "Walker", "Carpenter", "Mabait", "Baylin", "John", "Requinton", "Samonte", "Torrejos", "Abadilla", "Rocat", "Lumbay"]
+var FirstNames := [
+	"John",
+	"Jennifer",
+	"Madison",
+	"Mark",
+	"Abrahm",
+	"Dominic",
+	"Kimi",
+	"Shan",
+	"Mariane",
+	"Sofia",
+	"Elijah",
+	"Venj",
+	"Raj",
+	"Ben"
+]
+var LastNames := [
+	"Black",
+	"Brown",
+	"Jackson",
+	"Peralta",
+	"Walker",
+	"Carpenter",
+	"Baylin",
+	"John",
+	"Requinton",
+	"Samonte",
+	"Torrejos",
+	"Abadilla",
+	"Rocat",
+	"Lumbay"
+]
+
 var GhostTypes: Array[String]
 
 var FirstName
