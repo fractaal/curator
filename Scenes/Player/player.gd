@@ -321,9 +321,9 @@ func _physics_process(delta):
 
 			if interactable and (global_position - interactable.get_parent().global_position).length() < 3:
 				if interactable.has_method("getStatusForPlayer"):
-					$CenterContainer/VBoxContainer/Label.text = interactable.getStatusForPlayer() + "\n[INTERACT]"
+					$CenterContainer/VBoxContainer/Label.text = interactable.getStatusForPlayer()
 				else:
-					$CenterContainer/VBoxContainer/Label.text = "[INTERACT]"
+					$CenterContainer/VBoxContainer/Label.text = ""
 
 				$CenterContainer/VBoxContainer/Label.visible = true
 			else:
