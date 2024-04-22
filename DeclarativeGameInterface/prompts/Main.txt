@@ -46,9 +46,6 @@
 		- joltObjects(target) - Causes physics objects in a room to be jolted wildly.
 		- throwObjects(target) - Causes physics objects in a room to be thrown at the player.
 	</PHYSICS_OBJECT>
-	<GRANDFATHER_CLOCK>
-		- chimeClocks(target) - Causes clocks to ring out the Westminster quarters.
-	</GRANDFATHER_CLOCK>
 	<GHOST> (Methods that make you act as the ghost)
 		- moveToAsGhost(target) - Move the ghost to a valid target. Supports targets player, room.
 		- chasePlayerAsGhost(slow | fast) - Engage in a terrifying, high-octane audio-visual chase for half a minute. If ghost makes contact, player dies, jumpscare is played, game ends.
