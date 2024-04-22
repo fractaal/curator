@@ -598,7 +598,7 @@ Ghost Backstory:
 
         await ToSignal(GetTree().CreateTimer(1), "timeout");
 
-        if (!Engine.IsEditorHint())
+        if (OS.HasFeature("standalone"))
         {
             GenerateBackstory();
         }
@@ -682,9 +682,19 @@ Ghost Backstory:
 
         if (Stats.HasPlayerSteppedInsideHouse && !PerformedInitialSilentAIEnable)
         {
-            AIEnabled = true;
-            PerformedInitialSilentAIEnable = true;
-            GD.Print("Silently enabling AI because player has stepped inside the house.");
+            if (OS.HasFeature("standalone"))
+            {
+                AIEnabled = true;
+                PerformedInitialSilentAIEnable = true;
+                GD.Print("Silently enabling AI because player has stepped inside the house.");
+            }
+            else
+            {
+                GD.Print(
+                    "Would have silently enabled AI because player has stepped inside the house, but didn't (test build)"
+                );
+                PerformedInitialSilentAIEnable = true;
+            }
         }
     }
 
