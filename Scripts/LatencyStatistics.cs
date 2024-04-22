@@ -16,6 +16,7 @@ public partial class LatencyStatistics : Node
 
     private RichTextLabel FancyProgressBar;
     private RichTextLabel CurrentTime;
+    private Control CurrentTimeSpacer;
 
     private void UpdateLog()
     {
@@ -85,9 +86,13 @@ Command Recognized Count    {interpreterCommandRecognizedCount}"
             .CurrentScene
             .GetNode<RichTextLabel>("DebugUI/FancyProgressBar");
 
-        CurrentTime = GetTree().CurrentScene.GetNode<RichTextLabel>("DebugUI/CurrentTime");
+        CurrentTimeSpacer = GetTree()
+            .CurrentScene
+            .GetNode<Control>("DebugUI/CurrentTimeContainer/Spacer");
 
-        originalCurrentTimePosition = CurrentTime.Position;
+        CurrentTime = GetTree()
+            .CurrentScene
+            .GetNode<RichTextLabel>("DebugUI/CurrentTimeContainer/CurrentTime");
 
         bus.GameDataRead += (data) =>
         {
@@ -199,10 +204,7 @@ Command Recognized Count    {interpreterCommandRecognizedCount}"
                 "[right]"
                 + ((Time.GetTicksMsec() - loopStartTime) / 1000f).ToString("F")
                 + "s[/right]";
-            CurrentTime.Position = new Vector2(
-                originalCurrentTimePosition.X,
-                50 + (ActualProgressBarWidth * 7)
-            );
+            CurrentTimeSpacer.CustomMinimumSize = new Vector2(0, ActualProgressBarWidth * 7);
         }
     }
 
