@@ -1,0 +1,201 @@
+[gd_scene load_steps=10 format=3 uid="uid://boyd4lj1upb1x"]
+
+[ext_resource type="FontFile" uid="uid://dg4fvw3nd4p4u" path="res://Fonts/FantasqueSansMono-Bold.ttf" id="1_0sux5"]
+[ext_resource type="Script" path="res://Scenes/Menu/Menu.gd" id="1_cvbnu"]
+[ext_resource type="FontFile" uid="uid://mbijwkkci6k6" path="res://Fonts/InputMonoCondensed-Regular.ttf" id="2_qg3tt"]
+[ext_resource type="FontFile" uid="uid://cvunybceg2xmx" path="res://Fonts/JetBrains Mono Bold Nerd Font Complete Mono.ttf" id="3_f7m4j"]
+[ext_resource type="Script" path="res://Scenes/Menu/QuitGame.gd" id="5_oiw15"]
+[ext_resource type="FontFile" uid="uid://b2twsdkyswbmf" path="res://Fonts/JetBrains Mono Extra Bold Nerd Font Complete Mono.ttf" id="6_3vaks"]
+[ext_resource type="FontFile" uid="uid://sf6majfysrpt" path="res://Fonts/FantasqueSansMono-Italic.ttf" id="7_tskss"]
+[ext_resource type="FontFile" uid="uid://btl4oceaclqll" path="res://Fonts/FantasqueSansMono-BoldItalic.ttf" id="8_3s3ut"]
+[ext_resource type="Script" path="res://Scripts/LabelFixer.gd" id="8_8ggeq"]
+
+[node name="Menu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_cvbnu")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Spacer2" type="Control" parent="HBoxContainer"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+
+[node name="ColorRect" type="ColorRect" parent="HBoxContainer"]
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 2
+color = Color(0, 0, 0, 0.588235)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/ColorRect"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Control" type="Control" parent="HBoxContainer/ColorRect/VBoxContainer"]
+custom_minimum_size = Vector2(500, 130)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/ColorRect/VBoxContainer/Control"]
+layout_mode = 2
+offset_left = 68.0
+offset_top = 38.0
+offset_right = 362.0
+offset_bottom = 120.0
+theme_override_fonts/font = ExtResource("1_0sux5")
+theme_override_font_sizes/font_size = 81
+text = "CURATOR"
+
+[node name="Label" type="Label" parent="HBoxContainer/ColorRect/VBoxContainer/Control/Label"]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 69.0
+offset_right = 295.0
+offset_bottom = 151.0
+theme_override_fonts/font = ExtResource("2_qg3tt")
+theme_override_font_sizes/font_size = 16
+text = "TRULY INTELLIGENT GAME DIRECTOR"
+
+[node name="Control5" type="Control" parent="HBoxContainer/ColorRect/VBoxContainer"]
+custom_minimum_size = Vector2(0, 180)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/ColorRect/VBoxContainer/Control5"]
+layout_mode = 0
+offset_left = 74.0
+offset_top = 11.0
+offset_right = 226.0
+offset_bottom = 47.0
+theme_override_fonts/font = ExtResource("1_0sux5")
+theme_override_font_sizes/font_size = 36
+text = "GOAL"
+
+[node name="Controls" type="RichTextLabel" parent="HBoxContainer/ColorRect/VBoxContainer/Control5"]
+clip_contents = false
+custom_minimum_size = Vector2(500, 200)
+layout_mode = 2
+offset_left = 73.0
+offset_top = 48.0
+offset_right = 573.0
+offset_bottom = 386.0
+grow_vertical = 0
+theme_override_fonts/normal_font = ExtResource("3_f7m4j")
+theme_override_fonts/bold_font = ExtResource("6_3vaks")
+theme_override_fonts/italics_font = ExtResource("7_tskss")
+theme_override_fonts/bold_italics_font = ExtResource("8_3s3ut")
+theme_override_font_sizes/normal_font_size = 14
+theme_override_font_sizes/bold_font_size = 14
+bbcode_enabled = true
+text = "Determine the type of ghost haunting this house.
+
+Find evidence to determine with certainty, or take risks and deduce the type from ghost behavior. [i]Or both![/i]
+
+[b][i]Survive.[/i][/b]"
+
+[node name="LabelFixer" type="Node" parent="HBoxContainer/ColorRect/VBoxContainer/Control5/Controls"]
+script = ExtResource("8_8ggeq")
+
+[node name="Control4" type="Control" parent="HBoxContainer/ColorRect/VBoxContainer"]
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/ColorRect/VBoxContainer/Control4"]
+layout_mode = 0
+offset_left = 74.0
+offset_top = -12.0
+offset_right = 226.0
+offset_bottom = 24.0
+theme_override_fonts/font = ExtResource("1_0sux5")
+theme_override_font_sizes/font_size = 36
+text = "CONTROLS"
+
+[node name="Controls" type="RichTextLabel" parent="HBoxContainer/ColorRect/VBoxContainer/Control4"]
+clip_contents = false
+custom_minimum_size = Vector2(500, 200)
+layout_mode = 2
+offset_left = 73.0
+offset_top = 10.0
+offset_right = 573.0
+offset_bottom = 348.0
+grow_vertical = 0
+theme_override_fonts/normal_font = ExtResource("3_f7m4j")
+theme_override_fonts/bold_font = ExtResource("6_3vaks")
+theme_override_font_sizes/normal_font_size = 14
+theme_override_font_sizes/bold_font_size = 14
+bbcode_enabled = true
+text = "
+[b]T[/b] - Toggle Flashlight
+[b]Left Mouse Button[/b] - Interact, Pick Up Item
+
+[b]E[/b] - Toggle Item in Right Hand
+[b]Shift-E[/b] - Unequip Item in Right Hand
+
+[b]Q[/b] - Toggle Item in Left Hand
+[b]Shift-Q[/b] - Unequip Item in Left Hand
+
+[b]Tab[/b] - Toggle Cursor Lock 
+	(to click on the monitor outside)
+
+[b]Shift-V[/b] - Toggle Voice Recognition
+[b]Shift-X[/b] - Toggle AI
+[b]Shift-Z[/b] - Toggle Debug View"
+
+[node name="LabelFixer" type="Node" parent="HBoxContainer/ColorRect/VBoxContainer/Control4/Controls"]
+script = ExtResource("8_8ggeq")
+
+[node name="Control3" type="Control" parent="HBoxContainer/ColorRect/VBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(500, 70)
+layout_mode = 2
+
+[node name="Button" type="Button" parent="HBoxContainer/ColorRect/VBoxContainer/Control3"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -430.0
+offset_top = -30.0
+offset_bottom = 30.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_f7m4j")
+text = "    Toggle Fullscreen"
+alignment = 0
+
+[node name="Control2" type="Control" parent="HBoxContainer/ColorRect/VBoxContainer"]
+custom_minimum_size = Vector2(500, 100)
+layout_mode = 2
+
+[node name="Button" type="Button" parent="HBoxContainer/ColorRect/VBoxContainer/Control2"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -430.0
+offset_top = -30.0
+offset_bottom = 30.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_f7m4j")
+text = "    Quit Game"
+alignment = 0
+script = ExtResource("5_oiw15")
+
+[node name="Spacer" type="Control" parent="HBoxContainer"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+
+[connection signal="pressed" from="HBoxContainer/ColorRect/VBoxContainer/Control2/Button" to="HBoxContainer/ColorRect/VBoxContainer/Control2/Button" method="_quit_game"]
