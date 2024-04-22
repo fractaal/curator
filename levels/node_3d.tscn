@@ -1,4 +1,4 @@
-[gd_scene load_steps=114 format=3 uid="uid://ctahsvj88g1om"]
+[gd_scene load_steps=126 format=3 uid="uid://ctahsvj88g1om"]
 
 [ext_resource type="Script" path="res://levels/node_3d.gd" id="1_7plsp"]
 [ext_resource type="PackedScene" uid="uid://7gv6q50fuutj" path="res://Scenes/Player/player.tscn" id="1_eisjc"]
@@ -63,6 +63,7 @@
 [ext_resource type="PackedScene" uid="uid://cfb27gv2kwl1p" path="res://models/Seats/CoffeeTable.glb" id="59_su72e"]
 [ext_resource type="PackedScene" uid="uid://dd4gu5lfmicur" path="res://models/Seat.tscn" id="60_jk8wx"]
 [ext_resource type="FontFile" uid="uid://dhvoljulm758p" path="res://Fonts/JetBrains Mono Regular Nerd Font Complete Mono.ttf" id="61_etk1b"]
+[ext_resource type="Script" path="res://Scripts/Debug/FearFactorReceiver.gd" id="62_4m685"]
 [ext_resource type="FontFile" uid="uid://b2twsdkyswbmf" path="res://Fonts/JetBrains Mono Extra Bold Nerd Font Complete Mono.ttf" id="62_l181e"]
 [ext_resource type="PackedScene" uid="uid://c1y54yeagvxr4" path="res://models/Chair/ChairPhysicsObject.tscn" id="66_e2mm6"]
 [ext_resource type="PackedScene" uid="uid://cdxp461uj80ip" path="res://models/Book.tscn" id="67_sdr6n"]
@@ -82,6 +83,11 @@
 [ext_resource type="PackedScene" uid="uid://buarp2d3yiedg" path="res://models/Clock.tscn" id="80_yr6qh"]
 [ext_resource type="Script" path="res://Scripts/CriticalAlertReceiver.gd" id="81_higv2"]
 [ext_resource type="AudioStream" uid="uid://dphfwbv2e6kb0" path="res://Audio/Alert.wav" id="82_wi1yh"]
+[ext_resource type="PackedScene" uid="uid://bwqp0ltjmjncm" path="res://Scripts/ShaderPrecompiler/ShaderPrecompiler.tscn" id="83_gkfck"]
+[ext_resource type="Script" path="res://scripts/InitialFadeIn.gd" id="84_lc4jw"]
+[ext_resource type="Script" path="res://Scripts/ShaderPrecompiler/Watcher.gd" id="85_65pj0"]
+[ext_resource type="Script" path="res://levels/Sparks.gd" id="86_wu0qa"]
+[ext_resource type="PackedScene" uid="uid://boyd4lj1upb1x" path="res://Scenes/Menu/Menu.tscn" id="87_3yxpn"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6g5uc"]
 sky_top_color = Color(0, 0.0156863, 0.0392157, 1)
@@ -325,6 +331,49 @@ size = Vector3(1.44018, 3.32785, 1.90278)
 line_spacing = 0.0
 outline_size = 10
 outline_color = Color(0, 0, 0, 0.392157)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_21yi8"]
+emission_enabled = true
+emission = Color(1, 1, 0.176471, 1)
+emission_energy_multiplier = 20.68
+
+[sub_resource type="Gradient" id="Gradient_2006r"]
+offsets = PackedFloat32Array(0, 0.795053, 1)
+colors = PackedColorArray(1, 1, 0.854902, 1, 0.976563, 0.909067, 0.6616, 1, 0.648371, 0.510475, 0, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_1hfgu"]
+gradient = SubResource("Gradient_2006r")
+use_hdr = true
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_cii0q"]
+lifetime_randomness = 0.9
+angle_min = -720.0
+angle_max = 720.0
+direction = Vector3(0, -1, 0)
+initial_velocity_min = 5.0
+initial_velocity_max = 10.0
+angular_velocity_min = 250.0
+angular_velocity_max = 500.0
+color_ramp = SubResource("GradientTexture1D_1hfgu")
+turbulence_enabled = true
+turbulence_noise_scale = 0.01
+turbulence_influence_min = 0.01
+collision_mode = 1
+collision_friction = 0.0
+collision_bounce = 0.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ge6xl"]
+transparency = 2
+alpha_scissor_threshold = 0.5
+alpha_antialiasing_mode = 0
+blend_mode = 1
+depth_draw_mode = 2
+shading_mode = 0
+vertex_color_use_as_albedo = true
+
+[sub_resource type="BoxMesh" id="BoxMesh_fximc"]
+material = SubResource("StandardMaterial3D_ge6xl")
+size = Vector3(0.015, 0.015, 0.015)
 
 [node name="Node3d" type="Node3D"]
 script = ExtResource("1_7plsp")
@@ -1750,6 +1799,7 @@ placeholder_text = "Command Here"
 script = ExtResource("6_l450q")
 
 [node name="PromptDebug" type="RichTextLabel" parent="DebugUI"]
+visible = false
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -1804,6 +1854,7 @@ text_direction = 2
 script = ExtResource("13_bc6nn")
 
 [node name="SensorsDebug" type="RichTextLabel" parent="DebugUI"]
+visible = false
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
@@ -1819,6 +1870,70 @@ theme_override_font_sizes/italics_font_size = 12
 theme_override_font_sizes/bold_italics_font_size = 12
 theme_override_font_sizes/mono_font_size = 12
 bbcode_enabled = true
+
+[node name="FearFactor" type="Control" parent="DebugUI" node_paths=PackedStringArray("bar", "label")]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -750.0
+offset_top = 35.0
+offset_right = -433.0
+offset_bottom = 64.0
+grow_horizontal = 0
+script = ExtResource("62_4m685")
+bar = NodePath("ProgressBar")
+label = NodePath("FearFactor")
+
+[node name="ProgressBar" type="Control" parent="DebugUI/FearFactor"]
+anchors_preset = 0
+offset_left = 110.0
+offset_top = 6.0
+offset_right = 310.0
+offset_bottom = 21.0
+
+[node name="ColorRect" type="ColorRect" parent="DebugUI/FearFactor/ProgressBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="FearFactor" type="RichTextLabel" parent="DebugUI/FearFactor"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -349.0
+offset_top = 6.0
+offset_right = -215.0
+offset_bottom = 27.0
+grow_horizontal = 0
+theme_override_fonts/normal_font = ExtResource("43_ff5h2")
+theme_override_fonts/bold_font = ExtResource("62_l181e")
+theme_override_font_sizes/normal_font_size = 12
+theme_override_font_sizes/bold_font_size = 12
+theme_override_font_sizes/italics_font_size = 12
+theme_override_font_sizes/bold_italics_font_size = 12
+theme_override_font_sizes/mono_font_size = 12
+bbcode_enabled = true
+text = "[right]FEAR FACTOR[/right]"
+
+[node name="EndBar" type="Label" parent="DebugUI/FearFactor"]
+layout_mode = 0
+offset_left = 306.345
+offset_right = 346.345
+offset_bottom = 23.0
+text = "|"
+
+[node name="StartBar" type="Label" parent="DebugUI/FearFactor"]
+layout_mode = 0
+offset_left = 105.71
+offset_top = -0.465
+offset_right = 145.71
+offset_bottom = 22.535
+text = "|"
 
 [node name="LatencyStatistics" type="RichTextLabel" parent="DebugUI"]
 layout_mode = 1
@@ -1852,27 +1967,6 @@ Command Recognized Count	0"
 
 [node name="LabelFixer" type="Node" parent="DebugUI/LatencyStatistics"]
 script = ExtResource("45_lsjot")
-
-[node name="CurrentTime" type="RichTextLabel" parent="DebugUI"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -570.3
-offset_top = 197.0
-offset_right = -370.3
-offset_bottom = 217.0
-grow_horizontal = 0
-pivot_offset = Vector2(570, 0)
-theme_override_fonts/normal_font = ExtResource("43_ff5h2")
-theme_override_fonts/bold_font = ExtResource("62_l181e")
-theme_override_font_sizes/normal_font_size = 12
-theme_override_font_sizes/bold_font_size = 12
-theme_override_font_sizes/italics_font_size = 12
-theme_override_font_sizes/bold_italics_font_size = 12
-theme_override_font_sizes/mono_font_size = 12
-bbcode_enabled = true
-text = "[right]20.0s[/right]"
 
 [node name="FancyProgressBar" type="RichTextLabel" parent="DebugUI"]
 layout_mode = 1
@@ -1976,6 +2070,34 @@ theme_override_font_sizes/bold_italics_font_size = 12
 theme_override_font_sizes/mono_font_size = 12
 bbcode_enabled = true
 text = "Model: ???"
+
+[node name="CurrentTimeContainer" type="VBoxContainer" parent="DebugUI"]
+custom_minimum_size = Vector2(100, 200)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -470.0
+offset_top = 40.0
+offset_right = -370.0
+offset_bottom = 240.0
+grow_horizontal = 0
+
+[node name="Spacer" type="Control" parent="DebugUI/CurrentTimeContainer"]
+layout_mode = 2
+
+[node name="CurrentTime" type="RichTextLabel" parent="DebugUI/CurrentTimeContainer"]
+layout_mode = 2
+theme_override_fonts/normal_font = ExtResource("43_ff5h2")
+theme_override_fonts/bold_font = ExtResource("62_l181e")
+theme_override_font_sizes/normal_font_size = 12
+theme_override_font_sizes/bold_font_size = 12
+theme_override_font_sizes/italics_font_size = 12
+theme_override_font_sizes/bold_italics_font_size = 12
+theme_override_font_sizes/mono_font_size = 12
+bbcode_enabled = true
+text = "[right]20.0s[/right]"
+fit_content = true
 
 [node name="Crosshair" type="TextureRect" parent="."]
 anchors_preset = 8
@@ -2251,3 +2373,56 @@ sound_player = NodePath("AudioStreamPlayer")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="CriticalAlert"]
 stream = ExtResource("82_wi1yh")
+
+[node name="InitialFadeIn" type="ColorRect" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+script = ExtResource("84_lc4jw")
+
+[node name="ShaderPrecompiler" parent="." instance=ExtResource("83_gkfck")]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -10.9455, 1.99162, 5.00201)
+
+[node name="ShaderPrecompilerNotifier" type="Label" parent="."]
+visible = false
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -492.0
+offset_top = 36.0
+offset_right = -36.0
+offset_bottom = 61.0
+grow_horizontal = 0
+theme_override_fonts/font = ExtResource("77_uyrdc")
+theme_override_font_sizes/font_size = 24
+text = "Give us a second, compiling shaders..."
+horizontal_alignment = 2
+script = ExtResource("85_65pj0")
+
+[node name="Sparks" type="GPUParticles3D" parent="."]
+transform = Transform3D(-0.704212, 0.694254, 3.03468e-08, 0, -4.32258e-08, 0.98889, 0.694254, 0.704212, 3.07821e-08, -10.9985, 2.17075, 3.87562)
+material_overlay = SubResource("StandardMaterial3D_21yi8")
+cast_shadow = 0
+gi_mode = 0
+emitting = false
+amount = 256
+lifetime = 2.0
+one_shot = true
+explosiveness = 1.0
+randomness = 1.0
+fixed_fps = 0
+interpolate = false
+fract_delta = false
+visibility_aabb = AABB(-2.5, -3.91, -2.5, 5, 4.185, 5)
+trail_lifetime = 1.0
+process_material = SubResource("ParticleProcessMaterial_cii0q")
+draw_pass_1 = SubResource("BoxMesh_fximc")
+script = ExtResource("86_wu0qa")
+
+[node name="Menu" parent="." instance=ExtResource("87_3yxpn")]
+visible = false
