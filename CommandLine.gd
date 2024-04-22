@@ -27,6 +27,8 @@ func _input(event):
 			EventBus.emit_signal("LLMResponseChunk", chunk);
 
 		EventBus.emit_signal("LLMLastResponseChunk", tokenized[tokenized.size() - 1]);
+	elif event.is_action_pressed("ui_cancel") and has_focus():
+		release_focus()
 
 func fakeTokenize(_text: String) -> Array[String]:
 

@@ -52,6 +52,8 @@ func _input(event):
 		
 		clear()
 		release_focus()
+	elif event.is_action_pressed("ui_cancel") and has_focus():
+		release_focus()
 
 var completed_text := ""
 var partial_text := ""
