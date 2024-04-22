@@ -127,6 +127,14 @@ public partial class NarrativeIntegrity : Node
                             "VERDICT: Roleplaying - nonsensical or out of context in the context of in-universe speech.\nYou think you can catch me?",
                         role = "assistant"
                     },
+                    new() { content = "Mark Walker", role = "user" },
+                    new() { content = "Mark Walker", role = "assistant" },
+                    new() { content = "My name? David Requinton.", role = "user" },
+                    new() { content = "My name? David Requinton.", role = "assistant" },
+                    new() { content = "I died in this room.", role = "user", },
+                    new() { content = "I died in this room.", role = "assistant", },
+                    new() { content = "I died 200 years ago.", role = "user", },
+                    new() { content = "I died 200 years ago.", role = "assistant", },
                     new() { content = "I am a demon.", role = "user", },
                     new()
                     {
