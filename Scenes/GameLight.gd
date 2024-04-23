@@ -129,9 +129,8 @@ func _ready():
 
 	for light in lights:
 		defaultIntensities[light.name] = light.light_energy
-		if OS.get_name() == "macOS":
-			#light.shadow_enabled = false
-			pass
+		if Config.Get("SHADOWS").to_lower() == "true":
+			light.shadow_enabled = true
 
 	for node in nodesWithEmission:
 		defaultIntensities[node.name] = node.material.emission_energy_multiplier
