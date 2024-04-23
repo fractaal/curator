@@ -21,6 +21,25 @@ func _set_shadows(directional_shadow_size, positional_shadow_size):
 	RenderingServer.viewport_set_positional_shadow_atlas_size(get_viewport().get_viewport_rid(), positional_shadow_size, true)
 	RenderingServer.directional_shadow_atlas_set_size(directional_shadow_size, true)
 
+func _set_shadow_filters(quality):
+	var constants = ClassDB.class_get_integer_constant_list("RenderingServer")
+	
+	var available_quality_settings = []
+	
+	for constant in constants:
+		if constant.begins_with("SHADOW_QUALITY_") and not constant.ends_with("MAX"):
+			available_quality_settings.append(constant.substr("SHADOW_QUALITY_".length()))
+	
+	if quality in available_quality_settings:
+		RenderingServer.positional_soft_shadow_filter_set_quality(RenderingServer["SHADOW_QUALITY_" + quality])
+		RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer["SHADOW_QUALITY_" + quality])
+	else:
+		push_error(
+			"Invalid shadow quality setting: " + 
+			quality + " is not a valid quality setting!\n" +
+			"Valid quality settings are " + available_quality_settings.reduce(func (acc, qual): return acc + qual + ", ", ""),
+		)
+		
 func _ready():
 	var platform := OS.get_name()
 	
@@ -35,7 +54,10 @@ func _ready():
 	var directional_shadow_size = Config.Get("DIRECTIONAL_SHADOW_SIZE")
 	var positional_shadow_size = Config.Get("POSITIONAL_SHADOW_SIZE")
 	
+	var soft_shadow_quality = Config.Get("SHADOW_FILTER_QUALITY")
+	
 	_set_shadows(directional_shadow_size, positional_shadow_size)
+	_set_shadow_filters(soft_shadow_quality)
 
 	var vsync = Config.Get("VSYNC").to_lower()
 	if vsync == "true":
