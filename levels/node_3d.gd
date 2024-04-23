@@ -17,7 +17,7 @@ func _ready():
 		get_viewport().scaling_3d_mode = Viewport["SCALING_3D_MODE_" + scaling_mode]
 	else:
 		print("Invalid scaling mode: ", scaling_mode)
-		get_viewport().scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR2
+		get_viewport().scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR
 
 	var scaling_factor = Config.Get("SCALING_FACTOR")
 

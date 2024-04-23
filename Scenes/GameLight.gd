@@ -82,7 +82,7 @@ func _process(delta):
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	registry.Register(objectType);
+	registry.Register(objectType)
 	
 	noise = FastNoiseLite.new()
 
@@ -129,6 +129,9 @@ func _ready():
 
 	for light in lights:
 		defaultIntensities[light.name] = light.light_energy
+		if OS.get_name() == "macOS":
+			#light.shadow_enabled = false
+			pass
 
 	for node in nodesWithEmission:
 		defaultIntensities[node.name] = node.material.emission_energy_multiplier

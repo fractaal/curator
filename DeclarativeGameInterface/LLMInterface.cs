@@ -249,6 +249,10 @@ public partial class LLMInterface : Node
         catch (Exception e)
         {
             GD.PrintErr("Failed to send request: " + e.Message + ", " + e.StackTrace);
+            if (e.Message.Contains("not known"))
+            {
+                EmitCriticalMesage("Your internet connection is unstable!");
+            }
             return "";
         }
     }
@@ -358,6 +362,11 @@ public partial class LLMInterface : Node
         catch (Exception e)
         {
             GD.PrintErr("Failed to send request: " + e.Message);
+            if (e.Message.Contains("not known"))
+            {
+                EmitCriticalMesage("Your internet connection is unstable!");
+            }
+
             EmitLLMLastResponseChunk("");
         }
     }

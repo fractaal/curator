@@ -1,8 +1,9 @@
-[gd_scene load_steps=126 format=3 uid="uid://ctahsvj88g1om"]
+[gd_scene load_steps=127 format=3 uid="uid://ctahsvj88g1om"]
 
 [ext_resource type="Script" path="res://levels/node_3d.gd" id="1_7plsp"]
 [ext_resource type="PackedScene" uid="uid://7gv6q50fuutj" path="res://Scenes/Player/player.tscn" id="1_eisjc"]
 [ext_resource type="CompressedTexture3D" uid="uid://dvb27bbktotnl" path="res://textures/environment_adjustments_3d_lut_template.png" id="2_6h08h"]
+[ext_resource type="PackedScene" uid="uid://cggqb75a8w8r" path="res://addons/debug_menu/debug_menu.tscn" id="2_w3vj7"]
 [ext_resource type="PackedScene" uid="uid://bneerl5b5oye4" path="res://Scenes/Door.tscn" id="4_b4bgh"]
 [ext_resource type="PackedScene" uid="uid://cu4t280a3i24a" path="res://Scenes/WallLamp.tscn" id="5_2hejl"]
 [ext_resource type="Texture2D" uid="uid://yu8dy21hybkk" path="res://textures/Grass.jpg" id="6_6l7u0"]
@@ -109,25 +110,27 @@ sky = SubResource("Sky_ivwug")
 sky_rotation = Vector3(3.48787e-16, 3.48787e-16, 3.48787e-16)
 ambient_light_color = Color(0.890196, 0.890196, 0.890196, 1)
 tonemap_mode = 2
-ssr_enabled = true
 ssao_enabled = true
 ssao_radius = 0.25
 ssao_intensity = 8.0
 ssao_power = 3.0
 ssao_detail = 1.0
-ssil_enabled = true
-sdfgi_enabled = true
 sdfgi_use_occlusion = true
 sdfgi_cascades = 6
 sdfgi_min_cell_size = 0.4
+sdfgi_cascade0_distance = 25.6
+sdfgi_max_distance = 1638.4
 sdfgi_energy = 0.5
 glow_enabled = true
-glow_intensity = 1.0
-glow_bloom = 1.0
+glow_normalized = true
+glow_intensity = 0.2
+glow_bloom = 0.5
+glow_blend_mode = 1
+glow_hdr_scale = 4.0
+glow_hdr_luminance_cap = 10.0
 fog_light_color = Color(0, 0, 0, 1)
 fog_light_energy = 1.07
 fog_density = 0.1002
-volumetric_fog_enabled = true
 volumetric_fog_density = 0.03
 volumetric_fog_anisotropy = 0.85
 volumetric_fog_length = 16.0
@@ -377,6 +380,8 @@ size = Vector3(0.015, 0.015, 0.015)
 
 [node name="Node3d" type="Node3D"]
 script = ExtResource("1_7plsp")
+
+[node name="DebugMenu" parent="." instance=ExtResource("2_w3vj7")]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_l5pxq")
