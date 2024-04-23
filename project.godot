@@ -41,7 +41,7 @@ FuzzySharpGodotBridge="*res://Scripts/FuzzySharpGodotBridge.cs"
 window/size/viewport_width=1600
 window/size/viewport_height=900
 window/dpi/allow_hidpi=false
-window/vsync/vsync_mode=3
+window/vsync/vsync_mode=0
 
 [dotnet]
 
@@ -213,8 +213,7 @@ jolt_3d/limits/max_temporary_memory=128
 
 [rendering]
 
-lights_and_shadows/directional_shadow/size=1024
-lights_and_shadows/directional_shadow/size.mobile=1024
+lights_and_shadows/directional_shadow/size=2048
 lights_and_shadows/directional_shadow/soft_shadow_filter_quality=0
 lights_and_shadows/positional_shadow/soft_shadow_filter_quality=0
 global_illumination/gi/use_half_resolution=true
@@ -226,6 +225,5 @@ global_illumination/sdfgi/probe_ray_count=0
 global_illumination/sdfgi/frames_to_converge=2
 global_illumination/sdfgi/frames_to_update_lights=3
 occlusion_culling/use_occlusion_culling=true
-lights_and_shadows/positional_shadow/atlas_size=1024
-lights_and_shadows/positional_shadow/atlas_size.mobile=1024
+lights_and_shadows/positional_shadow/atlas_size=2048
 anti_aliasing/canvas_textures/default_texture_repeat=1
