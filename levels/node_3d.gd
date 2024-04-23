@@ -2,6 +2,25 @@ extends Node3D
 
 # var Config := preload ("res://Scripts/Config.cs")
 
+func _set_shadows(directional_shadow_size, positional_shadow_size):
+	await get_tree().create_timer(1).timeout
+	if directional_shadow_size == "":
+		directional_shadow_size = 1024
+	else:
+		directional_shadow_size = int(directional_shadow_size)
+		if directional_shadow_size < 1:
+			directional_shadow_size = 1
+	
+	if positional_shadow_size == "":
+		positional_shadow_size = 1024
+	else:
+		positional_shadow_size = int(positional_shadow_size)
+		if positional_shadow_size < 0:
+			positional_shadow_size = 0
+	
+	RenderingServer.viewport_set_positional_shadow_atlas_size(get_viewport().get_viewport_rid(), positional_shadow_size, true)
+	RenderingServer.directional_shadow_atlas_set_size(directional_shadow_size, true)
+
 func _ready():
 	var platform := OS.get_name()
 	
@@ -12,6 +31,17 @@ func _ready():
 	var scaling_mode = Config.Get("SCALING_ALGORITHM").to_upper()
 	if scaling_mode == "":
 		scaling_mode = "FSR2"
+	
+	var directional_shadow_size = Config.Get("DIRECTIONAL_SHADOW_SIZE")
+	var positional_shadow_size = Config.Get("POSITIONAL_SHADOW_SIZE")
+	
+	_set_shadows(directional_shadow_size, positional_shadow_size)
+
+	var vsync = Config.Get("VSYNC").to_lower()
+	if vsync == "true":
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED)
+	else:
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 
 	if Viewport["SCALING_3D_MODE_" + scaling_mode]:
 		get_viewport().scaling_3d_mode = Viewport["SCALING_3D_MODE_" + scaling_mode]
