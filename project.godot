@@ -19,6 +19,7 @@ boot_splash/image="res://Splash.png"
 [audio]
 
 driver/enable_input=true
+driver/mix_rate=48000
 
 [autoload]
 
@@ -220,7 +221,7 @@ global_illumination/gi/use_half_resolution=true
 anti_aliasing/screen_space_roughness_limiter/enabled=false
 scaling_3d/mode=1
 scaling_3d/scale=0.75
-scaling_3d/fsr_sharpness=0.3
+scaling_3d/fsr_sharpness=2.0
 global_illumination/sdfgi/probe_ray_count=0
 global_illumination/sdfgi/frames_to_converge=1
 occlusion_culling/use_occlusion_culling=true

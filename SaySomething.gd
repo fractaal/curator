@@ -74,7 +74,7 @@ func _on_capture_stream_to_text_transcribed_msg(is_partial, new_text):
 			completed_text = "" # Reset the completed_text since it's already handled
 			partial_text = "" # Clear partial text as well
 			update_text("You said - " + new_text)
-			# EventBus.emit_signal("ToastNotification", "You said \"" + new_text + "\"")
+			EventBus.emit_signal("ToastNotification", "You said \"" + new_text + "\"")
 		else:
 			# If it's not a complete sentence, just update the partial_text
 			partial_text = new_text

@@ -5,7 +5,7 @@ extends Node3D
 func _set_shadows(directional_shadow_size, positional_shadow_size):
 	await get_tree().create_timer(1).timeout
 	if directional_shadow_size == "":
-		directional_shadow_size = 1024
+		directional_shadow_size = 256
 	else:
 		directional_shadow_size = int(directional_shadow_size)
 		if directional_shadow_size < 1:
@@ -35,9 +35,9 @@ func _set_shadow_filters(quality):
 		RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer["SHADOW_QUALITY_" + quality])
 	else:
 		push_error(
-			"Invalid shadow quality setting: " + 
+			"Invalid shadow quality setting: " +
 			quality + " is not a valid quality setting!\n" +
-			"Valid quality settings are " + available_quality_settings.reduce(func (acc, qual): return acc + qual + ", ", ""),
+			"Valid quality settings are " + available_quality_settings.reduce(func(acc, qual): return acc + qual + ", ", ""),
 		)
 		
 func _ready():
@@ -49,12 +49,15 @@ func _ready():
 
 	var scaling_mode = Config.Get("SCALING_ALGORITHM").to_upper()
 	if scaling_mode == "":
-		scaling_mode = "FSR2"
+		scaling_mode = "FSR"
 	
 	var directional_shadow_size = Config.Get("DIRECTIONAL_SHADOW_SIZE")
 	var positional_shadow_size = Config.Get("POSITIONAL_SHADOW_SIZE")
 	
 	var soft_shadow_quality = Config.Get("SHADOW_FILTER_QUALITY")
+
+	if soft_shadow_quality == "":
+		soft_shadow_quality = "SOFT_VERY_LOW"
 	
 	_set_shadows(directional_shadow_size, positional_shadow_size)
 	_set_shadow_filters(soft_shadow_quality)
@@ -65,12 +68,8 @@ func _ready():
 	else:
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 
-	if Viewport["SCALING_3D_MODE_" + scaling_mode]:
-		get_viewport().scaling_3d_mode = Viewport["SCALING_3D_MODE_" + scaling_mode]
-	else:
-		print("Invalid scaling mode: ", scaling_mode)
-		get_viewport().scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR
-
+	get_viewport().scaling_3d_mode = Viewport["SCALING_3D_MODE_" + scaling_mode]
+	
 	var scaling_factor = Config.Get("SCALING_FACTOR")
 
 	if scaling_factor.is_valid_float():

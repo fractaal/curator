@@ -37,6 +37,8 @@ var chaseSpeed = "slow"
 
 var chasing_EntireSequence = false
 
+var _last_chase_time = 0
+
 var FirstNames := [
 	"John",
 	"Jennifer",
@@ -190,6 +192,10 @@ func appear():
 func chase(arguments):
 	if chasing or gameEnded:
 		return
+	
+	if (Time.get_ticks_msec() - _last_chase_time) < 5000:
+		print("New chase command was suspiciously too near a newly-ended chase. Ignoring")
+		return
 
 	EventBus.emit_signal("ChaseStarted")
 	chasing_EntireSequence = true
@@ -251,6 +257,7 @@ func chase(arguments):
 		await tween.finished
 
 	chasing_EntireSequence = false
+	_last_chase_time = Time.get_ticks_msec()
 
 	EventBus.emit_signal("ChaseEnded")
 	EventBus.emit_signal("ObjectInteraction", "unlock", "doors", "all")

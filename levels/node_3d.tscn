@@ -131,6 +131,7 @@ glow_hdr_luminance_cap = 10.0
 fog_light_color = Color(0, 0, 0, 1)
 fog_light_energy = 1.07
 fog_density = 0.1002
+volumetric_fog_enabled = true
 volumetric_fog_density = 0.03
 volumetric_fog_anisotropy = 0.85
 volumetric_fog_length = 16.0
@@ -326,7 +327,7 @@ size = Vector3(5.57324, 3.29832, 4.62598)
 size = Vector3(5.8857, 3.32785, 16.6559)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_vwoup"]
-size = Vector3(1.44018, 3.32785, 1.90278)
+size = Vector3(1.44018, 3.32785, 2.73391)
 
 [sub_resource type="AudioStreamMicrophone" id="AudioStreamMicrophone_pqhwn"]
 
@@ -392,6 +393,7 @@ light_color = Color(0.643137, 0.705882, 0.988235, 1)
 light_energy = 0.02
 light_bake_mode = 0
 shadow_enabled = true
+directional_shadow_mode = 0
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 root_node = NodePath("")
@@ -588,7 +590,10 @@ transform = Transform3D(0.003, 0, 0, 0, 0.003, 0, 0, 0, 0.003, -0.975137, 2.6767
 transform = Transform3D(-0.003, 0, -2.62268e-10, 0, 0.003, 0, 2.62268e-10, 0, -0.003, -0.191331, 2.92017, 10.7204)
 
 [node name="wall_lamp_09" parent="NavigationRegion3D" instance=ExtResource("5_2hejl")]
-transform = Transform3D(3.93402e-10, 0, -0.003, 0, 0.003, 0, 0.003, 0, 3.93402e-10, -3.62162, 3.62979, 4.79429)
+transform = Transform3D(3.93402e-10, 0, -0.003, 0, 0.003, 0, 0.003, 0, 3.93402e-10, -3.63189, 2.57771, 6.09359)
+
+[node name="wall_lamp_10" parent="NavigationRegion3D" instance=ExtResource("5_2hejl")]
+transform = Transform3D(3.93402e-10, 0, -0.003, 0, 0.003, 0, 0.003, 0, 3.93402e-10, -3.63189, 2.57771, 3.41063)
 
 [node name="wall_lamp_15" parent="NavigationRegion3D" instance=ExtResource("5_2hejl")]
 transform = Transform3D(0.003, 0, 5.24536e-10, 0, 0.003, 0, -5.24536e-10, 0, 0.003, 9.83878, 6.83464, 4.56775)
@@ -809,7 +814,7 @@ material = ExtResource("20_8ymn3")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.35122, 3.68162, 20.0274)
 
 [node name="CeilingLight4" parent="NavigationRegion3D" instance=ExtResource("10_oimnh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.24999, 7.26182, 20.1411)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.408508, 7.26182, 20.1411)
 
 [node name="CeilingLight5" parent="NavigationRegion3D" instance=ExtResource("10_oimnh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.85336, 7.43769, 7.94418)
@@ -818,7 +823,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.85336, 7.43769, 7.94418)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.31564, 3.86406, 12.1055)
 
 [node name="CeilingLight3" parent="NavigationRegion3D" instance=ExtResource("10_oimnh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.89204, 3.86406, 4.9094)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.11757, 3.79023, 5.14355)
 
 [node name="CeilingLight7" parent="NavigationRegion3D" instance=ExtResource("10_oimnh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.86197, 7.44263, 7.60008)
@@ -2205,7 +2210,7 @@ collision_mask = 15
 script = ExtResource("12_kaqth")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Entrance"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.7708, 0.613299, -0.241802)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.7708, 0.613299, -0.378697)
 shape = SubResource("BoxShape3D_vwoup")
 
 [node name="LogManager" type="Node" parent="." node_paths=PackedStringArray("LatencyStatisticsUI", "LLMResponseUI", "LLMModelUI")]
@@ -2251,12 +2256,12 @@ script = ExtResource("32_jsfk5")
 
 [node name="MicPlayer" type="AudioStreamPlayer" parent="CaptureStreamToText"]
 stream = SubResource("AudioStreamMicrophone_pqhwn")
+autoplay = true
 bus = &"Record"
 
 [node name="CaptureStreamToText" type="SpeechToText" parent="CaptureStreamToText"]
 language_model = ExtResource("74_1wubi")
 script = ExtResource("38_3vk56")
-recording = false
 transcribe_interval = 2.0
 maximum_sentence_time = 10
 

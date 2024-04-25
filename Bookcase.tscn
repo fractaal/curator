@@ -1,8 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://qadd3ea7f3ag"]
+[gd_scene load_steps=7 format=3 uid="uid://qadd3ea7f3ag"]
 
 [ext_resource type="PackedScene" uid="uid://m63apa1qke4" path="res://models/Bookcase.fbx" id="1_66ph7"]
 [ext_resource type="Script" path="res://PantryCabinet.gd" id="1_dq26e"]
-[ext_resource type="PackedScene" uid="uid://dt5d3woepamaa" path="res://models/CuttingBoard.tscn" id="2_g47rt"]
 [ext_resource type="PackedScene" uid="uid://cdxp461uj80ip" path="res://models/Book.tscn" id="3_yk0wk"]
 [ext_resource type="PackedScene" uid="uid://26xawlqggyub" path="res://models/Can/Can.tscn" id="5_a74x3"]
 [ext_resource type="PackedScene" uid="uid://dlu0qla0pb2o5" path="res://models/Plate/Plate.tscn" id="6_mwqcf"]
@@ -12,7 +11,7 @@ size = Vector3(2.28662, 0.101318, 1.03314)
 
 [node name="Node3D10" type="StaticBody3D"]
 script = ExtResource("1_dq26e")
-Objects = Array[PackedScene]([ExtResource("2_g47rt"), ExtResource("3_yk0wk"), ExtResource("6_mwqcf"), ExtResource("5_a74x3")])
+Objects = Array[PackedScene]([ExtResource("3_yk0wk"), ExtResource("6_mwqcf"), ExtResource("5_a74x3")])
 
 [node name="Root Scene" parent="." instance=ExtResource("1_66ph7")]
 transform = Transform3D(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05, 0, 0, 0)
