@@ -259,8 +259,6 @@ public partial class LLMInterface : Node
 
     private async Task DoRequest(List<Message> messages)
     {
-        EventBus bus = EventBus.Get();
-
         try
         {
             using (var request = new HttpRequestMessage(HttpMethod.Post, url))
