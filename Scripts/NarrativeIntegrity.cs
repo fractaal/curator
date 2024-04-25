@@ -42,7 +42,14 @@ public partial class NarrativeIntegrity : Node
         "arg",
         "param",
         "whisper",
-        "message"
+        "message",
+        "roleplay",
+        "universe",
+        "language",
+        "vague",
+        "nonsensical",
+        "context",
+        "natural"
     };
 
     public override void _Ready()
@@ -169,10 +176,25 @@ public partial class NarrativeIntegrity : Node
                 return sanitizedMessage;
             }
 
-            Bus.EmitSignal(
-                EventBus.SignalName.SystemFeedback,
-                $"NARRATIVE INTEGRITY FAILURE: During {action}, you generated \"{message}\" as output. This is not allowed, because of **{reason}.** Your message has been amended to \"{sanitizedMessage}\" Please take note of this in the future and follow the example of the amended message."
-            );
+            if (sanitizedMessage == "")
+            {
+                Bus.EmitSignal(
+                    EventBus.SignalName.SystemFeedback,
+                    $"NARRATIVE INTEGRITY FAILURE: During {action}, you generated -- \"{message}\" -- as output."
+                        + $"This is not allowed, because: **{reason}.** Your message has been completely removed."
+                        + "To prevent future removals, abide by narrative integrity, and respect the game objective."
+                );
+            }
+            else
+            {
+                Bus.EmitSignal(
+                    EventBus.SignalName.SystemFeedback,
+                    $"NARRATIVE INTEGRITY FAILURE: During {action}, you generated -- \"{message}\" -- as output."
+                        + $"This is not allowed, because: **{reason}.** Your message has been amended to -- \"{sanitizedMessage}\" -- "
+                        + "Please take note of this in the future and abide by narrative integrity, the example of the amended message,"
+                        + "and respect the game objective."
+                );
+            }
 
             return sanitizedMessage;
         }
