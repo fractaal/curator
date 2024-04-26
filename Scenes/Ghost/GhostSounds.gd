@@ -32,9 +32,7 @@ func _on_ghost_action(verb: String, arguments: String):
 		var stream: AudioStreamWAV
 		
 		for _stream in sound_streams:
-			print("Comparing ", _stream.resource_path.get_file().get_basename(), " with ", sound_name)
 			var factor = FuzzySharpGodotBridge.PartialRatio(_stream.resource_path.get_file().get_basename(), sound_name)
-			print("Factor was ", factor)
 			if factor > 75:
 				stream = _stream
 
