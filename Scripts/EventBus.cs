@@ -94,6 +94,9 @@ public partial class EventBus : Node
     [Signal]
     public delegate void CriticalMessageEventHandler(string message);
 
+    [Signal]
+    public delegate void LogFileMessageEventHandler(string message);
+
     // Some game-specific signals
     [Signal]
     public delegate void ChaseStartedEventHandler();
