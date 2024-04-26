@@ -53,6 +53,7 @@ public partial class Logger : Node
         string subdirectory = "Game Logs";
         string logFileName = "Game Log " + $"{DateTime.Now:yyyy-MM-dd HHmmss}" + ".txt";
         string logDirectory = Path.Combine(directory, subdirectory);
+
         logFilePath = Path.Combine(logDirectory, logFileName);
         Directory.CreateDirectory(logDirectory);
 
@@ -157,6 +158,12 @@ public partial class Logger : Node
         bus.EndgameSummary += (string message) =>
         {
             Write($"EndgameSummary|" + message);
+            Flush();
+        };
+
+        bus.LogFileMessage += (string message) =>
+        {
+            Write($"LogFileMessage|" + message);
             Flush();
         };
     }
