@@ -1,4 +1,4 @@
-[gd_scene load_steps=128 format=3 uid="uid://ctahsvj88g1om"]
+[gd_scene load_steps=129 format=3 uid="uid://ctahsvj88g1om"]
 
 [ext_resource type="Script" path="res://levels/node_3d.gd" id="1_7plsp"]
 [ext_resource type="PackedScene" uid="uid://7gv6q50fuutj" path="res://Scenes/Player/player.tscn" id="1_eisjc"]
@@ -82,6 +82,7 @@
 [ext_resource type="Script" path="res://levels/EndGameButtons.gd" id="76_stbum"]
 [ext_resource type="Script" path="res://Scripts/FearFactor.cs" id="77_7fshy"]
 [ext_resource type="FontFile" uid="uid://dg4fvw3nd4p4u" path="res://Fonts/FantasqueSansMono-Bold.ttf" id="77_uyrdc"]
+[ext_resource type="Script" path="res://DeclarativeGameInterface/FailureStatistics.cs" id="80_7lcau"]
 [ext_resource type="PackedScene" uid="uid://buarp2d3yiedg" path="res://models/Clock.tscn" id="80_yr6qh"]
 [ext_resource type="Script" path="res://Scripts/CriticalAlertReceiver.gd" id="81_higv2"]
 [ext_resource type="AudioStream" uid="uid://dphfwbv2e6kb0" path="res://Audio/Alert.wav" id="82_wi1yh"]
@@ -2065,14 +2066,10 @@ text = "[b]-- LLM Response --[/b]"
 
 [node name="Events" type="RichTextLabel" parent="DebugUI"]
 layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -1574.0
-offset_top = 111.0
-offset_right = -1259.0
-offset_bottom = 449.0
-grow_horizontal = 0
+offset_left = 34.0
+offset_top = 100.0
+offset_right = 513.0
+offset_bottom = 438.0
 focus_mode = 2
 theme_override_fonts/normal_font = ExtResource("43_ff5h2")
 theme_override_font_sizes/normal_font_size = 12
@@ -2090,14 +2087,10 @@ script = ExtResource("45_lsjot")
 
 [node name="EventsTitle" type="RichTextLabel" parent="DebugUI"]
 layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -1571.0
-offset_top = 81.0
-offset_right = -1239.0
-offset_bottom = 106.0
-grow_horizontal = 0
+offset_left = 31.0
+offset_top = 76.0
+offset_right = 363.0
+offset_bottom = 101.0
 theme_override_fonts/normal_font = ExtResource("43_ff5h2")
 theme_override_fonts/bold_font = ExtResource("62_l181e")
 theme_override_font_sizes/normal_font_size = 12
@@ -2154,6 +2147,17 @@ theme_override_font_sizes/mono_font_size = 12
 bbcode_enabled = true
 text = "[right]20.0s[/right]"
 fit_content = true
+
+[node name="FailureStatistics" type="Label" parent="DebugUI"]
+layout_mode = 0
+offset_left = 511.0
+offset_top = 40.0
+offset_right = 641.0
+offset_bottom = 63.0
+theme_override_fonts/font = ExtResource("62_l181e")
+theme_override_font_sizes/font_size = 12
+text = "Failure Statistics"
+horizontal_alignment = 2
 
 [node name="Crosshair" type="TextureRect" parent="."]
 anchors_preset = 8
@@ -2302,12 +2306,12 @@ script = ExtResource("32_jsfk5")
 
 [node name="MicPlayer" type="AudioStreamPlayer" parent="CaptureStreamToText"]
 stream = SubResource("AudioStreamMicrophone_pqhwn")
-autoplay = true
 bus = &"Record"
 
 [node name="CaptureStreamToText" type="SpeechToText" parent="CaptureStreamToText"]
 language_model = ExtResource("74_1wubi")
 script = ExtResource("38_3vk56")
+recording = false
 transcribe_interval = 2.0
 maximum_sentence_time = 10
 
@@ -2363,6 +2367,10 @@ script = ExtResource("75_k1sr7")
 [node name="ToastNotifications" type="Node" parent="." node_paths=PackedStringArray("StatusView")]
 script = ExtResource("76_r0kne")
 StatusView = NodePath("../CenterContainer/VBoxContainer/Label")
+
+[node name="FailureStatistics" type="Node" parent="." node_paths=PackedStringArray("Display")]
+script = ExtResource("80_7lcau")
+Display = NodePath("../DebugUI/FailureStatistics")
 
 [node name="FearFactor" type="Node" parent="."]
 script = ExtResource("77_7fshy")
