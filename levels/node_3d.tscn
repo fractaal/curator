@@ -1,4 +1,4 @@
-[gd_scene load_steps=127 format=3 uid="uid://ctahsvj88g1om"]
+[gd_scene load_steps=128 format=3 uid="uid://ctahsvj88g1om"]
 
 [ext_resource type="Script" path="res://levels/node_3d.gd" id="1_7plsp"]
 [ext_resource type="PackedScene" uid="uid://7gv6q50fuutj" path="res://Scenes/Player/player.tscn" id="1_eisjc"]
@@ -66,6 +66,7 @@
 [ext_resource type="FontFile" uid="uid://dhvoljulm758p" path="res://Fonts/JetBrains Mono Regular Nerd Font Complete Mono.ttf" id="61_etk1b"]
 [ext_resource type="Script" path="res://Scripts/Debug/FearFactorReceiver.gd" id="62_4m685"]
 [ext_resource type="FontFile" uid="uid://b2twsdkyswbmf" path="res://Fonts/JetBrains Mono Extra Bold Nerd Font Complete Mono.ttf" id="62_l181e"]
+[ext_resource type="Script" path="res://scripts/Debug/EventsAndSystemFeedbackDebug.gd" id="64_5dgl1"]
 [ext_resource type="PackedScene" uid="uid://c1y54yeagvxr4" path="res://models/Chair/ChairPhysicsObject.tscn" id="66_e2mm6"]
 [ext_resource type="PackedScene" uid="uid://cdxp461uj80ip" path="res://models/Book.tscn" id="67_sdr6n"]
 [ext_resource type="PackedScene" uid="uid://dlc0kujmelwd8" path="res://models/Chair/Table.tscn" id="67_yfhxp"]
@@ -1802,7 +1803,7 @@ grow_vertical = 2
 layout_mode = 0
 offset_left = 28.0
 offset_top = 28.0
-offset_right = 778.0
+offset_right = 468.0
 offset_bottom = 68.0
 theme_override_fonts/font = ExtResource("43_ff5h2")
 placeholder_text = "Command Here"
@@ -2022,10 +2023,10 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -337.0
-offset_top = 298.0
-offset_right = -18.0
-offset_bottom = 784.0
+offset_left = -730.0
+offset_top = 94.0
+offset_right = -415.0
+offset_bottom = 432.0
 grow_horizontal = 0
 focus_mode = 2
 theme_override_fonts/normal_font = ExtResource("43_ff5h2")
@@ -2047,10 +2048,10 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -334.0
-offset_top = 268.0
-offset_right = -2.0
-offset_bottom = 293.0
+offset_left = -727.0
+offset_top = 64.0
+offset_right = -395.0
+offset_bottom = 89.0
 grow_horizontal = 0
 theme_override_fonts/normal_font = ExtResource("43_ff5h2")
 theme_override_fonts/bold_font = ExtResource("62_l181e")
@@ -2061,6 +2062,51 @@ theme_override_font_sizes/bold_italics_font_size = 12
 theme_override_font_sizes/mono_font_size = 12
 bbcode_enabled = true
 text = "[b]-- LLM Response --[/b]"
+
+[node name="Events" type="RichTextLabel" parent="DebugUI"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -1574.0
+offset_top = 111.0
+offset_right = -1259.0
+offset_bottom = 449.0
+grow_horizontal = 0
+focus_mode = 2
+theme_override_fonts/normal_font = ExtResource("43_ff5h2")
+theme_override_font_sizes/normal_font_size = 12
+theme_override_font_sizes/bold_font_size = 12
+theme_override_font_sizes/italics_font_size = 12
+theme_override_font_sizes/bold_italics_font_size = 12
+theme_override_font_sizes/mono_font_size = 12
+bbcode_enabled = true
+selection_enabled = true
+script = ExtResource("64_5dgl1")
+
+[node name="LabelFixer" type="Node" parent="DebugUI/Events"]
+process_mode = 4
+script = ExtResource("45_lsjot")
+
+[node name="EventsTitle" type="RichTextLabel" parent="DebugUI"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -1571.0
+offset_top = 81.0
+offset_right = -1239.0
+offset_bottom = 106.0
+grow_horizontal = 0
+theme_override_fonts/normal_font = ExtResource("43_ff5h2")
+theme_override_fonts/bold_font = ExtResource("62_l181e")
+theme_override_font_sizes/normal_font_size = 12
+theme_override_font_sizes/bold_font_size = 12
+theme_override_font_sizes/italics_font_size = 12
+theme_override_font_sizes/bold_italics_font_size = 12
+theme_override_font_sizes/mono_font_size = 12
+bbcode_enabled = true
+text = "[b]-- Events & System Feedback --[/b]"
 
 [node name="LLMModel" type="RichTextLabel" parent="DebugUI"]
 layout_mode = 1
