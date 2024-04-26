@@ -72,7 +72,7 @@ public partial class FailureStatistics : Node
 
         if ((CommandsRecognized + BaseFailures) > 0)
         {
-            SuccessRate = SucceededCommands / (CommandsRecognized + BaseFailures) * 100;
+            SuccessRate = (float)SucceededCommands / (CommandsRecognized + BaseFailures) * 100;
         }
 
         string result =
