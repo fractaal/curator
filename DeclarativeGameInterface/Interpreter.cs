@@ -10,6 +10,7 @@ public struct Command
 {
     public string Verb;
     public List<string> Arguments;
+    public string Raw;
 }
 
 public partial class Interpreter : Node
@@ -290,22 +291,15 @@ public partial class Interpreter : Node
 
         var matches = Regex.Matches(accumulatedText, pattern);
 
-        accumulatedText = Regex.Replace(
-            accumulatedText,
-            @"(?<!\])\w+\([^)]*\)(?!\[)",
-            match => $""
-        );
+        accumulatedText = Regex.Replace(accumulatedText, pattern, "");
 
         if (matches.Count() > 0)
         {
+            GD.Print(matches.Count() + " matches found");
             var recognizedCommands = new List<Command>();
 
             foreach (Match match in matches)
             {
-                EventBus
-                    .Get()
-                    .EmitSignal(EventBus.SignalName.InterpreterCommandRecognized, match.Value);
-
                 var value = match.Value;
                 var separatedString = value.Split("(");
                 var verb = separatedString[0].ToLower();
@@ -334,7 +328,7 @@ public partial class Interpreter : Node
                         );
                         Bus.EmitSignal(
                             EventBus.SignalName.SystemFeedback,
-                            $"ERROR: Command {verb} does NOT exist. PLEASE refer to the system prompt available at your disposal.\nFurther errors could result in TERMINATION of the game."
+                            $"COMMAND DOESN'T EXIST: Command {verb} does NOT exist. PLEASE refer to the system prompt available at your disposal.\nFurther errors could result in TERMINATION of the game."
                         );
                         continue;
                     }
@@ -346,7 +340,21 @@ public partial class Interpreter : Node
                     .Select(argument => argument.Trim().ToLower())
                     .ToList();
 
-                recognizedCommands.Add(new Command { Verb = verb, Arguments = arguments });
+                EventBus
+                    .Get()
+                    .EmitSignal(
+                        EventBus.SignalName.InterpreterCommandRecognized,
+                        verb + "(" + argumentString + ")"
+                    );
+
+                recognizedCommands.Add(
+                    new Command
+                    {
+                        Verb = verb,
+                        Arguments = arguments,
+                        Raw = verb + "(" + argumentString + ")"
+                    }
+                );
             }
 
             return recognizedCommands;
@@ -426,7 +434,7 @@ public partial class Interpreter : Node
                 {
                     Bus.EmitSignal(
                         EventBus.SignalName.SystemFeedback,
-                        $"TARGET DOESN'T EXIST: Trying to {objectInteractionPrefix} {objectType} in/at {target} FAILED. Because there is no such thing as \"{target}\"! Refer to the available rooms in ROOM INFORMATION."
+                        $"TARGET DOESN'T EXIST: Trying to {command.Raw} FAILED because there is no such thing as \"{target}\"! Refer to the available rooms in ROOM INFORMATION."
                     );
 
                     continue;
@@ -455,10 +463,8 @@ public partial class Interpreter : Node
                     {
                         Bus.EmitSignal(
                             EventBus.SignalName.SystemFeedback,
-                            $"TARGET DOESN'T EXIST: Trying to {command.Verb} {target} FAILED. Because there is no such thing as \"{target}\"! Refer to the available rooms in ROOM INFORMATION."
+                            $"TARGET DOESN'T EXIST: Trying to {command.Raw} FAILED because there is no such thing as \"{target}\"! Refer to the available rooms in ROOM INFORMATION."
                         );
-
-                        GD.Print("isn't a valid target");
 
                         continue;
                     }
@@ -486,10 +492,6 @@ public partial class Interpreter : Node
                 {
                     if (player.GetNode("Locator").Get("Room").AsString() == "None")
                     {
-                        Bus.EmitSignal(
-                            EventBus.SignalName.SystemFeedback,
-                            "ERROR: You tried to chase the player with `chasePlayerAsGhost`, but the player is currently outside. Try again when they're inside."
-                        );
                         continue;
                     }
 
