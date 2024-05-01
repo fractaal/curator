@@ -241,6 +241,7 @@ public partial class Interpreter : Node
             "flickerlights",
             "explodelights",
             "restorelights",
+            "turnonlights",
             "turnonradios",
             "turnoffradios",
             "playfreakymusiconradios",
@@ -307,9 +308,15 @@ public partial class Interpreter : Node
                 if (AllVerbs.Contains(verb) == false)
                 {
                     // Attempt fuzzy matching
-                    var bestMatch = AllVerbs.FindAll(v => Fuzz.PartialRatio(v, verb) > 80);
+                    var _matches = AllVerbs
+                        .Select(v => new { Verb = v, Ratio = Fuzz.PartialRatio(v, verb) })
+                        .Where(x => x.Ratio > 80);
 
-                    if (bestMatch.Count > 0)
+                    var bestMatch = matches.Any()
+                        ? _matches.Aggregate((max, cur) => max.Ratio > cur.Ratio ? max : cur).Verb
+                        : null;
+
+                    if (bestMatch is not null)
                     {
                         GD.Print(
                             "Parser: command verb "
@@ -317,7 +324,7 @@ public partial class Interpreter : Node
                                 + " not found, but a viable best match is "
                                 + bestMatch[0]
                         );
-                        verb = bestMatch[0];
+                        verb = bestMatch;
                     }
                     else
                     {
