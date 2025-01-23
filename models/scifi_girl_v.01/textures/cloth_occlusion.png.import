@@ -2,7 +2,7 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cthamueb8dill"
+uid="uid://bkiw0ilm03fwn"
 path.s3tc="res://.godot/imported/cloth_occlusion.png-17e6696ae48958c574980838210e1a09.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
@@ -24,8 +24,8 @@ compress/normal_map=0
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1
-roughness/mode=8
-roughness/src_normal="res://models/scifi_girl_v.01/textures/cloth_normal.jpeg"
+roughness/mode=0
+roughness/src_normal=""
 process/fix_alpha_border=true
 process/premult_alpha=false
 process/normal_map_invert_y=false

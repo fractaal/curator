@@ -2,13 +2,12 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bjhaufq6kojss"
+uid="uid://cuhi71fcegnto"
 path.s3tc="res://.godot/imported/Jar2_NormalMap.png-4d080e569c63e8dbc27b07b1702c604f.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
-generator_parameters={}
 
 [deps]
 

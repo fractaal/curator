@@ -104,6 +104,8 @@ func _ready():
 	GhostAge = randi_range(10, 1000)
 	FavoriteRoom = "None Yet..."
 
+	print("Ghost Type is ", GhostType)
+
 	EventBus.GhostAction.connect(_on_ghost_action)
 	lastLocationForRoomCheck = global_transform.origin
 

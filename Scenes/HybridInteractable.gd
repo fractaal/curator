@@ -48,4 +48,3 @@ func connect_to_event_bus():
 
 func _ready():
 	connect_to_event_bus.call_deferred()
-

@@ -2,13 +2,12 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://u4ooeh8xdo0m"
+uid="uid://dfnfipha5a1o"
 path.s3tc="res://.godot/imported/Carpet_wood _texture3200.jpg-1a5a5faa2b1fed24fb796661a62450b8.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
-generator_parameters={}
 
 [deps]
 

@@ -2,13 +2,12 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bmolyr2w3q0ao"
+uid="uid://cem3whpritutc"
 path.s3tc="res://.godot/imported/Carpet_NormalMap.png-de31f7b1385c52820cc409cb28da3702.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
-generator_parameters={}
 
 [deps]
 

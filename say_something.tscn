@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://blofmm7xtsw62"]
+
+[ext_resource type="FontFile" uid="uid://cvunybceg2xmx" path="res://Fonts/JetBrains Mono Bold Nerd Font Complete Mono.ttf" id="1_htlbk"]
+[ext_resource type="Script" path="res://SaySomething.gd" id="2_y57u6"]
+
+[node name="SaySomething" type="TextEdit"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 37.0
+offset_top = -70.0
+offset_right = 1012.0
+offset_bottom = -33.0
+grow_vertical = 0
+theme_override_fonts/font = ExtResource("1_htlbk")
+placeholder_text = "Press ENTER to say something..."
+script = ExtResource("2_y57u6")

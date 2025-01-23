@@ -6,92 +6,92 @@ using Godot;
 
 public partial class Prompter : Node
 {
-    private string SYSTEM_PROMPT = "";
+	private string SYSTEM_PROMPT = "";
 
-    private string BEHAVIOR_PROMPT = "";
+	private string BEHAVIOR_PROMPT = "";
 
-    private List<string> llmResponses = new List<string>();
-    private string data = "";
+	private List<string> llmResponses = new List<string>();
+	private string data = "";
 
-    private string accumulatedLLMResponse = "";
+	private string accumulatedLLMResponse = "";
 
-    private EventBus bus;
-    private LLMInterface llmInterface;
+	private EventBus bus;
+	private LLMInterface llmInterface;
 
-    private RichTextLabel promptDebugUI;
+	private RichTextLabel promptDebugUI;
 
-    public Prompter()
-    {
-        var file = FileAccess.Open(
-            "res://DeclarativeGameInterface/prompts/Main.txt",
-            FileAccess.ModeFlags.Read
-        );
-        SYSTEM_PROMPT = file.GetAsText();
+	public Prompter()
+	{
+		var file = FileAccess.Open(
+			"res://DeclarativeGameInterface/prompts/Main.txt",
+			FileAccess.ModeFlags.Read
+		);
+		SYSTEM_PROMPT = file.GetAsText();
 
-        BEHAVIOR_PROMPT = FileAccess
-            .Open(
-                "res://DeclarativeGameInterface/prompts/BehaviorPrompt.txt",
-                FileAccess.ModeFlags.Read
-            )
-            .GetAsText();
-    }
+		BEHAVIOR_PROMPT = FileAccess
+			.Open(
+				"res://DeclarativeGameInterface/prompts/BehaviorPrompt.txt",
+				FileAccess.ModeFlags.Read
+			)
+			.GetAsText();
+	}
 
-    public override void _Ready()
-    {
-        bus = GetNode<EventBus>("/root/EventBus");
-        llmInterface = GetNode<LLMInterface>("/root/LLMInterface");
+	public override void _Ready()
+	{
+		bus = GetNode<EventBus>("/root/EventBus");
+		llmInterface = GetNode<LLMInterface>("/root/LLMInterface");
 
-        promptDebugUI = GetNode<RichTextLabel>("/root/Node3d/DebugUI/PromptDebug");
+		promptDebugUI = GetNode<RichTextLabel>("/root/Node3d/DebugUI/PromptDebug");
 
-        bus.GameDataRead += (data) =>
-        {
-            string previousResponses = llmResponses
-                .TakeLast(5)
-                .Aggregate("", (acc, response) => acc + response + "\n");
+		bus.GameDataRead += (data) =>
+		{
+			string previousResponses = llmResponses
+				.TakeLast(5)
+				.Aggregate("", (acc, response) => acc + response + "\n");
 
-            if (previousResponses.Length == 0)
-            {
-                previousResponses = "No previous responses\n";
-            }
+			if (previousResponses.Length == 0)
+			{
+				previousResponses = "No previous responses\n";
+			}
 
-            string prompt = "\n" + data + "\n";
+			string prompt = "\n" + data + "\n";
 
-            List<Message> messages = new List<Message>
-            {
-                new Message { role = "system", content = SYSTEM_PROMPT },
-            };
+			List<Message> messages = new List<Message>
+			{
+				new Message { role = "system", content = SYSTEM_PROMPT },
+			};
 
-            messages.Add(new Message { role = "user", content = prompt });
-            messages.Add(new Message { role = "system", content = BEHAVIOR_PROMPT });
+			messages.Add(new Message { role = "user", content = prompt });
+			messages.Add(new Message { role = "system", content = BEHAVIOR_PROMPT });
 
-            promptDebugUI.Text = messages.Aggregate(
-                "",
-                (acc, message) =>
-                    acc
-                    + "\n [color=\"#ff0000\"][b]"
-                    + message.role
-                    + "[/b][/color]: "
-                    + message.content
-                    + "\n"
-            );
+			promptDebugUI.Text = messages.Aggregate(
+				"",
+				(acc, message) =>
+					acc
+					+ "\n [color=\"#ff0000\"][b]"
+					+ message.role
+					+ "[/b][/color]: "
+					+ message.content
+					+ "\n"
+			);
 
-            llmInterface.Send(messages);
-        };
+			llmInterface.Send(messages);
+		};
 
-        bus.LLMResponseChunk += (chunk) =>
-        {
-            accumulatedLLMResponse += chunk;
-        };
+		bus.LLMResponseChunk += (chunk) =>
+		{
+			accumulatedLLMResponse += chunk;
+		};
 
-        bus.LLMLastResponseChunk += (chunk) =>
-        {
-            bus.EmitSignal(EventBus.SignalName.LLMFullResponse, accumulatedLLMResponse);
-            accumulatedLLMResponse = "";
-        };
+		bus.LLMLastResponseChunk += (chunk) =>
+		{
+			bus.EmitSignal(EventBus.SignalName.LLMFullResponse, accumulatedLLMResponse);
+			accumulatedLLMResponse = "";
+		};
 
-        bus.LLMFullResponse += (response) =>
-        {
-            llmResponses.Add(accumulatedLLMResponse);
-        };
-    }
+		bus.LLMFullResponse += (response) =>
+		{
+			llmResponses.Add(accumulatedLLMResponse);
+		};
+	}
 }
