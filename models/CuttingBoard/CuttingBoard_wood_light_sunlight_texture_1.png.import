@@ -2,13 +2,12 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d1f4oeqej8ooi"
+uid="uid://8hcq1mmpu7q1"
 path.s3tc="res://.godot/imported/CuttingBoard_wood_light_sunlight_texture_1.png-dd7b8e45f169992c6066700d96db1e14.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
-generator_parameters={}
 
 [deps]
 

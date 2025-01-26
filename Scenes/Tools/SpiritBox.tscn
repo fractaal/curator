@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://24g1f7o1rgir"]
+[gd_scene load_steps=11 format=3 uid="uid://24g1f7o1rgir"]
 
 [ext_resource type="AudioStream" uid="uid://cg1cen26lapox" path="res://Audio/switch.wav" id="1_7gcr8"]
 [ext_resource type="Script" path="res://Scenes/Tools/SpiritBox.cs" id="1_ccq3c"]
@@ -19,7 +19,15 @@ albedo_color = Color(0.458824, 0.458824, 0.458824, 1)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tcycb"]
 albedo_color = Color(0.721569, 0.305882, 0.337255, 1)
 
-[node name="SpiritBox" type="RigidBody3D" groups=["interactables"]]
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_3dx0p"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
+[node name="SpiritBox" type="RigidBody3D" groups=["holdable", "interactables"]]
 collision_layer = 16
 mass = 0.1
 
@@ -121,3 +129,6 @@ width = 520.0
 
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
 volume_db = -10.0
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_3dx0p")

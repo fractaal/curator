@@ -36,11 +36,13 @@ GhostData="*res://Scripts/GhostData.gd"
 NarrativeIntegrity="*res://Scripts/NarrativeIntegrity.cs"
 AltEnter="*res://AltEnter.gd"
 FuzzySharpGodotBridge="*res://Scripts/FuzzySharpGodotBridge.cs"
+MultiplayerManager="*res://Multiplayer/MultiplayerManager.gd"
+RPCUtils="*res://Multiplayer/RPCUtils.gd"
 
 [display]
 
-window/size/viewport_width=1600
-window/size/viewport_height=900
+window/size/viewport_width=960
+window/size/viewport_height=540
 window/dpi/allow_hidpi=false
 window/vsync/vsync_mode=0
 

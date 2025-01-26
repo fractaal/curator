@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://bneerl5b5oye4"]
+[gd_scene load_steps=13 format=3 uid="uid://bneerl5b5oye4"]
 
 [ext_resource type="Script" path="res://Scenes/Door.gd" id="1_7lrvj"]
 [ext_resource type="PackedScene" uid="uid://c636dkxlvpmaj" path="res://models/Door/Door.glb" id="1_xh40n"]
@@ -14,6 +14,17 @@
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_leqwb"]
 size = Vector3(0.2, 3, 1.5802)
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_fm7lc"]
+properties/0/path = NodePath("Interactable:locked")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath("Interactable:isOpen")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath("Interactable:isAnimating")
+properties/2/spawn = true
+properties/2/replication_mode = 1
 
 [node name="Door" type="Node3D" groups=["interactables"]]
 transform = Transform3D(0.955687, 0, 0, 0, 0.955687, 0, 0, 0, 0.955687, 2.08165e-12, 2.08165e-12, 2.08165e-12)
@@ -78,3 +89,6 @@ size = Vector3(0.3, 3.132, 1.75)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0929925, -0.0830084, -0.0106601)
 operation = 2
 size = Vector3(1.65967, 3.16309, 1.60742)
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_fm7lc")

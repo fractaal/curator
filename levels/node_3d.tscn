@@ -1,7 +1,6 @@
 [gd_scene load_steps=129 format=3 uid="uid://ctahsvj88g1om"]
 
 [ext_resource type="Script" path="res://levels/node_3d.gd" id="1_7plsp"]
-[ext_resource type="PackedScene" uid="uid://7gv6q50fuutj" path="res://Scenes/Player/player.tscn" id="1_eisjc"]
 [ext_resource type="CompressedTexture3D" uid="uid://dvb27bbktotnl" path="res://textures/environment_adjustments_3d_lut_template.png" id="2_6h08h"]
 [ext_resource type="PackedScene" uid="uid://cggqb75a8w8r" path="res://addons/debug_menu/debug_menu.tscn" id="2_w3vj7"]
 [ext_resource type="PackedScene" uid="uid://bneerl5b5oye4" path="res://Scenes/Door.tscn" id="4_b4bgh"]
@@ -91,6 +90,7 @@
 [ext_resource type="Script" path="res://Scripts/ShaderPrecompiler/Watcher.gd" id="85_65pj0"]
 [ext_resource type="Script" path="res://levels/Sparks.gd" id="86_wu0qa"]
 [ext_resource type="PackedScene" uid="uid://boyd4lj1upb1x" path="res://Scenes/Menu/Menu.tscn" id="87_3yxpn"]
+[ext_resource type="Script" path="res://Multiplayer/MultiplayerHUD.gd" id="92_l31e2"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6g5uc"]
 sky_top_color = Color(0, 0.0156863, 0.0392157, 1)
@@ -133,8 +133,8 @@ fog_light_color = Color(0, 0, 0, 1)
 fog_light_energy = 1.07
 fog_density = 0.1002
 volumetric_fog_enabled = true
-volumetric_fog_density = 0.03
-volumetric_fog_anisotropy = 0.85
+volumetric_fog_density = 0.075
+volumetric_fog_anisotropy = 0.25
 volumetric_fog_length = 16.0
 volumetric_fog_detail_spread = 1.0
 adjustment_enabled = true
@@ -385,6 +385,11 @@ script = ExtResource("1_7plsp")
 
 [node name="DebugMenu" parent="." instance=ExtResource("2_w3vj7")]
 
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(-0.706279, 0, -0.707933, 0, 1, 0, 0.707933, 0, -0.706279, -17.4537, 3.7059, 2.56698)
+current = true
+fov = 60.0
+
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_l5pxq")
 
@@ -401,9 +406,6 @@ root_node = NodePath("")
 libraries = {
 "": SubResource("AnimationLibrary_jaevg")
 }
-
-[node name="Player" parent="." instance=ExtResource("1_eisjc")]
-transform = Transform3D(-0.866025, -1.1675e-08, -0.5, 0, 1, 0, 0.5, -2.76722e-08, -0.866025, -13.3107, 1.5, 1.51714)
 
 [node name="Door" parent="." instance=ExtResource("4_b4bgh")]
 transform = Transform3D(0.955687, 0, 0, 0, 0.955687, 0, 0, 0, 0.955687, -3.0944, 1.93014, 3.99536)
@@ -1737,6 +1739,7 @@ use_collision = true
 size = Vector3(155.772, 1, 105.295)
 
 [node name="Ghost" parent="." instance=ExtResource("9_1ok4b")]
+process_mode = 4
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.79612, 0.5, 6.84054)
 
 [node name="Controls" type="RichTextLabel" parent="."]
@@ -2269,6 +2272,7 @@ LLMResponseUI = NodePath("../DebugUI/LLMResponse")
 LLMModelUI = NodePath("../DebugUI/LLMModel")
 
 [node name="Sensors" type="Node" parent="." node_paths=PackedStringArray("DebugView", "PromptDebugView")]
+process_mode = 4
 script = ExtResource("16_73gw5")
 DebugView = NodePath("../DebugUI/SensorsDebug")
 PromptDebugView = NodePath("../DebugUI/PromptDebug")
@@ -2489,3 +2493,47 @@ script = ExtResource("86_wu0qa")
 
 [node name="Menu" parent="." instance=ExtResource("87_3yxpn")]
 visible = false
+
+[node name="PlayerSpawnLocation" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.3442, 2.05557, 2.39756)
+
+[node name="MultiplayerHUD" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("92_l31e2")
+
+[node name="Join" type="Control" parent="MultiplayerHUD"]
+anchors_preset = 0
+offset_left = 21.0
+offset_top = 18.0
+offset_right = 362.0
+offset_bottom = 106.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MultiplayerHUD/Join"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="HostGameButton" type="Button" parent="MultiplayerHUD/Join/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Host Game"
+
+[node name="JoinGameButton" type="Button" parent="MultiplayerHUD/Join/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Join Game"
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://Scenes/Player/player.tscn")
+spawn_path = NodePath("../PlayerSpawnLocation")
+spawn_limit = 16

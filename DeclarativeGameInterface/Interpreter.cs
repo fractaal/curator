@@ -234,26 +234,26 @@ public partial class Interpreter : Node
 			"shift",
 		};
 
-    private List<string> objectInteractionVerbs =
-        new()
-        {
-            "turnofflights",
-            "flickerlights",
-            "explodelights",
-            "restorelights",
-            "turnonlights",
-            "turnonradios",
-            "turnoffradios",
-            "playfreakymusiconradios",
-            "stopradios",
-            "opendoors",
-            "closedoors",
-            "lockdoors",
-            "unlockdoors",
-            "shiftobjects",
-            "joltobjects",
-            "throwobjects",
-        };
+	private List<string> objectInteractionVerbs =
+		new()
+		{
+			"turnofflights",
+			"flickerlights",
+			"explodelights",
+			"restorelights",
+			"turnonlights",
+			"turnonradios",
+			"turnoffradios",
+			"playfreakymusiconradios",
+			"stopradios",
+			"opendoors",
+			"closedoors",
+			"lockdoors",
+			"unlockdoors",
+			"shiftobjects",
+			"joltobjects",
+			"throwobjects",
+		};
 
 	private List<string> ghostActionVerbs =
 		new()
@@ -305,41 +305,41 @@ public partial class Interpreter : Node
 				var separatedString = value.Split("(");
 				var verb = separatedString[0].ToLower();
 
-                if (AllVerbs.Contains(verb) == false)
-                {
-                    // Attempt fuzzy matching
-                    var _matches = AllVerbs
-                        .Select(v => new { Verb = v, Ratio = Fuzz.PartialRatio(v, verb) })
-                        .Where(x => x.Ratio > 80);
+				if (AllVerbs.Contains(verb) == false)
+				{
+					// Attempt fuzzy matching
+					var _matches = AllVerbs
+						.Select(v => new { Verb = v, Ratio = Fuzz.PartialRatio(v, verb) })
+						.Where(x => x.Ratio > 80);
 
-                    var bestMatch = matches.Any()
-                        ? _matches.Aggregate((max, cur) => max.Ratio > cur.Ratio ? max : cur).Verb
-                        : null;
+					var bestMatch = matches.Any()
+						? _matches.Aggregate((max, cur) => max.Ratio > cur.Ratio ? max : cur).Verb
+						: null;
 
-                    if (bestMatch is not null)
-                    {
-                        GD.Print(
-                            "Parser: command verb "
-                                + verb
-                                + " not found, but a viable best match is "
-                                + bestMatch[0]
-                        );
-                        verb = bestMatch;
-                    }
-                    else
-                    {
-                        GD.Print(
-                            "Parser: command verb "
-                                + verb
-                                + " not found, and no viable best match found."
-                        );
-                        Bus.EmitSignal(
-                            EventBus.SignalName.SystemFeedback,
-                            $"COMMAND DOESN'T EXIST: Command {verb} does NOT exist. PLEASE refer to the system prompt available at your disposal.\nFurther errors could result in TERMINATION of the game."
-                        );
-                        continue;
-                    }
-                }
+					if (bestMatch is not null)
+					{
+						GD.Print(
+							"Parser: command verb "
+								+ verb
+								+ " not found, but a viable best match is "
+								+ bestMatch[0]
+						);
+						verb = bestMatch;
+					}
+					else
+					{
+						GD.Print(
+							"Parser: command verb "
+								+ verb
+								+ " not found, and no viable best match found."
+						);
+						Bus.EmitSignal(
+							EventBus.SignalName.SystemFeedback,
+							$"COMMAND DOESN'T EXIST: Command {verb} does NOT exist. PLEASE refer to the system prompt available at your disposal.\nFurther errors could result in TERMINATION of the game."
+						);
+						continue;
+					}
+				}
 
 				var argumentString = separatedString[1].Substring(0, separatedString[1].Length - 1);
 				var arguments = argumentString

@@ -10,6 +10,9 @@ var noise_x_high = FastNoiseLite.new()
 var noise_y_high = FastNoiseLite.new()
 
 func _physics_process(_delta):
+	if not is_multiplayer_authority():
+		return
+
 	# target_rotation = $"../Head/Camera3d".rotation + $"..".rotation
 	target_rotation = $"../Head/Camera3d".global_transform.basis.get_rotation_quaternion()
 

@@ -109,7 +109,7 @@ func _ready():
 	EventBus.GhostAction.connect(_on_ghost_action)
 	lastLocationForRoomCheck = global_transform.origin
 
-	player = get_tree().current_scene.get_node("Player");
+	update_player_reference()
 
 	var rooms = get_tree().get_nodes_in_group("rooms")
 	FavoriteRoom = rooms[randi() % rooms.size()].name
@@ -265,6 +265,10 @@ func chase(arguments):
 	EventBus.emit_signal("ObjectInteraction", "unlock", "doors", "all")
 
 func _physics_process(delta):
+	if !player:
+		update_player_reference()
+		return
+		
 	LineOfSightCheck.look_at(player.global_position + Vector3(0, .75, 0))
 	LineOfSightCheck.rotate_object_local(Vector3(0, 1, 0), PI)
 
@@ -364,3 +368,12 @@ func getStatusStateless():
 	out += "---\n"
 
 	return out
+
+func update_player_reference():
+	# Try to get multiplayer player first
+	var multiplayer_player = get_tree().current_scene.get_node_or_null("PlayerSpawnLocation/Player_" + str(multiplayer.get_unique_id()))
+	if multiplayer_player:
+		player = multiplayer_player
+	else:
+		# Fall back to singleplayer player
+		player = get_tree().current_scene.get_node_or_null("Player")

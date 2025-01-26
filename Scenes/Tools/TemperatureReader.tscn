@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://cc1v1twvevriu"]
+[gd_scene load_steps=11 format=3 uid="uid://cc1v1twvevriu"]
 
 [ext_resource type="Script" path="res://Scenes/Tools/TemperatureReader.cs" id="1_htmcl"]
 [ext_resource type="AudioStream" uid="uid://cg1cen26lapox" path="res://Audio/switch.wav" id="2_4fhhw"]
@@ -22,7 +22,15 @@ roughness = 0.0
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o12bk"]
 albedo_color = Color(0.792157, 0.188235, 0, 1)
 
-[node name="TempReader" type="RigidBody3D" groups=["interactables"]]
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_ko2yu"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
+[node name="TempReader" type="RigidBody3D" groups=["holdable", "interactables"]]
 collision_layer = 16
 mass = 0.1
 continuous_cd = true
@@ -116,3 +124,6 @@ stream = ExtResource("2_4fhhw")
 stream = ExtResource("3_2w03f")
 volume_db = -20.0
 max_db = -15.0
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_ko2yu")

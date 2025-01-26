@@ -17,12 +17,25 @@ var player: Node3D
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	player = get_tree().current_scene.get_node("Player")
+	update_player_reference()
 	area.mouse_entered.connect(func(): mouse_entered=true)
 	area.mouse_exited.connect(func(): mouse_entered=false)
 	viewport.set_process_input(true)
 
+func update_player_reference():
+	# Try to get multiplayer player first
+	var multiplayer_player = get_tree().current_scene.get_node_or_null("PlayerSpawnLocation/Player_" + str(multiplayer.get_unique_id()))
+	if multiplayer_player:
+		player = multiplayer_player
+	else:
+		# Fall back to singleplayer player
+		player = get_tree().current_scene.get_node_or_null("Player")
+
 func _physics_process(_delta):
+	if !player:
+		update_player_reference()
+		return
+		
 	if (player.global_position - display.global_position).length() > 7.5:
 		mouse_entered = false
 	
@@ -46,7 +59,6 @@ func handle_mouse(event):
 		mouse_held = event.pressed
 	
 	var mouse_pos3D = find_mouse(event.global_position)
-	# print("mouse pos 3d is ", mouse_pos3D)
 	
 	mouse_inside = mouse_pos3D != null
 	

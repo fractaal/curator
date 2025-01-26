@@ -11,6 +11,34 @@ extends CharacterBody3D
 @export var proximity_indicator: TextureRect
 @export var heartbeat_player: AudioStreamPlayer3D
 
+@export var local_uis: Array[Control]
+
+func color_from_id(id: int):
+	var r = rand_from_seed(id)
+	var g = rand_from_seed(id + 1)
+	var b = rand_from_seed(id + 2) 
+
+	return Color((r[0] % 255) / 255.0, (g[0] % 255) / 255.0, (b[0] % 255) / 255.0)
+
+@export var player_id: int = 1:
+	set(id):
+		player_id = id
+		set_multiplayer_authority(id)
+		print("Setting authority to ", id)
+
+		var mat: StandardMaterial3D = (%_DebugCylinderMesh as MeshInstance3D).get_surface_override_material(0).duplicate(true)
+		var mesh_color = color_from_id(id)
+
+		print("Setting mesh color to ", mesh_color)
+		mat.albedo_color = mesh_color
+
+		%_DebugCylinderMesh.set_surface_override_material(0, mat)
+
+func _enter_tree() -> void:
+	var peer_id = str(name).split("_")[1]
+
+	player_id = int(peer_id)
+
 var footstepSounds: Array[AudioStreamPlayer3D] = []
 
 # @export var _bullet_scene: PackedScene
@@ -113,12 +141,31 @@ func connect_to_event_bus():
 	EventBus.PlayerEffect.connect(_on_player_effect)
 
 func _ready():
+	if not is_multiplayer_authority():
+		print("Peer ", multiplayer.get_unique_id(), " not authority for ", name, ", skipping _ready")
+		# Disable processing for non-authority players
+		set_process(false)
+		set_process_input(false)
+		set_physics_process(false)
+
+		$SpotLight3D.light_volumetric_fog_energy = 1 # Give other players flashlights some volumetrics
+
+		for ui in local_uis:
+			ui.visible = false
+
+		# Make sure camera is not active for other players' instances
+		$Head/Camera3d.current = false
+		return
+	else:
+		print("Peer ", multiplayer.get_unique_id(), " authority for ", name, ", setting up")
+	
+	setup_attachment_points()
 	connect_to_event_bus()
 	#Captures mouse and stops rgun from hitting yourself
 	gunRay.add_exception(self)
 	gunRay.set_collision_mask_value(4, true) # collide with doors
 	gunRay.set_collision_mask_value(5, true) # collide with items
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 	worldEnvironment = get_tree().current_scene.get_node("WorldEnvironment") as WorldEnvironment
 	
@@ -157,6 +204,9 @@ var heartbeat_interval = 1
 var has_just_shown_proximity_vignette = false
 
 func _process(_delta):
+	$Head/Camera3d.make_current()
+	_hand_tick()
+
 	stamina_indicator.modulate = Color(1, 1, 1, pow(1 - (stamina / 100), 3))
 
 	var distance = (ghost.global_position - global_position).length()
@@ -211,6 +261,19 @@ func _physics_process(delta):
 		if Input.is_action_pressed("Jump") and is_on_floor() and not hasFocusOnGui:
 			velocity.y = JUMP_VELOCITY
 			stamina -= 25
+
+		if Input.is_action_just_pressed("LetGoRightHand"):
+			_drop_item("right")
+		if Input.is_action_just_pressed("LetGoLeftHand"):
+			_drop_item("left")
+
+		if Input.is_action_just_pressed("SecondaryInteractInRightHand") and not hasFocusOnGui:
+			if right_item:
+				right_item.secondaryInteract()
+
+		if Input.is_action_just_pressed("SecondaryInteractInLeftHand") and not hasFocusOnGui:
+			if left_item:
+				left_item.secondaryInteract()
 
 		# Handle Shooting
 		if Input.is_action_just_pressed("Shoot") and not hasFocusOnGui:
@@ -351,16 +414,34 @@ func find_interactable(object: Node3D) -> Node3D:
 
 	return null
 
+func find_holdable(object: Node3D) -> Node3D:
+	var parent = object
+	while parent:
+		if parent.is_in_group("holdable"):
+			if parent.has_node("Interactable"):
+				return parent.get_node("Interactable");
+			else:
+				push_error("Holdable object does not have an Interactable script attached to it.")
+		parent = parent.get_parent()
+
+	return null
+
 func interact():
 	if not gunRay.is_colliding():
 		return
 	
 	var object: Node3D = gunRay.get_collider()
 
+	var holdable = find_holdable(object)
+
+	if holdable:
+		_pick_up_item(holdable)
+		return
+
 	var interactable = find_interactable(object)
 
 	if interactable and (global_position - interactable.get_parent().global_position).length() < 3:
-		interactable.interact()
+		interactable.interact(self)
 
 func secondaryInteract():
 	if not gunRay.is_colliding():
@@ -371,10 +452,55 @@ func secondaryInteract():
 	var interactable = find_interactable(object)
 
 	if interactable and (global_position - interactable.get_parent().global_position).length() < 3:
-		interactable.secondaryInteract()
+		interactable.secondaryInteract(self)
 
 func getStatus():
 	if playerStats:
 		return playerStats.getStatus()
 	else:
 		return "NO PLAYER STATS AVAILABLE"
+
+################ HAND AVAILABILITY
+var left_attachment_point: Node3D
+var right_attachment_point: Node3D
+
+@export var left_item: Node = null
+@export var right_item: Node = null
+
+func setup_attachment_points():
+	if left_attachment_point == null:
+		left_attachment_point = $Head/Camera3d/ItemAttachmentPointLeft
+	if right_attachment_point == null:
+		right_attachment_point = $Head/Camera3d/ItemAttachmentPointRight
+
+@rpc("any_peer", "call_local")
+func _pick_up_item(item: Node): 
+	if left_item == null:
+		left_item = item
+	elif right_item == null:
+		right_item = item
+	else:
+		push_error("Both hands are already occupied")
+
+func _drop_item(hand: String):
+	var forward_vector = -$Head/Camera3d.global_transform.basis.z
+	if hand == "left":
+		left_item.get_parent().freeze = false
+		(left_item.get_parent() as RigidBody3D).apply_impulse(forward_vector * 0.25)
+		left_item = null
+	elif hand == "right":
+		right_item.get_parent().freeze = false
+		(right_item.get_parent() as RigidBody3D).apply_impulse(forward_vector * 0.25)
+		right_item = null
+	else:
+		push_error("Invalid hand: " + hand)
+
+func _hand_tick():
+	if left_item:
+		left_item.get_parent().freeze = true
+		left_item.get_parent().global_position = left_attachment_point.global_position
+		left_item.get_parent().global_rotation = left_attachment_point.global_rotation
+	if right_item:
+		right_item.get_parent().freeze = true
+		right_item.get_parent().global_position = right_attachment_point.global_position
+		right_item.get_parent().global_rotation = right_attachment_point.global_rotation

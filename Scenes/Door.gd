@@ -1,8 +1,8 @@
 extends Node
 
-var locked = false
-var isOpen = false
-var isAnimating = false
+@export var locked = false
+@export var isOpen = false
+@export var isAnimating = false
 
 @export var door: Node3D
 
@@ -51,18 +51,49 @@ func _ready():
 
 	ghost = get_tree().current_scene.get_node("Ghost")
 
-func open():
+func _enter_tree():
+	if multiplayer.is_server():
+		# Sync initial state to new clients
+		sync_state.rpc_id(multiplayer.get_remote_sender_id(), isOpen, locked)
 
+@rpc("authority")
+func sync_state(door_open: bool, door_locked: bool):
+	isOpen = door_open
+	locked = door_locked
+	if isOpen:
+		_openStep(1.0)  # Instantly set door to open position
+	else:
+		_closeStep(1.0)  # Instantly set door to closed position
+
+func open():
+	if multiplayer.is_server():
+		# Server directly handles the open
+		_handle_open.rpc()
+	else:
+		# Clients request the server to open
+		request_open.rpc_id(1)
+
+@rpc("any_peer", "call_local")
+func request_open():
+	if not multiplayer.is_server():
+		return
+		
 	if locked:
-		rattleSFX.seek(0)
-		rattleSFX.play()
+		play_rattle.rpc()
+		return
+		
+	_handle_open.rpc()
+
+@rpc("authority", "call_local")
+func _handle_open():
+	if locked:
+		play_rattle.rpc()
 		return
 
 	if isOpen: return
 	if isAnimating: return
 
-	openSFX.seek(0)
-	openSFX.play()
+	play_open_sfx.rpc()
 
 	isAnimating = true
 	isOpen = true
@@ -72,11 +103,35 @@ func open():
 
 	isAnimating = false
 
+@rpc("authority", "call_local")
+func play_rattle():
+	rattleSFX.seek(0)
+	rattleSFX.play()
+
+@rpc("authority", "call_local")
+func play_open_sfx():
+	openSFX.seek(0)
+	openSFX.play()
+
 func playerClose():
+	if multiplayer.is_server():
+		_handle_player_close.rpc()
+	else:
+		request_player_close.rpc_id(1)
+
+@rpc("any_peer", "call_local")
+func request_player_close():
+	if not multiplayer.is_server():
+		return
+	_handle_player_close.rpc()
+
+@rpc("authority", "call_local")
+func _handle_player_close():
 	closeSFX.seek(0)
 	closeSFX.play()
 	_close()
 
+@rpc("authority", "call_local")
 func close():
 	closeByGhostSFX.seek(0)
 	closeByGhostSFX.play()

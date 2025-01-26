@@ -10,15 +10,11 @@ var noise: FastNoiseLite
 
 # States of the light
 var hasSetBackToDefault = false
-var isFlickering = false
 
 var isDead = false
 var deathFrame = 0
 
-var isReviving = false
 var reviveFrame = 0
-
-var interactable = true
 
 var rng = RandomNumberGenerator.new()
 
@@ -34,6 +30,30 @@ var registry = preload ("res://Scripts/InteractableRegistry.cs")
 
 @export var locator: Node
 @export var Sparks: GPUParticles3D
+
+# Add sync vars
+@export var locked = false
+@export var isFlickering = false
+@export var isReviving = false
+@export var interactable = true
+
+var hasPlayerWon = false
+var winSongBeatTime = 0.517
+var winSongElapsed = 0
+
+@rpc("authority", "call_local")
+func setEnergy(num: float):
+	for light in lights:
+		light.light_energy = defaultIntensities[light.name] * num
+	for node in nodesWithEmission:
+		node.material.emission_energy_multiplier = defaultIntensities[node.name] * num
+
+@rpc("authority", "call_local")
+func setColor(color: Color):
+	for light in lights:
+		light.light_color = color
+	for node in nodesWithEmission:
+		node.material.emission = color
 
 func _on_object_interact(verb: String, type: String, target: String):
 	if not type.to_lower().contains(objectType):
@@ -54,9 +74,6 @@ func _on_object_interact(verb: String, type: String, target: String):
 		else:
 			return
 
-var hasPlayerWon = false
-var winSongBeatTime = 0.517
-var winSongElapsed = 0
 
 func playerWon():
 	hasPlayerWon = true
@@ -64,7 +81,6 @@ func playerWon():
 var lastChosenEnergy = 0
 
 func _process(delta):
-
 	if kill_time != 0 and Time.get_ticks_msec() - kill_time > 30000:
 		kill_time = 0
 		if not interactable:
@@ -80,7 +96,6 @@ func _process(delta):
 		else:
 			setEnergy(clamp(lastChosenEnergy - (winSongElapsed / winSongBeatTime) * lastChosenEnergy, 0.5, 100))
 
-# Called when the node enters the scene tree for the first time.
 func _ready():
 	registry.Register(objectType)
 	
@@ -137,6 +152,7 @@ func _ready():
 
 	await get_tree().create_timer(2).timeout
 
+
 func connect_to_event_bus():
 	await get_tree().create_timer(3).timeout
 	EventBus.ObjectInteraction.connect(_on_object_interact)
@@ -147,22 +163,20 @@ func setEnergiesToDefault():
 	for node in nodesWithEmission:
 		node.material.emission_energy_multiplier = defaultIntensities[node.name]
 
-func setEnergy(num):
-	for light in lights:
-		light.light_energy = defaultIntensities[light.name] * num
-	for node in nodesWithEmission:
-		node.material.emission_energy_multiplier = defaultIntensities[node.name] * num
 
-func setColor(color):
-	for light in lights:
-		light.light_color = color
-	for node in nodesWithEmission:
-		node.material.emission = color
+################ RESTORE / TURN ON 
+func _restoreStep(progress: float):
+	var noiseMult = clamp(noise.get_noise_1d(Time.get_ticks_msec()) + 0.5, 0, 1)
+	var cleanProgress = pow(progress, 2)
+	setEnergy((cleanProgress * noiseMult * 0.75) + (cleanProgress * 0.25))
 
 func turnOn():
 	restore()
-		
+
 func restore():
+	RPCUtils.try_rpc_call(self, "restore")
+
+func restore_impl(_args: Array = []):
 	await get_tree().create_timer(randf_range(0.0, 1.5)).timeout
 	RestoreSFX.pitch_scale = randf_range(0.85, 1.3)
 	RestoreSFX.seek(0)
@@ -170,20 +184,22 @@ func restore():
 	HumSFX.play()
 
 	var tween = create_tween()
-	isFlickering = false;
-	isDead = false;
-	isReviving = true;
-	await tween.tween_method(_restoreStep, 0.0, 1.0, 2.0).finished;
-	setEnergiesToDefault();
+	isFlickering = false
+	isDead = false
+	isReviving = true
+	await tween.tween_method(_restoreStep, 0.0, 1.0, 2.0).finished
+	setEnergiesToDefault()
 	isReviving = false
 	interactable = true
 
-func _restoreStep(progress: float):
-	var noiseMult = clamp(noise.get_noise_1d(Time.get_ticks_msec()) + 0.5, 0, 1)
-	var cleanProgress = pow(progress, 2)
-	setEnergy((cleanProgress * noiseMult * 0.75) + (cleanProgress * 0.25))
+################ FLICKER 
+func _flickerStep(_step: float):
+	setEnergy(clamp(noise.get_noise_1d(Time.get_ticks_msec()), 0, 1))
 
 func flicker():
+	RPCUtils.try_rpc_call(self, "flicker")
+
+func flicker_impl(_args: Array = []):
 	await get_tree().create_timer(randf_range(0.0, 0.5)).timeout
 	FlickerSFX.pitch_scale = randf_range(0.9, 1.1)
 	FlickerSFX.seek(0)
@@ -199,10 +215,16 @@ func flicker():
 	else:
 		setEnergy(0.0)
 
-func _flickerStep(_step: float):
-	setEnergy(clamp(noise.get_noise_1d(Time.get_ticks_msec()), 0, 1))
+################ EXPLODE 
+func _explodeStep(progress: float):
+	var noiseMult = clamp(noise.get_noise_1d(Time.get_ticks_msec() + 0.5), 0, 1)
+	var cleanEnergy = 1 / pow(10 * progress, 2.5)
+	setEnergy((cleanEnergy * noiseMult * 0.75) + (cleanEnergy * 0.25))
 
 func explode():
+	RPCUtils.try_rpc_call(self, "explode")
+
+func explode_impl(_args: Array = []):
 	await get_tree().create_timer(randf_range(0.0, 0.5)).timeout
 	kill_time = Time.get_ticks_msec()
 
@@ -220,15 +242,11 @@ func explode():
 	isDead = true
 	interactable = false
 
-func _explodeStep(progress: float):
-	var noiseMult = clamp(noise.get_noise_1d(Time.get_ticks_msec() + 0.5), 0, 1)
-	var cleanEnergy = 1 / pow(10 * progress, 2.5)
-	setEnergy((cleanEnergy * noiseMult * 0.75) + (cleanEnergy * 0.25))
+################ TURN OFF 
+func turnOff():
+	RPCUtils.try_rpc_call(self, "turnOff")	
 
-func turnon():
-	restore()
- 
-func turnoff():
+func turnOff_impl(_args: Array = []):
 	await get_tree().create_timer(randf_range(0.0, 0.5)).timeout
 
 	TurnOffSFX.pitch_scale = randf_range(0.85, 1.3)
@@ -242,24 +260,34 @@ func turnoff():
 	setEnergy(0.0)
 	isDead = true
 
-func turnOffInstant(): # Only the player should be able to do this
+################ TURN OFF INSTANT 
+func turnOffInstant():
+	RPCUtils.try_rpc_call(self, "turnOffInstant")
+
+func turnOffInstant_impl(_args: Array = []):
 	if not interactable: return
 	HumSFX.stop()
 	setEnergy(0.0)
 	isDead = true
 
-func turnOnInstant(): # Only the player should be able to do this
+################ TURN ON INSTANT 
+func turnOnInstant():
+	RPCUtils.try_rpc_call(self, "turnOnInstant")
+
+func turnOnInstant_impl(_args: Array = []):
 	if not interactable: return
 	HumSFX.play()
 	setEnergiesToDefault()
 	isDead = false
 
+################ GET STATUS 
 func getStatus():
 	return "Light Status - " + ("Off" if isDead else "On") + (" " if interactable else "(Dead - " + "(%d" % ((Time.get_ticks_msec() - kill_time) / 1000) + "s ago) (**Player can't interact**)")
 
 func getStatusForPlayer():
 	return "Light Status - " + ("Off" if isDead else "On") + (" " if interactable else " (Dead)")
 
+################ INTERACT 
 func interact():
 	pass
 

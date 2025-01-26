@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://7gv6q50fuutj"]
+[gd_scene load_steps=30 format=3 uid="uid://7gv6q50fuutj"]
 
 [ext_resource type="Script" path="res://Scenes/Player/player.gd" id="1_1w47b"]
 [ext_resource type="Script" path="res://Scenes/Player/SmoothFlashlight.gd" id="1_h2o6c"]
@@ -29,13 +29,43 @@ radius = 0.25
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_6b3ky"]
 radius = 0.35
+height = 1.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7fvnj"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_ege17"]
+radius = 0.3
+height = 0.6
 
 [sub_resource type="LabelSettings" id="LabelSettings_cawmj"]
 line_spacing = 0.0
 outline_size = 10
 outline_color = Color(0, 0, 0, 0.392157)
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("stamina_exhausted", "stamina_indicator", "ghost_indicator", "proximity_indicator", "heartbeat_player", "flashlightAudio", "playerStats", "flashlight_dimmed_stream_player", "telekinesis_stream_player", "telekinesis_intense_stream_player") groups=["player"]]
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_lew3a"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath("SpotLight3D:position")
+properties/2/spawn = true
+properties/2/replication_mode = 1
+properties/3/path = NodePath("SpotLight3D:rotation")
+properties/3/spawn = true
+properties/3/replication_mode = 1
+properties/4/path = NodePath("_DebugCylinderMesh:position")
+properties/4/spawn = true
+properties/4/replication_mode = 1
+properties/5/path = NodePath("_DebugCylinderMesh:rotation")
+properties/5/spawn = true
+properties/5/replication_mode = 1
+properties/6/path = NodePath("SpotLight3D:spot_range")
+properties/6/spawn = true
+properties/6/replication_mode = 1
+
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("stamina_exhausted", "stamina_indicator", "ghost_indicator", "proximity_indicator", "heartbeat_player", "local_uis", "flashlightAudio", "playerStats", "flashlight_dimmed_stream_player", "telekinesis_stream_player", "telekinesis_intense_stream_player") groups=["player"]]
 collision_layer = 2
 collision_mask = 9
 script = ExtResource("1_1w47b")
@@ -45,6 +75,7 @@ stamina_indicator = NodePath("Stamina")
 ghost_indicator = NodePath("GhostMeddleOverlay")
 proximity_indicator = NodePath("GhostProximityOverlay")
 heartbeat_player = NodePath("Heartbeat")
+local_uis = [NodePath("CenterContainer"), NodePath("GhostProximityOverlay"), NodePath("GhostMeddleOverlay"), NodePath("Stamina")]
 flashlightAudio = NodePath("FlashlightSFX")
 playerStats = NodePath("PlayerStats")
 flashlight_dimmed_stream_player = NodePath("FlashlightFlickering")
@@ -66,9 +97,17 @@ spot_angle = 30.0
 [node name="CollisionShape3d" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_emkox")
 
-[node name="MeshInstance3d" type="MeshInstance3D" parent="."]
-visible = false
+[node name="_DebugCylinderMesh" type="MeshInstance3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.327299, 0)
 mesh = SubResource("CapsuleMesh_6b3ky")
+surface_material_override/0 = SubResource("StandardMaterial3D_7fvnj")
+
+[node name="_DebugCylinderMesh2" type="MeshInstance3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.825105, 0)
+mesh = SubResource("CapsuleMesh_ege17")
+surface_material_override/0 = SubResource("StandardMaterial3D_7fvnj")
 
 [node name="Head" type="Node3D" parent="."]
 
@@ -185,3 +224,6 @@ volume_db = -15.0
 stream = ExtResource("19_hojpj")
 volume_db = -30.0
 pitch_scale = 0.9
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_lew3a")
