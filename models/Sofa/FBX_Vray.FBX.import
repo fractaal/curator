@@ -4,12 +4,11 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://f3iwmetccfgx"
-path="res://.godot/imported/FBX_Vray.FBX-4fc09f6990d3352168b2c70cb4f65b50.scn"
+valid=false
 
 [deps]
 
 source_file="res://models/Sofa/FBX_Vray.FBX"
-dest_files=["res://.godot/imported/FBX_Vray.FBX-4fc09f6990d3352168b2c70cb4f65b50.scn"]
 
 [params]
 

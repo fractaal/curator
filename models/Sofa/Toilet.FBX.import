@@ -4,12 +4,11 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://damxqosvi60x5"
-path="res://.godot/imported/Toilet.FBX-66ba8ee01a84ab7cb13e5e876b316ce3.scn"
+valid=false
 
 [deps]
 
 source_file="res://models/Sofa/Toilet.FBX"
-dest_files=["res://.godot/imported/Toilet.FBX-66ba8ee01a84ab7cb13e5e876b316ce3.scn"]
 
 [params]
 

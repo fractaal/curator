@@ -372,6 +372,12 @@ public partial class Interpreter : Node
 		}
 	}
 
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true)]
+	public void _FromServerInterpret(string chunk)
+	{
+		Interpret(chunk);
+	}
+
 	public async void Interpret(string chunk)
 	{
 		var pattern = @"\w+\([^)]*\)";

@@ -210,7 +210,6 @@ cycle_debug_menu={
 3d/run_on_separate_thread=true
 common/physics_ticks_per_second=50
 common/max_physics_steps_per_frame=16
-3d/physics_engine="JoltPhysics3D"
 jolt_3d/collisions/areas_detect_static_bodies=true
 jolt_3d/limits/max_temporary_memory=128
 

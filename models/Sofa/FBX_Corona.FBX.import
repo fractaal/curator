@@ -4,12 +4,11 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://dsbrs2cjlymgj"
-path="res://.godot/imported/FBX_Corona.FBX-9fc38f6776f969d3afd90cc08fde9fa6.scn"
+valid=false
 
 [deps]
 
 source_file="res://models/Sofa/FBX_Corona.FBX"
-dest_files=["res://.godot/imported/FBX_Corona.FBX-9fc38f6776f969d3afd90cc08fde9fa6.scn"]
 
 [params]
 

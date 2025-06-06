@@ -1,4 +1,4 @@
-[gd_scene load_steps=129 format=3 uid="uid://ctahsvj88g1om"]
+[gd_scene load_steps=124 format=3 uid="uid://ctahsvj88g1om"]
 
 [ext_resource type="Script" path="res://levels/node_3d.gd" id="1_7plsp"]
 [ext_resource type="CompressedTexture3D" uid="uid://dvb27bbktotnl" path="res://textures/environment_adjustments_3d_lut_template.png" id="2_6h08h"]
@@ -42,22 +42,17 @@
 [ext_resource type="PackedScene" uid="uid://dxldky3t37s46" path="res://models/Carpet/Carpet.glb" id="29_6mi4k"]
 [ext_resource type="Script" path="res://Scripts/VoiceRecognition/VoiceRecognition.gd" id="32_jsfk5"]
 [ext_resource type="Script" path="res://addons/godot_whisper/capture_stream_to_text.gd" id="38_3vk56"]
-[ext_resource type="PackedScene" uid="uid://c8b8kxy0m5d2f" path="res://models/Sofa.tscn" id="39_73gjl"]
 [ext_resource type="FontFile" uid="uid://cvunybceg2xmx" path="res://Fonts/JetBrains Mono Bold Nerd Font Complete Mono.ttf" id="43_ff5h2"]
 [ext_resource type="PackedScene" uid="uid://cw45eq4b5snrb" path="res://models/Chair/Carpet/Carpet.glb" id="43_rrrwr"]
 [ext_resource type="Script" path="res://levels/ControlsUI.gd" id="44_bh7qd"]
 [ext_resource type="Script" path="res://Scripts/LabelFixer.gd" id="45_lsjot"]
 [ext_resource type="PackedScene" uid="uid://babnmfetxurn0" path="res://models/Chair/Bed/Bed.glb" id="49_4lupa"]
-[ext_resource type="PackedScene" uid="uid://bmjt2kulgwce2" path="res://models/Toilet.tscn" id="50_2l11h"]
 [ext_resource type="PackedScene" uid="uid://davd62ntoc44d" path="res://models/Chair/Shower/Shower.glb" id="51_c3ruq"]
 [ext_resource type="PackedScene" uid="uid://5ipc8o3mop7p" path="res://models/FlowerVase.tscn" id="52_pikqh"]
 [ext_resource type="PackedScene" uid="uid://6qfh7o0ivou" path="res://models/Jar2.tscn" id="53_v8ivd"]
 [ext_resource type="PackedScene" uid="uid://bbnqukgldh7ba" path="res://Desk.tscn" id="53_w40i5"]
-[ext_resource type="PackedScene" uid="uid://qadd3ea7f3ag" path="res://Bookcase.tscn" id="54_qwnpb"]
 [ext_resource type="PackedScene" uid="uid://vpyvcf4tm560" path="res://models/Jar.tscn" id="54_t4qqa"]
 [ext_resource type="PackedScene" uid="uid://tcpgunomg5at" path="res://models/Roadblock/Roadblock.tscn" id="56_2818y"]
-[ext_resource type="PackedScene" uid="uid://bl2ue6w66xymv" path="res://Cabinet.tscn" id="56_x7gpu"]
-[ext_resource type="PackedScene" uid="uid://chdkq52kt5idp" path="res://models/Bookshelf.tscn" id="57_5l7gu"]
 [ext_resource type="Texture2D" uid="uid://d0oiur2uvxscn" path="res://textures/Art.png" id="58_cjtwx"]
 [ext_resource type="PackedScene" uid="uid://h5v8lv5lfktd" path="res://Computer.tscn" id="59_5ftby"]
 [ext_resource type="PackedScene" uid="uid://cfb27gv2kwl1p" path="res://models/Seats/CoffeeTable.glb" id="59_su72e"]
@@ -381,6 +376,7 @@ material = SubResource("StandardMaterial3D_ge6xl")
 size = Vector3(0.015, 0.015, 0.015)
 
 [node name="Node3d" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 script = ExtResource("1_7plsp")
 
 [node name="DebugMenu" parent="." instance=ExtResource("2_w3vj7")]
@@ -1146,15 +1142,6 @@ transform = Transform3D(0.999249, 0, -0.0387541, 0, 1, 0, 0.0387541, 0, 0.999249
 [node name="CeilingLight9" parent="NavigationRegion3D" instance=ExtResource("24_2thbs")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.171205, 3.09837, 8.14452)
 
-[node name="Sofa" parent="NavigationRegion3D" instance=ExtResource("39_73gjl")]
-transform = Transform3D(-2, 0, -3.01992e-07, 0, 2, 0, 3.01992e-07, 0, -2, 1.69877, 0.5, 2.05007)
-
-[node name="CSGBox3D" type="CSGBox3D" parent="NavigationRegion3D/Sofa"]
-transform = Transform3D(1, -0.00243124, 2.53121e-06, 0.00243124, 0.999995, -0.00243124, 3.39945e-06, 0.00243124, 0.999995, 0.00940943, 0.159909, 0.0783969)
-visible = false
-use_collision = true
-size = Vector3(1.93627, 1.32214, 0.819214)
-
 [node name="Switch5" parent="NavigationRegion3D" instance=ExtResource("18_1u6af")]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -2.42669, 2.38033, 10.7601)
 
@@ -1226,37 +1213,7 @@ transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6.0956
 [node name="Node3D18" parent="NavigationRegion3D" instance=ExtResource("52_pikqh")]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 5.83141, 5.52881, 20.7332)
 
-[node name="Node3D10" parent="NavigationRegion3D" instance=ExtResource("54_qwnpb")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.48112, -0.497525, 18.5878)
-
-[node name="Node3D14" parent="NavigationRegion3D" instance=ExtResource("54_qwnpb")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.48112, -0.497525, 21.3209)
-
 [node name="Node3D12" type="Node3D" parent="NavigationRegion3D"]
-
-[node name="Node3D11" parent="NavigationRegion3D/Node3D12" instance=ExtResource("54_qwnpb")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.82814, -0.497525, 18.5878)
-
-[node name="Node3D15" parent="NavigationRegion3D" instance=ExtResource("56_x7gpu")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 4.2972, 21.6861)
-
-[node name="Root Scene" parent="NavigationRegion3D" instance=ExtResource("57_5l7gu")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 3.99407, 4.22034, 22.0583)
-
-[node name="Root Scene3" parent="NavigationRegion3D" instance=ExtResource("57_5l7gu")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 4.96493, 4.22034, 22.0583)
-
-[node name="Root Scene4" parent="NavigationRegion3D" instance=ExtResource("57_5l7gu")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 4.96493, 5.37864, 22.0583)
-
-[node name="Root Scene5" parent="NavigationRegion3D" instance=ExtResource("57_5l7gu")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 3.98252, 5.37864, 22.0583)
-
-[node name="Root Scene6" parent="NavigationRegion3D" instance=ExtResource("57_5l7gu")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 3.98252, 6.37864, 22.0583)
-
-[node name="Root Scene7" parent="NavigationRegion3D" instance=ExtResource("57_5l7gu")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 4.93256, 6.37864, 22.0583)
 
 [node name="Bed" parent="NavigationRegion3D" instance=ExtResource("49_4lupa")]
 transform = Transform3D(-5.46392e-08, 0, -1.25, 0, 1.25, 0, 1.25, 0, -5.46392e-08, -0.0500714, 4.32485, 9.33966)
@@ -1272,9 +1229,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.79526, 1.92752, 0.876947)
 visible = false
 use_collision = true
 size = Vector3(3.95544, 1.30188, 2.11774)
-
-[node name="Toilet" parent="NavigationRegion3D" instance=ExtResource("50_2l11h")]
-transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 10.818, 4.34815, 8.65331)
 
 [node name="Roadblock" parent="NavigationRegion3D" instance=ExtResource("56_2818y")]
 transform = Transform3D(0.969248, 0, 0.246086, 0, 1, 0, -0.246086, 0, 0.969248, -12.5287, -0.0724369, -0.844017)
@@ -1737,6 +1691,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.0014, 0, 10.121)
 visible = false
 use_collision = true
 size = Vector3(155.772, 1, 105.295)
+
+[node name="NavigationRegion3D_Sofa#CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, -0.00243124, 2.53121e-06, 0.00243124, 0.999995, -0.00243124, 3.39945e-06, 0.00243124, 0.999995, 0.00940943, 0.159909, 0.0783969)
+visible = false
+use_collision = true
+size = Vector3(1.93627, 1.32214, 0.819214)
 
 [node name="Ghost" parent="." instance=ExtResource("9_1ok4b")]
 process_mode = 4

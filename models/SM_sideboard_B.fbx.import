@@ -4,12 +4,11 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://cx1tsixosvm4u"
-path="res://.godot/imported/SM_sideboard_B.fbx-44e3710fe250bab062f5079a76bd7c15.scn"
+valid=false
 
 [deps]
 
 source_file="res://models/SM_sideboard_B.fbx"
-dest_files=["res://.godot/imported/SM_sideboard_B.fbx-44e3710fe250bab062f5079a76bd7c15.scn"]
 
 [params]
 

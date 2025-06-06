@@ -310,8 +310,10 @@ public partial class SpiritBox : Holdable
 	//     Holding = true;
 	// }
 
+	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true)]
 	public override void secondaryInteract()
 	{
+		GD.Print("Secondary interact on client ", Multiplayer.GetUniqueId());
 		PowerSound.Play(0);
 		Power = !Power;
 

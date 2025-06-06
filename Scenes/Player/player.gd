@@ -263,17 +263,17 @@ func _physics_process(delta):
 			stamina -= 25
 
 		if Input.is_action_just_pressed("LetGoRightHand"):
-			_drop_item("right")
+			_drop_item("right", multiplayer.get_unique_id())
 		if Input.is_action_just_pressed("LetGoLeftHand"):
-			_drop_item("left")
+			_drop_item("left", multiplayer.get_unique_id())
 
 		if Input.is_action_just_pressed("SecondaryInteractInRightHand") and not hasFocusOnGui:
 			if right_item:
-				right_item.secondaryInteract()
+				right_item.secondaryInteract.rpc()
 
 		if Input.is_action_just_pressed("SecondaryInteractInLeftHand") and not hasFocusOnGui:
 			if left_item:
-				left_item.secondaryInteract()
+				left_item.secondaryInteract.rpc()
 
 		# Handle Shooting
 		if Input.is_action_just_pressed("Shoot") and not hasFocusOnGui:
@@ -435,7 +435,8 @@ func interact():
 	var holdable = find_holdable(object)
 
 	if holdable:
-		_pick_up_item(holdable)
+		_pick_up_item.rpc(holdable.get_path(), multiplayer.get_unique_id())
+		print("rpc Picked up ", holdable.name, " on peer ", multiplayer.get_unique_id())
 		return
 
 	var interactable = find_interactable(object)
@@ -474,23 +475,36 @@ func setup_attachment_points():
 		right_attachment_point = $Head/Camera3d/ItemAttachmentPointRight
 
 @rpc("any_peer", "call_local")
-func _pick_up_item(item: Node): 
+func _pick_up_item(item_path: NodePath, intent_peer: int): 
+	var item = get_tree().get_root().get_node(item_path)
+	
 	if left_item == null:
 		left_item = item
+		left_item.set_multiplayer_authority(intent_peer, true)
+		print("set authority of ", item.name, " to ", str(intent_peer), " (on ", str(multiplayer.get_unique_id()), ")")
 	elif right_item == null:
 		right_item = item
+		right_item.set_multiplayer_authority(intent_peer, true)
+		print("set authority of ", item.name, " to ", str(intent_peer), " (on ", str(multiplayer.get_unique_id()), ")")
 	else:
 		push_error("Both hands are already occupied")
+	
 
-func _drop_item(hand: String):
+@rpc("any_peer", "call_local")
+func _update_item_transform(item: NodePath, _transform: Transform3D):
+	get_tree().get_root().get_node(item).global_transform = _transform
+
+func _drop_item(hand: String, intent_peer: int):
 	var forward_vector = -$Head/Camera3d.global_transform.basis.z
 	if hand == "left":
 		left_item.get_parent().freeze = false
 		(left_item.get_parent() as RigidBody3D).apply_impulse(forward_vector * 0.25)
+		left_item.set_multiplayer_authority(1, true)
 		left_item = null
 	elif hand == "right":
 		right_item.get_parent().freeze = false
 		(right_item.get_parent() as RigidBody3D).apply_impulse(forward_vector * 0.25)
+		right_item.set_multiplayer_authority(1, true)
 		right_item = null
 	else:
 		push_error("Invalid hand: " + hand)
@@ -500,7 +514,11 @@ func _hand_tick():
 		left_item.get_parent().freeze = true
 		left_item.get_parent().global_position = left_attachment_point.global_position
 		left_item.get_parent().global_rotation = left_attachment_point.global_rotation
+
+		_update_item_transform.rpc(left_item.get_parent().get_path(), left_attachment_point.global_transform)
 	if right_item:
 		right_item.get_parent().freeze = true
 		right_item.get_parent().global_position = right_attachment_point.global_position
 		right_item.get_parent().global_rotation = right_attachment_point.global_rotation
+
+		_update_item_transform.rpc(right_item.get_parent().get_path(), right_attachment_point.global_transform)

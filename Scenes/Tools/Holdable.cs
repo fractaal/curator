@@ -89,7 +89,8 @@ public abstract partial class Holdable : Node
 			&& GetViewport().GuiGetFocusOwner() == null
 		)
 		{
-			secondaryInteract();
+			GD.Print("RPCing secondary interact on client ", Multiplayer.GetUniqueId());
+			Rpc("secondaryInteract");
 		}
 
 		if (
@@ -99,7 +100,8 @@ public abstract partial class Holdable : Node
 			&& GetViewport().GuiGetFocusOwner() == null
 		)
 		{
-			secondaryInteract();
+			GD.Print("RPCing secondary interact on client ", Multiplayer.GetUniqueId());
+			Rpc("secondaryInteract");
 		}
 	}
 
@@ -152,5 +154,6 @@ public abstract partial class Holdable : Node
 
 	public abstract string getStatus();
 
+	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true)]
 	public abstract void secondaryInteract();
 }
