@@ -32,10 +32,10 @@ func toggle():
 	else:
 		turnOn()
 		
-func interact():
+func interact(_player = null):
 	toggle()
 
-func secondaryInteract():
+func secondaryInteract(_player = null):
 	pass
 
 func getStatus():

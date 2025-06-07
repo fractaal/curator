@@ -159,11 +159,11 @@ func togglePlay():
 	else:
 		playfreakymusicon()
 
-func interact():
+func interact(_player = null):
 	togglePower()
 	EventBus.emit_signal("NotableEventOccurred", "Player turned " + ("on" if isOn else "off") + " the radio in " + locator.Room)
 
-func secondaryInteract():
+func secondaryInteract(_player = null):
 	togglePlay()
 	# EventBus.emit_signal("NotableEventOccurred", "Player " + ("started" if isPlaying else "stopped") + " the radio in " + locator.Room)
 

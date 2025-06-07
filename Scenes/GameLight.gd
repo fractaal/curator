@@ -287,9 +287,9 @@ func getStatus():
 func getStatusForPlayer():
 	return "Light Status - " + ("Off" if isDead else "On") + (" " if interactable else " (Dead)")
 
-################ INTERACT 
-func interact():
+################ INTERACT
+func interact(_player = null):
 	pass
 
-func secondaryInteract():
+func secondaryInteract(_player = null):
 	pass

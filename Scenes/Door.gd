@@ -194,7 +194,7 @@ func _closeStep(progress: float):
 	var y = lerp(105, 0, progress)
 	door.rotation.y = deg_to_rad(y)
 	
-func interact():
+func interact(_player = null):
 	if locked:
 		EventBus.emit_signal("NotableEventOccurred", "Player tried to open door in " + locator.Room + " - but it was locked")
 	else:
@@ -204,8 +204,8 @@ func interact():
 			EventBus.emit_signal("NotableEventOccurred", "Player opened door in " + locator.Room)
 
 	toggle()
-	
-func secondaryInteract():
+
+func secondaryInteract(_player = null):
 	pass
 
 func getStatus():
