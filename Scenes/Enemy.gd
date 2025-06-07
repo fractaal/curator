@@ -3,7 +3,6 @@ extends CharacterBody3D
 var speed = 2.5
 
 @onready var nav_agent = $NavigationAgent3D
-#@onready var _animator = $AnimationPlayer
 @onready var skeleton: Node3D = $Skeleton3D
 @onready var CollisionShape = $CollisionShape3D
 @onready var LineOfSightCheck = $RayCast3D
@@ -13,21 +12,19 @@ var speed = 2.5
 @export var heartbeatSFX: AudioStreamPlayer
 @export var huntTensionSFX: AudioStreamPlayer
 @export var jumpscareSFX: AudioStreamPlayer
-@export var appearSFX: AudioStreamPlayer3D;
-@export var disappearSFX: AudioStreamPlayer3D;
+@export var appearSFX: AudioStreamPlayer3D
+@export var disappearSFX: AudioStreamPlayer3D
 @export var huntGracePeriodSFX: AudioStreamPlayer
 
 @onready var ghost_sounds = $GhostSounds
-	
+
 @export var blackTexture: ColorRect
-
 @export var evidenceDepositor: Node
-
 @export var endRevealText: Label
 
 var GhostData := preload ("res://Scripts/GhostData.gd")
 
-var player: Node3D
+var current_target: Node3D = null
 
 var last_location = Vector3()
 var lastLocationForRoomCheck: Vector3
@@ -109,11 +106,8 @@ func _ready():
 	EventBus.GhostAction.connect(_on_ghost_action)
 	lastLocationForRoomCheck = global_transform.origin
 
-	update_player_reference()
-
 	var rooms = get_tree().get_nodes_in_group("rooms")
 	FavoriteRoom = rooms[randi() % rooms.size()].name
-	# FavoriteRoom = "Pantry"
 
 	EventBus.emit_signal("GhostInformation", "Name - " + FirstName + " " + LastName)
 	EventBus.emit_signal("GhostInformation", "Type - " + GhostType)
@@ -143,16 +137,15 @@ var moveFlag = false
 
 func _on_ghost_action(verb, arguments):
 	verb = verb.to_lower()
-	
-	if verb == "moveasghost" or verb == "movetoasghost":
 
+	if verb == "moveasghost" or verb == "movetoasghost":
 		if manifesting:
 			return
 
 		print("Ghost now pathing to " + arguments)
-			
+
 		moveFlag = true
-		var _position = TargetResolution.GetTargetPosition(arguments);
+		var _position = TargetResolution.GetTargetPosition(arguments)
 
 		if _position == Vector3.ZERO:
 			return
@@ -163,14 +156,23 @@ func _on_ghost_action(verb, arguments):
 
 		moveFlag = false
 
-	if verb == "chaseplayerasghost":
+	elif verb == "chaseplayerasghost" or verb == "chasetargetasghost":
+		# For backwards compatibility, "chaseplayerasghost" still works
+		# but now we also support "chasetargetasghost" for any target
 		chase(arguments)
-		pass
 
-	if verb == "appearasghost":
+	elif verb == "settargetasghost":
+		# New action to set a specific target
+		var target_node = TargetResolution.GetTarget(arguments)
+		if target_node and target_node is Node3D:
+			set_target(target_node)
+		else:
+			print("Ghost cannot set target - invalid target: ", arguments)
+
+	elif verb == "appearasghost":
 		appear()
-	
-	if verb == "depositevidenceasghost":
+
+	elif verb == "depositevidenceasghost":
 		if evidenceDepositor:
 			evidenceDepositor.DepositEvidence(GhostType)
 
@@ -194,9 +196,14 @@ func appear():
 func chase(arguments):
 	if chasing or gameEnded:
 		return
-	
+
 	if (Time.get_ticks_msec() - _last_chase_time) < 5000:
 		print("New chase command was suspiciously too near a newly-ended chase. Ignoring")
+		return
+
+	# If still no target, can't chase
+	if not current_target:
+		print("Ghost cannot chase - no target available")
 		return
 
 	EventBus.emit_signal("ChaseStarted")
@@ -221,20 +228,29 @@ func chase(arguments):
 	if arguments == "end":
 		speed = 35
 
-	var huntTime = randf_range(30, 45) if arguments != "end" else 9999
+	var huntTime = randf_range(30, 45) if arguments != "end" else 9999.0
 	EventBus.emit_signal("NotableEventOccurred", "Ghost chase started for " + str(huntTime) + " seconds. REMEMBER - TERRIFY THE PLAYER!")
 
-	for i in range(0, huntTime * 10):
+	for i in range(0, int(huntTime * 10)):
+		# Check if target still exists
+		if not is_instance_valid(current_target):
+			print("Chase target became invalid, ending chase")
+			break
+
 		skeleton.visible = true
-		update_target_location(player.global_transform.origin)
-		var length = (player.global_transform.origin - global_transform.origin).length()
+		update_target_location(current_target.global_transform.origin)
+		var length = (current_target.global_transform.origin - global_transform.origin).length()
 
 		if (length < 1.25):
 			jumpscareSFX.play(0)
-			player.kill()
-			# if arguments != "end":
-			EventBus.emit_signal("GameLost", "Player was caught by the ghost")
-			EventBus.emit_signal("NotableEventOccurred", "Game Lost - Player was caught by the ghost!")
+
+			# Only kill if target is a player with a kill method
+			if current_target.has_method("kill"):
+				current_target.kill()
+				EventBus.emit_signal("GameLost", "Player was caught by the ghost")
+				EventBus.emit_signal("NotableEventOccurred", "Game Lost - Player was caught by the ghost!")
+			else:
+				print("Ghost reached target: ", current_target.name)
 			break
 
 		await get_tree().create_timer(0.1).timeout
@@ -242,14 +258,19 @@ func chase(arguments):
 	chasing = false
 	speed = 2.5
 
-	if not player.dead:
+	# Check if target is a player and handle death state
+	var target_is_dead = false
+	if current_target and current_target.has_method("kill") and current_target.has_property("dead"):
+		target_is_dead = current_target.dead
+
+	if not target_is_dead:
 		skeleton.visible = false
 
-	if player.dead:
+	if target_is_dead:
 		blackTexture.visible = true
 		var tween = create_tween()
 
-		endRevealText.text = "THE GHOST WAS A " + GhostType.to_upper();
+		endRevealText.text = "THE GHOST WAS A " + GhostType.to_upper()
 
 		tween.tween_property(blackTexture, "modulate", Color(0, 0, 0, 1), 0.25).set_trans(Tween.TRANS_EXPO).set_delay(1.75)
 		tween.tween_property(endRevealText, "modulate", Color(1, 1, 1, 1), 1).set_delay(3)
@@ -265,63 +286,53 @@ func chase(arguments):
 	EventBus.emit_signal("ObjectInteraction", "unlock", "doors", "all")
 
 func _physics_process(delta):
-	if !player:
-		update_player_reference()
-		return
-		
-	LineOfSightCheck.look_at(player.global_position + Vector3(0, .75, 0))
-	LineOfSightCheck.rotate_object_local(Vector3(0, 1, 0), PI)
+	# If still no target, skip line of sight checks but continue with movement
+	if current_target:
+		LineOfSightCheck.look_at(current_target.global_position + Vector3(0, .75, 0))
+		LineOfSightCheck.rotate_object_local(Vector3(0, 1, 0), PI)
 
-	if LineOfSightCheck.is_colliding():
-		var object: Node3D = LineOfSightCheck.get_collider()
-		
-		var parent = object
-		
+		if LineOfSightCheck.is_colliding():
+			var object: Node3D = LineOfSightCheck.get_collider()
+
+			var parent = object
+
+			inLineOfSight = false
+
+			while (parent != null):
+				if parent != current_target:
+					parent = parent.get_parent()
+				else:
+					inLineOfSight = true
+					break
+	else:
 		inLineOfSight = false
-		
-		while (parent != null):
-			if parent != player:
-				parent = parent.get_parent()
-			else:
-				inLineOfSight = true
-				break
-	
+
 	var current_location = global_transform.origin
 	var next_location = nav_agent.get_next_path_position()
 	var new_velocity = (next_location - current_location).normalized() * speed
 
-	# if (current_location - next_location).length() > 0.1:
-	# 	return
-	
 	velocity = new_velocity
-	
+
 	if (current_location - next_location).length() > 0.1 and not chasing and not manifesting:
 		var direction = (next_location - current_location).normalized()
 		rotation.y = lerp_angle(rotation.y, atan2( - direction.x, -direction.z), delta * 5)
-	
+
 	if manifesting or chasing:
 		$Skeleton3D/OmniLight3D.light_energy = randf_range(0.01, 0.05)
-		var direction = (player.global_transform.origin - global_transform.origin).normalized()
-		rotation.y = lerp_angle(rotation.y, atan2( - direction.x, -direction.z), delta * 5)
-	
-	# _animator.play("mixamocom", -1, (last_location - current_location).normalized().length())
+		if current_target:
+			var direction = (current_target.global_transform.origin - global_transform.origin).normalized()
+			rotation.y = lerp_angle(rotation.y, atan2( - direction.x, -direction.z), delta * 5)
+
 	move_and_slide()
-	
-	# for i in get_slide_collision_count():
-	# 	var c = get_slide_collision(i)
-	# 	if c.get_collider() is RigidBody3D:
-	# 		var obj := c.get_collider() as RigidBody3D
-	# 		obj.apply_central_impulse( - c.get_normal() * 10)
-	
+
 	last_location = current_location
 
-	if chasing:
+	if chasing and current_target:
 		$Skeleton3D/OmniLight3D.light_energy = randf_range(0.5, 1.5)
 
-		var distance = (player.global_transform.origin - global_transform.origin).length()
+		var distance = (current_target.global_transform.origin - global_transform.origin).length()
 
 		huntTensionSFX.volume_db = (-(distance * 2)) - 10
-
 		huntTensionSFX.pitch_scale = 0.75 + clamp((1 / distance), 0, 1.25)
 
 		if chaseSpeed == "fast":
@@ -333,8 +344,12 @@ func _physics_process(delta):
 		huntTensionSFX.volume_db = -80
 
 func _process(_delta):
+	# Check if current target is a player and is dead
+	var target_is_dead = false
+	if current_target and current_target.has_method("kill") and current_target.has_property("dead"):
+		target_is_dead = current_target.dead
 
-	if not player.dead: # Otherwise it looks like we're humping the player
+	if not target_is_dead: # Otherwise it looks like we're humping the target
 		skeleton.position.y = remap((sin(float(Time.get_ticks_msec()) / 600)), -1, 1, 0.05, 0.25)
 	else:
 		skeleton.position.y = 0.1
@@ -346,6 +361,59 @@ func _process(_delta):
 func update_target_location(target_location):
 	nav_agent.target_position = target_location
 
+# Target management functions for multiplayer support
+func set_target(new_target: Node3D):
+	"""Set the ghost's current target to chase/stalk"""
+	current_target = new_target
+	if current_target:
+		print("Ghost target set to: ", current_target.name)
+	else:
+		print("Ghost target cleared")
+
+func get_all_players() -> Array[Node3D]:
+	"""Get all players in the game (both singleplayer and multiplayer)"""
+	var players: Array[Node3D] = []
+
+	# Try to find multiplayer players first
+	var player_spawn_location = get_tree().current_scene.get_node_or_null("PlayerSpawnLocation")
+	if player_spawn_location:
+		for child in player_spawn_location.get_children():
+			if child.name.begins_with("Player_"):
+				players.append(child)
+
+	# Fall back to singleplayer player if no multiplayer players found
+	if players.is_empty():
+		var single_player = get_tree().current_scene.get_node_or_null("Player")
+		if single_player:
+			players.append(single_player)
+
+	return players
+
+func get_closest_player() -> Node3D:
+	"""Get the closest player to the ghost"""
+	var players = get_all_players()
+	if players.is_empty():
+		return null
+
+	var closest_player: Node3D = null
+	var closest_distance = INF
+
+	for player in players:
+		var distance = global_position.distance_to(player.global_position)
+		if distance < closest_distance:
+			closest_distance = distance
+			closest_player = player
+
+	return closest_player
+
+func get_random_player() -> Node3D:
+	"""Get a random player from all available players"""
+	var players = get_all_players()
+	if players.is_empty():
+		return null
+
+	return players[randi() % players.size()]
+
 func getStatus():
 	var out = "Name: " + FirstName + " " + LastName + "\n"
 	out += "Type: " + GhostType + "\n"
@@ -353,8 +421,25 @@ func getStatus():
 	out += "Favorite Room: " + FavoriteRoom + "\n"
 	out += "Current Room: " + Locator.Room + "\n"
 	out += "---\n"
-	out += "IN LINE OF SIGHT? (WOULD THE PLAYER SEE THE GHOST IF IT MANIFESTS?): " + ("YES" if inLineOfSight else "NO") + "\n"
-	out += "CHASING PLAYER?: " + ("YES - GO CRAZY!" if chasing else "No") + "\n"
+
+	# Target information
+	if current_target:
+		out += "CURRENT TARGET: " + current_target.name + "\n"
+		var distance = global_position.distance_to(current_target.global_position)
+		out += "DISTANCE TO TARGET: " + str(distance).pad_decimals(1) + " units\n"
+	else:
+		out += "CURRENT TARGET: None\n"
+
+	# Available players
+	var players = get_all_players()
+	out += "AVAILABLE PLAYERS: " + str(players.size()) + "\n"
+	for player in players:
+		var dist = global_position.distance_to(player.global_position)
+		out += "  - " + player.name + " (distance: " + str(dist).pad_decimals(1) + ")\n"
+
+	out += "---\n"
+	out += "IN LINE OF SIGHT? (WOULD THE TARGET SEE THE GHOST IF IT MANIFESTS?): " + ("YES" if inLineOfSight else "NO") + "\n"
+	out += "CHASING TARGET?: " + ("YES - GO CRAZY!" if chasing else "No") + "\n"
 	out += "VISIBLE?: " + ("Yes" if skeleton.visible else "No") + "\n"
 	out += "---\n"
 
@@ -368,12 +453,3 @@ func getStatusStateless():
 	out += "---\n"
 
 	return out
-
-func update_player_reference():
-	# Try to get multiplayer player first
-	var multiplayer_player = get_tree().current_scene.get_node_or_null("PlayerSpawnLocation/Player_" + str(multiplayer.get_unique_id()))
-	if multiplayer_player:
-		player = multiplayer_player
-	else:
-		# Fall back to singleplayer player
-		player = get_tree().current_scene.get_node_or_null("Player")
