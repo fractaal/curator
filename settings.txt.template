@@ -1,12 +1,105 @@
-API_KEY=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
+# Curator Game Configuration File
+# This file contains all the configuration settings for the Curator game.
+# Lines starting with # are comments and will be ignored.
+# Format: KEY=VALUE (no spaces around the equals sign)
 
-MODEL=qwen/qwen-2.5-72b-instruct
-AUX_MODEL=qwen/qwen-2.5-72b-instruct
+# =============================================================================
+# AI/LLM CONFIGURATION (REQUIRED)
+# =============================================================================
 
+# Your OpenRouter API key (REQUIRED)
+# Get one from: https://openrouter.ai/
+API_KEY=
+
+# Primary AI model for ghost behavior
+# Examples: qwen/qwen-2.5-72b-instruct, anthropic/claude-3.5-sonnet, openai/gpt-4o
+MODEL=google/gemini-2.5-flash-preview-05-20
+
+# Auxiliary AI model for secondary tasks (summarization, etc.)
+AUX_MODEL=google/gemini-2.5-flash-preview-05-20
+
+# AI model temperature settings (0.0 = deterministic, 1.0 = creative)
 MODEL_TEMPERATURE=0.7
 AUX_MODEL_TEMPERATURE=0.7
 
+# AI model penalty settings (optional, defaults to 1.0 if not specified)
+MODEL_FREQUENCY_PENALTY=1.0
+MODEL_PRESENCE_PENALTY=1.0
+MODEL_REPETITION_PENALTY=0.0
+
+AUX_MODEL_FREQUENCY_PENALTY=1.0
+AUX_MODEL_PRESENCE_PENALTY=1.0
+AUX_MODEL_REPETITION_PENALTY=0.0
+
+# Maximum tokens in AI responses
 RESPONSE_MAX_TOKENS=1024
 
-MAX_HISTORY=20
+# Number of conversation history entries to keep for AI context
+MAX_HISTORY=30
+
+# How often (in seconds) the AI reads game state and makes decisions
 SENSOR_READ_INTERVAL=15
+
+# =============================================================================
+# GRAPHICS AND RENDERING SETTINGS
+# =============================================================================
+
+# 3D scaling algorithm: FSR, BILINEAR, or NEAREST
+SCALING_ALGORITHM=FSR
+
+# 3D scaling factor (0.5 = half resolution, 1.0 = native, 2.0 = double)
+SCALING_FACTOR=1.0
+
+# Shadow map sizes (higher = better quality, lower performance)
+# Common values: 512, 1024, 2048, 4096
+DIRECTIONAL_SHADOW_SIZE=2048
+POSITIONAL_SHADOW_SIZE=1024
+
+# Shadow filtering quality: SOFT_VERY_LOW, SOFT_LOW, SOFT_MEDIUM, SOFT_HIGH, SOFT_ULTRA
+SHADOW_FILTER_QUALITY=SOFT_VERY_LOW
+
+# Enable/disable shadows entirely (true/false)
+SHADOWS=true
+
+# Advanced rendering features (true/false)
+# SDFGI: Signed Distance Field Global Illumination
+SDFGI=false
+
+# Volumetric fog effects
+VOLUMETRICS=false
+
+# Screen Space Ambient Occlusion
+SSAO=false
+
+# Screen Space Reflections
+SSR=false
+
+# Screen Space Indirect Lighting
+SSIL=false
+
+# =============================================================================
+# DISPLAY SETTINGS
+# =============================================================================
+
+# Run in fullscreen mode (true/false)
+FULLSCREEN=false
+
+# Enable vertical sync (true/false)
+VSYNC=true
+
+# Maximum frame rate (0 = unlimited)
+MAX_FPS=60
+
+# =============================================================================
+# NOTES
+# =============================================================================
+
+# Performance Tips:
+# - For better performance: Lower shadow sizes, disable advanced rendering features
+# - For better quality: Increase shadow sizes, enable SDFGI/SSAO/SSR
+# - SCALING_FACTOR < 1.0 can significantly improve performance on lower-end hardware
+
+# AI Tips:
+# - Higher SENSOR_READ_INTERVAL = less frequent AI decisions (better performance)
+# - Lower SENSOR_READ_INTERVAL = more responsive AI (higher API costs)
+# - Adjust MODEL_TEMPERATURE for different AI personalities (0.3-0.9 recommended)
