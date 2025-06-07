@@ -1,4 +1,4 @@
-[gd_scene load_steps=124 format=3 uid="uid://ctahsvj88g1om"]
+[gd_scene load_steps=120 format=3 uid="uid://ctahsvj88g1om"]
 
 [ext_resource type="Script" path="res://levels/node_3d.gd" id="1_7plsp"]
 [ext_resource type="CompressedTexture3D" uid="uid://dvb27bbktotnl" path="res://textures/environment_adjustments_3d_lut_template.png" id="2_6h08h"]
@@ -40,8 +40,6 @@
 [ext_resource type="PackedScene" uid="uid://boejxxg3pk1pd" path="res://Scenes/CeilingLight2.tscn" id="24_2thbs"]
 [ext_resource type="Script" path="res://levels/Debug.gd" id="25_wy030"]
 [ext_resource type="PackedScene" uid="uid://dxldky3t37s46" path="res://models/Carpet/Carpet.glb" id="29_6mi4k"]
-[ext_resource type="Script" path="res://Scripts/VoiceRecognition/VoiceRecognition.gd" id="32_jsfk5"]
-[ext_resource type="Script" path="res://addons/godot_whisper/capture_stream_to_text.gd" id="38_3vk56"]
 [ext_resource type="FontFile" uid="uid://cvunybceg2xmx" path="res://Fonts/JetBrains Mono Bold Nerd Font Complete Mono.ttf" id="43_ff5h2"]
 [ext_resource type="PackedScene" uid="uid://cw45eq4b5snrb" path="res://models/Chair/Carpet/Carpet.glb" id="43_rrrwr"]
 [ext_resource type="Script" path="res://levels/ControlsUI.gd" id="44_bh7qd"]
@@ -70,7 +68,6 @@
 [ext_resource type="PackedScene" uid="uid://dt5d3woepamaa" path="res://models/CuttingBoard.tscn" id="71_su2b8"]
 [ext_resource type="PackedScene" uid="uid://26xawlqggyub" path="res://models/Can/Can.tscn" id="73_waol4"]
 [ext_resource type="PackedScene" uid="uid://2ghyrom7p4ag" path="res://models/Workbench/Workbench.tscn" id="74_1v032"]
-[ext_resource type="WhisperResource" path="res://addons/godot_whisper/models/gglm-tiny.en.bin" id="74_1wubi"]
 [ext_resource type="Script" path="res://Scripts/LatencyStatistics.cs" id="75_k1sr7"]
 [ext_resource type="Script" path="res://Scripts/ToastNotifications.cs" id="76_r0kne"]
 [ext_resource type="Script" path="res://levels/EndGameButtons.gd" id="76_stbum"]
@@ -324,8 +321,6 @@ size = Vector3(5.8857, 3.32785, 16.6559)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_vwoup"]
 size = Vector3(1.44018, 3.32785, 2.73391)
-
-[sub_resource type="AudioStreamMicrophone" id="AudioStreamMicrophone_pqhwn"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_4fvki"]
 line_spacing = 0.0
@@ -2252,29 +2247,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.2669, 1.69158, 8.55443)
 [node name="Debug" type="Node" parent="." node_paths=PackedStringArray("DebugUI")]
 script = ExtResource("25_wy030")
 DebugUI = NodePath("../DebugUI")
-
-[node name="CaptureStreamToText" type="VBoxContainer" parent="."]
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -614.0
-offset_top = -100.0
-grow_horizontal = 0
-grow_vertical = 0
-script = ExtResource("32_jsfk5")
-
-[node name="MicPlayer" type="AudioStreamPlayer" parent="CaptureStreamToText"]
-stream = SubResource("AudioStreamMicrophone_pqhwn")
-bus = &"Record"
-
-[node name="CaptureStreamToText" type="SpeechToText" parent="CaptureStreamToText"]
-language_model = ExtResource("74_1wubi")
-script = ExtResource("38_3vk56")
-recording = false
-transcribe_interval = 2.0
-maximum_sentence_time = 10
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
 anchors_preset = 15

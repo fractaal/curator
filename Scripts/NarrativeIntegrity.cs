@@ -63,6 +63,13 @@ public partial class NarrativeIntegrity : Node
 
 	public async Task<string> CheckIntegrityForAudio(string message, string action)
 	{
+		// Only the server should make LLM requests in multiplayer
+		if (!Multiplayer.IsServer())
+		{
+			GD.Print("NarrativeIntegrity: Skipping integrity check - not server, returning original message");
+			return message ?? "";
+		}
+
 		var rooms = GetTree().GetNodesInGroup("rooms").Select(room => room.Name.ToString());
 		var ghostTypes = GhostData.Call("GetGhostTypes").AsStringArray();
 

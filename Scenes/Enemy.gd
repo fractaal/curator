@@ -94,44 +94,46 @@ func _on_game_lost(_reason):
 func _ready():
 	GhostTypes = GhostData.GetGhostTypes()
 
-	# Set up name and type
-	FirstName = FirstNames[randi() % FirstNames.size()]
-	LastName = LastNames[randi() % LastNames.size()]
-	GhostType = GhostTypes[randi() % GhostTypes.size()]
-	GhostAge = randi_range(10, 1000)
-	FavoriteRoom = "None Yet..."
+	# Only server should generate ghost properties to ensure consistency
+	if multiplayer.is_server():
+		# Set up name and type
+		FirstName = FirstNames[randi() % FirstNames.size()]
+		LastName = LastNames[randi() % LastNames.size()]
+		GhostType = GhostTypes[randi() % GhostTypes.size()]
+		GhostAge = randi_range(10, 1000)
+		FavoriteRoom = "None Yet..."
+
+		var rooms = get_tree().get_nodes_in_group("rooms")
+		FavoriteRoom = rooms[randi() % rooms.size()].name
+
+		# RPC the ghost properties to all clients
+		_rpc_set_ghost_properties.rpc(FirstName, LastName, GhostType, GhostAge, FavoriteRoom)
 
 	print("Ghost Type is ", GhostType)
 
 	EventBus.GhostAction.connect(_on_ghost_action)
 	lastLocationForRoomCheck = global_transform.origin
 
-	var rooms = get_tree().get_nodes_in_group("rooms")
-	FavoriteRoom = rooms[randi() % rooms.size()].name
-
-	EventBus.emit_signal("GhostInformation", "Name - " + FirstName + " " + LastName)
-	EventBus.emit_signal("GhostInformation", "Type - " + GhostType)
-	EventBus.emit_signal("GhostInformation", "Age - " + str(GhostAge))
-	EventBus.emit_signal("GhostInformation", "Favorite Room - " + FavoriteRoom)
-
 	EventBus.GameWon.connect(_on_game_won)
 	EventBus.GameLost.connect(_on_game_lost)
 
-	_on_ghost_action("movetoasghost", FavoriteRoom)
+	# Wait for ghost properties to be set before starting movement
+	if multiplayer.is_server():
+		_on_ghost_action("movetoasghost", FavoriteRoom)
 
-	print("Ghost favorite room is " + FavoriteRoom + " starting to path there")
+		print("Ghost favorite room is " + FavoriteRoom + " starting to path there")
 
-	while moveFlag:
-		await get_tree().create_timer(0.1).timeout
+		while moveFlag:
+			await get_tree().create_timer(0.1).timeout
 
-	print("Ghost is now in " + FavoriteRoom)
+		print("Ghost is now in " + FavoriteRoom)
 
-	while true:
-		await get_tree().create_timer(randf_range(5, 10)).timeout
+		while true:
+			await get_tree().create_timer(randf_range(5, 10)).timeout
 
-		if not chasing_EntireSequence and not manifesting and not chasing and not moveFlag:
-			if Locator.RoomObject:
-				update_target_location(Locator.RoomObject.GetRandomPosition())
+			if not chasing_EntireSequence and not manifesting and not chasing and not moveFlag:
+				if Locator.RoomObject:
+					update_target_location(Locator.RoomObject.GetRandomPosition())
 	
 var moveFlag = false
 
@@ -159,7 +161,10 @@ func _on_ghost_action(verb, arguments):
 	elif verb == "chaseplayerasghost" or verb == "chasetargetasghost":
 		# For backwards compatibility, "chaseplayerasghost" still works
 		# but now we also support "chasetargetasghost" for any target
-		chase(arguments)
+		if multiplayer.is_server():
+			_rpc_chase.rpc(arguments)
+		else:
+			print("Non-server tried to make ghost chase - ignoring")
 
 	elif verb == "settargetasghost":
 		# New action to set a specific target
@@ -170,11 +175,34 @@ func _on_ghost_action(verb, arguments):
 			print("Ghost cannot set target - invalid target: ", arguments)
 
 	elif verb == "appearasghost":
-		appear()
+		if multiplayer.is_server():
+			_rpc_appear.rpc()
+		else:
+			print("Non-server tried to make ghost appear - ignoring")
 
 	elif verb == "depositevidenceasghost":
 		if evidenceDepositor:
 			evidenceDepositor.DepositEvidence(GhostType)
+
+# RPC method for setting ghost properties - called by server, executed on all clients
+@rpc("authority", "call_local")
+func _rpc_set_ghost_properties(first_name: String, last_name: String, ghost_type: String, ghost_age: int, favorite_room: String):
+	FirstName = first_name
+	LastName = last_name
+	GhostType = ghost_type
+	GhostAge = ghost_age
+	FavoriteRoom = favorite_room
+
+	# Emit the ghost information signals on all clients
+	EventBus.emit_signal("GhostInformation", "Name - " + FirstName + " " + LastName)
+	EventBus.emit_signal("GhostInformation", "Type - " + GhostType)
+	EventBus.emit_signal("GhostInformation", "Age - " + str(GhostAge))
+	EventBus.emit_signal("GhostInformation", "Favorite Room - " + FavoriteRoom)
+
+# RPC method for ghost appearance - called by server, executed on all clients
+@rpc("authority", "call_local")
+func _rpc_appear():
+	appear()
 
 func appear():
 	if chasing or gameEnded:
@@ -192,6 +220,11 @@ func appear():
 	if chasing:
 		return
 	skeleton.visible = false
+
+# RPC method for ghost chase - called by server, executed on all clients
+@rpc("authority", "call_local")
+func _rpc_chase(arguments):
+	chase(arguments)
 
 func chase(arguments):
 	if chasing or gameEnded:
@@ -286,6 +319,9 @@ func chase(arguments):
 	EventBus.emit_signal("ObjectInteraction", "unlock", "doors", "all")
 
 func _physics_process(delta):
+	if (!multiplayer.is_server()):
+		return
+
 	# If still no target, skip line of sight checks but continue with movement
 	if current_target:
 		LineOfSightCheck.look_at(current_target.global_position + Vector3(0, .75, 0))
@@ -344,6 +380,9 @@ func _physics_process(delta):
 		huntTensionSFX.volume_db = -80
 
 func _process(_delta):
+	if (!multiplayer.is_server()):
+		return
+
 	# Check if current target is a player and is dead
 	var target_is_dead = false
 	if current_target and current_target.has_method("kill") and current_target.has_property("dead"):

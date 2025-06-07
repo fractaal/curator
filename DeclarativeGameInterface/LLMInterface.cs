@@ -174,6 +174,13 @@ public partial class LLMInterface : Node
 
     public void Send(List<Message> messages)
     {
+        // Only the server should make LLM requests in multiplayer
+        if (!Multiplayer.IsServer())
+        {
+            GD.Print("LLMInterface: Skipping LLM request - not server");
+            return;
+        }
+
         var thread = new System.Threading.Thread(async () => await DoRequest(messages))
         {
             IsBackground = true
@@ -185,6 +192,13 @@ public partial class LLMInterface : Node
 
     public async Task<string> SendIsolated(List<Message> messages)
     {
+        // Only the server should make LLM requests in multiplayer
+        if (!Multiplayer.IsServer())
+        {
+            GD.Print("LLMInterface: Skipping isolated LLM request - not server");
+            return "";
+        }
+
         try
         {
             using (var request = new HttpRequestMessage(HttpMethod.Post, url))

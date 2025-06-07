@@ -104,9 +104,16 @@ public partial class EvidenceDepositor : Node
 
     public void DepositEvidence(string ghostType)
     {
+        // Only server should make the decision about which evidence to deposit
+        if (!Multiplayer.IsServer())
+        {
+            GD.Print("Non-server tried to deposit evidence - ignoring");
+            return;
+        }
+
         var evidences = GhostToEvidences[ghostType];
 
-        string chosenEvidence = "";
+        string chosenEvidence;
 
         if (DepositedEvidences.Count == evidences.Count)
         {
@@ -127,7 +134,18 @@ public partial class EvidenceDepositor : Node
 
         DepositedEvidences.Add(chosenEvidence);
 
-        PackedScene evidencePrefab = chosenEvidence switch
+        // Get the spawn position
+        Vector3 spawnPosition = Locator.RoomObject?.GetRandomPosition() ?? Vector3.Zero;
+
+        // RPC the evidence spawning to all clients (including server)
+        Rpc(MethodName.RpcSpawnEvidence, chosenEvidence, spawnPosition);
+    }
+
+    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true)]
+    public void RpcSpawnEvidence(string evidenceType, Vector3 position)
+    {
+        GD.Print("Depositing evidence ", evidenceType, " on ", position, " (on peer " + Multiplayer.GetUniqueId() + ") -- from peer " + Multiplayer.GetRemoteSenderId());
+        PackedScene evidencePrefab = evidenceType switch
         {
             "Bloodstains" => BloodstainsPrefab,
             "EMF Level 5" => EMFLevel5Prefab,
@@ -143,17 +161,17 @@ public partial class EvidenceDepositor : Node
         {
             var evidence = evidencePrefab.Instantiate<Node3D>();
             GetTree().Root.AddChild(evidence);
-            evidence.GlobalPosition = Locator.RoomObject?.GetRandomPosition() ?? Vector3.Zero;
+            evidence.GlobalPosition = position;
             EventBus
                 .Get()
                 .EmitSignal(
                     EventBus.SignalName.NotableEventOccurred,
-                    "Ghost evidence deposited - " + chosenEvidence
+                    "Ghost evidence deposited - " + evidenceType
                 );
         }
         else
         {
-            GD.PrintErr("Evidence prefab not found for " + chosenEvidence);
+            GD.PrintErr("Evidence prefab not found for " + evidenceType);
         }
     }
 }

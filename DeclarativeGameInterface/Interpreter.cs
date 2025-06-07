@@ -68,7 +68,12 @@ public partial class Interpreter : Node
 
 		Bus.LLMResponseChunk += (chunk) =>
 		{
-			Interpret(chunk);
+			// Only the server should process LLM response chunks
+			// Clients will receive the effects via interactable-level RPCs
+			if (Multiplayer.IsServer())
+			{
+				Interpret(chunk);
+			}
 		};
 
 		Bus.ObjectInteractionAcknowledged += (verb, objectType, target) =>
@@ -372,11 +377,7 @@ public partial class Interpreter : Node
 		}
 	}
 
-	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true)]
-	public void _FromServerInterpret(string chunk)
-	{
-		Interpret(chunk);
-	}
+
 
 	public async void Interpret(string chunk)
 	{

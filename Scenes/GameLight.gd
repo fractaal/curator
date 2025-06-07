@@ -243,6 +243,9 @@ func explode_impl(_args: Array = []):
 	interactable = false
 
 ################ TURN OFF 
+func turnoff(): # Lowercase just in case
+	RPCUtils.try_rpc_call(self, "turnOff")
+
 func turnOff():
 	RPCUtils.try_rpc_call(self, "turnOff")	
 

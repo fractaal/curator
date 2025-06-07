@@ -476,16 +476,22 @@ func setup_attachment_points():
 
 @rpc("any_peer", "call_local")
 func _pick_up_item(item_path: NodePath, intent_peer: int): 
+	print("pick up item called on ", multiplayer.get_unique_id())
+
 	var item = get_tree().get_root().get_node(item_path)
+
+	var authority_item = NodeUtils.walk_up_until_node_of_type("Node3D", item)
+	
+	print("auth item is ", authority_item.name)
 	
 	if left_item == null:
 		left_item = item
-		left_item.set_multiplayer_authority(intent_peer, true)
-		print("set authority of ", item.name, " to ", str(intent_peer), " (on ", str(multiplayer.get_unique_id()), ")")
+		authority_item.set_multiplayer_authority(multiplayer.get_remote_sender_id(), true)
+		print("set authority of ", item.name, " to ", str(multiplayer.get_remote_sender_id()), " (on ", str(multiplayer.get_unique_id()), ")")
 	elif right_item == null:
 		right_item = item
-		right_item.set_multiplayer_authority(intent_peer, true)
-		print("set authority of ", item.name, " to ", str(intent_peer), " (on ", str(multiplayer.get_unique_id()), ")")
+		authority_item.set_multiplayer_authority(multiplayer.get_remote_sender_id(), true)
+		print("set authority of ", item.name, " to ", str(multiplayer.get_remote_sender_id()), " (on ", str(multiplayer.get_unique_id()), ")")
 	else:
 		push_error("Both hands are already occupied")
 	
@@ -496,15 +502,16 @@ func _update_item_transform(item: NodePath, _transform: Transform3D):
 
 func _drop_item(hand: String, intent_peer: int):
 	var forward_vector = -$Head/Camera3d.global_transform.basis.z
+
 	if hand == "left":
 		left_item.get_parent().freeze = false
 		(left_item.get_parent() as RigidBody3D).apply_impulse(forward_vector * 0.25)
-		left_item.set_multiplayer_authority(1, true)
+		NodeUtils.walk_up_until_node_of_type("Node3D", left_item).set_multiplayer_authority(1, true)
 		left_item = null
 	elif hand == "right":
 		right_item.get_parent().freeze = false
 		(right_item.get_parent() as RigidBody3D).apply_impulse(forward_vector * 0.25)
-		right_item.set_multiplayer_authority(1, true)
+		NodeUtils.walk_up_until_node_of_type("Node3D", right_item).set_multiplayer_authority(1, true)
 		right_item = null
 	else:
 		push_error("Invalid hand: " + hand)

@@ -219,6 +219,13 @@ Ghost Backstory:
 
 	private void SendDataToLLM()
 	{
+		// Only the server should make LLM requests in multiplayer
+		if (!Multiplayer.IsServer())
+		{
+			GD.Print("Sensors: Skipping LLM request - not server");
+			return;
+		}
+
 		var allRoomInfo = Room.GetAllRoomInformation();
 		var systemFeedback = GetSystemFeedback();
 
@@ -577,6 +584,14 @@ Ghost Backstory:
 
 		Bus.LLMFullResponse += async (message) =>
 		{
+			// Only the server should make LLM requests in multiplayer
+			if (!Multiplayer.IsServer())
+			{
+				GD.Print("Sensors: Skipping LLM summarization - not server");
+				DoneSummarizing = true;
+				return;
+			}
+
 			if (!AIEnabled)
 			{
 				GD.Print("AI disabled, skipping LLM summarization.");

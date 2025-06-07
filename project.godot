@@ -25,7 +25,6 @@ driver/mix_rate=48000
 
 EventBus="*res://Scripts/EventBus.cs"
 Config="*res://Scripts/Config.cs"
-PlayerManager="*res://Scripts/PlayerManager.cs"
 Curator="*res://Curator/Curator.tscn"
 LLMInterface="*res://DeclarativeGameInterface/LLMInterface.cs"
 TargetResolution="*res://Scripts/TargetResolution.cs"
@@ -39,11 +38,13 @@ AltEnter="*res://AltEnter.gd"
 FuzzySharpGodotBridge="*res://Scripts/FuzzySharpGodotBridge.cs"
 MultiplayerManager="*res://Multiplayer/MultiplayerManager.gd"
 RPCUtils="*res://Multiplayer/RPCUtils.gd"
+PlayerManager="*res://Scripts/PlayerManager.cs"
 
 [display]
 
-window/size/viewport_width=960
-window/size/viewport_height=540
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/initial_position_type=0
 window/dpi/allow_hidpi=false
 window/vsync/vsync_mode=0
 
@@ -209,11 +210,7 @@ cycle_debug_menu={
 [physics]
 
 3d/run_on_separate_thread=true
-common/physics_ticks_per_second=100
-common/max_physics_steps_per_frame=32
-3d/default_gravity=6.0
-3d/solver/solver_iterations=32
-common/physics_interpolation=true
+3d/physics_engine="JoltPhysics3D"
 jolt_3d/collisions/areas_detect_static_bodies=true
 jolt_3d/limits/max_temporary_memory=128
 

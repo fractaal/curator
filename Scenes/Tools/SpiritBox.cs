@@ -60,9 +60,13 @@ public partial class SpiritBox : Holdable
 
 		bus.GhostAction += async (verb, arguments) =>
 		{
-			if (verb == "speakasghost" && Power)
+			if (verb == "speakasghost")
 			{
-				messageQueue.Add(arguments);
+				// Only server should process ghost speech and distribute to all spirit boxes
+				if (Multiplayer.IsServer())
+				{
+					Rpc(MethodName.RpcGhostSpeak, arguments);
+				}
 			}
 		};
 
@@ -309,6 +313,18 @@ public partial class SpiritBox : Holdable
 	//     parent.Freeze = true;
 	//     Holding = true;
 	// }
+
+	// RPC method for ghost speech - called by server, executed on all clients
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true)]
+	public void RpcGhostSpeak(string message)
+	{
+		GD.Print($"Received ghost speech message '{message}' on client {Multiplayer.GetUniqueId()} from {Multiplayer.GetRemoteSenderId()}");
+		// Only add to queue if this spirit box is powered on
+		if (Power)
+		{
+			messageQueue.Add(message);
+		}
+	}
 
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true)]
 	public override void secondaryInteract()

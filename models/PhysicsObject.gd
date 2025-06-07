@@ -2,7 +2,7 @@ extends Node
 
 var rigidBody: RigidBody3D
 var locator: Node
-var player: Node3D
+var playerManager: Node  # Reference to PlayerManager for multiplayer support
 
 var shiftSfx: AudioStreamPlayer3D
 var joltSfx: AudioStreamPlayer3D
@@ -58,46 +58,141 @@ func _ready():
 
 	rigidBody = get_parent() as RigidBody3D
 	locator = get_parent().get_node("RoomLocator")
-	player = get_tree().current_scene.get_node("Player")
+
+	# Get PlayerManager reference for multiplayer support
+	playerManager = get_node("/root/PlayerManager")
+	if playerManager == null:
+		push_error("PlayerManager not found - required for multiplayer architecture")
 
 	rigidBody.add_child.call_deferred(shiftSfx)
 	rigidBody.add_child.call_deferred(joltSfx)
 	rigidBody.add_child.call_deferred(throwSfx)
-	
+
 	originalRotation = rigidBody.global_rotation_degrees
 
 	connect_to_event_bus.call_deferred()
 
 func jolt():
-	await get_tree().create_timer(randf_range(0.0, 1.5)).timeout
-	joltSfx.pitch_scale = randf_range(0.8, 1.2)
+	# Only server should initiate physics actions
+	if multiplayer.is_server():
+		_handle_jolt.rpc()
+	else:
+		# Clients request the server to perform jolt
+		_request_jolt.rpc_id(1)
+
+@rpc("any_peer", "call_local")
+func _request_jolt():
+	if not multiplayer.is_server():
+		return
+	_handle_jolt.rpc()
+
+@rpc("authority", "call_local")
+func _handle_jolt():
+	# Server generates random values and sends to all clients
+	var delay = randf_range(0.0, 1.5)
+	var pitch = randf_range(0.8, 1.2)
+	var impulse_vector = Vector3(randf(), randf(), randf()) * 2 * rigidBody.mass
+
+	_execute_jolt.rpc(delay, pitch, impulse_vector)
+
+@rpc("authority", "call_local")
+func _execute_jolt(delay: float, pitch: float, impulse_vector: Vector3):
+	await get_tree().create_timer(delay).timeout
+	joltSfx.pitch_scale = pitch
 	joltSfx.play(0)
-	rigidBody.apply_impulse(Vector3(
-		randf(),
-		randf(),
-		randf()
-	) * 2 * rigidBody.mass)
+	rigidBody.apply_impulse(impulse_vector)
 
 func throw():
-	await get_tree().create_timer(randf_range(0.0, 1.5)).timeout
-	throwSfx.pitch_scale = randf_range(0.8, 1.2)
-	throwSfx.volume_db = -15
-	throwSfx.play(0)
-	var direction = player.global_transform.origin - rigidBody.global_transform.origin
+	# Only server should initiate physics actions
+	if multiplayer.is_server():
+		_handle_throw.rpc()
+	else:
+		# Clients request the server to perform throw
+		_request_throw.rpc_id(1)
+
+@rpc("any_peer", "call_local")
+func _request_throw():
+	if not multiplayer.is_server():
+		return
+	_handle_throw.rpc()
+
+@rpc("authority", "call_local")
+func _handle_throw():
+	# Server determines target player and generates random values
+	var target_player = _get_closest_player()
+	if target_player == null:
+		push_warning("No players found for throw action")
+		return
+
+	var delay = randf_range(0.0, 1.5)
+	var pitch = randf_range(0.8, 1.2)
+	var direction = target_player.global_transform.origin - rigidBody.global_transform.origin
 	direction = direction.normalized()
-	# Adjust the magnitude of the impulse as necessary. 
-	# You might want to experiment with different values for different effects.
 	var impulse_strength = 8
 	var impulse = direction * impulse_strength * rigidBody.mass
-	
+
+	_execute_throw.rpc(delay, pitch, impulse)
+
+@rpc("authority", "call_local")
+func _execute_throw(delay: float, pitch: float, impulse: Vector3):
+	await get_tree().create_timer(delay).timeout
+	throwSfx.pitch_scale = pitch
+	throwSfx.volume_db = -15
+	throwSfx.play(0)
 	rigidBody.apply_impulse(impulse)
 
 func shift():
-	await get_tree().create_timer(randf_range(0.0, 1.5)).timeout
-	shiftSfx.pitch_scale = randf_range(0.8, 1.2)
-	shiftSfx.play(0)
-	rigidBody.apply_impulse(Vector3(
+	# Only server should initiate physics actions
+	if multiplayer.is_server():
+		_handle_shift.rpc()
+	else:
+		# Clients request the server to perform shift
+		_request_shift.rpc_id(1)
+
+@rpc("any_peer", "call_local")
+func _request_shift():
+	if not multiplayer.is_server():
+		return
+	_handle_shift.rpc()
+
+@rpc("authority", "call_local")
+func _handle_shift():
+	# Server generates random values and sends to all clients
+	var delay = randf_range(0.0, 1.5)
+	var pitch = randf_range(0.8, 1.2)
+	var impulse_vector = Vector3(
 		randf() * 0.25,
 		randf(),
 		randf() * 0.25
-	) * rigidBody.mass)
+	) * rigidBody.mass
+
+	_execute_shift.rpc(delay, pitch, impulse_vector)
+
+@rpc("authority", "call_local")
+func _execute_shift(delay: float, pitch: float, impulse_vector: Vector3):
+	await get_tree().create_timer(delay).timeout
+	shiftSfx.pitch_scale = pitch
+	shiftSfx.play(0)
+	rigidBody.apply_impulse(impulse_vector)
+
+# Helper function to get the closest player for throw actions
+func _get_closest_player() -> Node3D:
+	if playerManager == null:
+		return null
+
+	var all_players = playerManager.GetAllPlayers()
+	if all_players.size() == 0:
+		return null
+
+	var closest_player: Node3D = null
+	var closest_distance: float = INF
+
+	for player_id in all_players:
+		var player = all_players[player_id]
+		if player != null:
+			var distance = rigidBody.global_position.distance_to(player.global_position)
+			if distance < closest_distance:
+				closest_distance = distance
+				closest_player = player
+
+	return closest_player
