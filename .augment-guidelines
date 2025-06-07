@@ -1,0 +1,30 @@
+<CURRENT_MAJOR_TASK>
+    - Migrate this game from a primarily singleplayer-only architecture to a multiplayer architecture (and even singleplayer should basically be one-player multiplayer)
+    - Clean up and fix code smells and issues with the codebase (You can tell this codebase was rushed)
+    <IMPORTANT_CRITICAL>
+        Avoid making assumptions or "reaches" about new features, enhancements, etc. as this adds unecessary complexity into a codebase that is already complex. 
+        The current and only objective is to maintain feature parity while moving over the codebase to a multiplayer architecture - anything else is a reach and should not be attempted (unless directed otherwise of course)
+
+        If something *needs* to be created as a consequeunce of the new multiplayer architecture, go ahead -- just note it as a requirement. However, anything that could be construed as a 'new feature' - stop! Discuss first.
+
+        ### What *could* be construed as a 'new feature'?
+        
+        ✅ Previously, when the game was just singleplayer, the ghost only has one target (the player). However, in multiplayer, the ghost should have multiple targets (all players). This is a necessary change.
+        ❌ However, "automatically selecting a target" is not. The ghost should not automatically select a target - it should only target when told to. -- "auto selecting targets" is a 'new' but NOT necessary feature.
+
+        This does *not* mean that we're *not* open to enhancements because we are! Ideas are always welcome! However -- if it's not necessary, you should simply *state it as an aside* (maybe in a file!) and move on.
+        I've made a file in .ai/FUTURE_IDEAS.md for this purpose. Put any ideas you have in here that would be worth exploring -- but NOT worth implementing right now in our migration task.
+        Be sure to write as much context as you can for the idea -- not just one liners, but rather a full paragraph or two that substantiates the idea.
+
+        ### "Cleaning up" the code
+        As stated before, the codebase is quite rushed and messy. As such, a good auxiliary objective while we're migrating to multiplayer is to clean up the codebase as we go. This means:
+        - Refactoring code to be more readable, more modular, more maintainable
+        - Removing code that is no longer used
+        - Adding comments where necessary (and ONLY where necessary! -- over-commenting is a code smell in itself)
+
+        ### Migration and Backwards Compatibility
+        - During multiplayer migration, maintain feature parity but NOT backwards compatibility - breaking changes are expected and acceptable as part of the architectural migration
+        - Do NOT implement backward compatibility layers during migration - we should break things and force the migration to be complete
+        - etc.
+    </IMPORTANT_CRITICAL>
+</CURRENT_MAJOR_TASK>
