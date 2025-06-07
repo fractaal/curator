@@ -27,4 +27,45 @@
         - Do NOT implement backward compatibility layers during migration - we should break things and force the migration to be complete
         - etc.
     </IMPORTANT_CRITICAL>
+
+    <CONTEXT_AND_DOCUMENTATION>
+        **Use context7.** Godot is not as popular as Unity and Unreal and that means AI models such as yourself will (possibly) be more prone to hallucinations. As such, utilize context7 to access the Godot documentation and APIs. We are in Godot 4.3
+
+        Use context7, *especially* for Multiplayer, Networking and RPC concerns.
+    </CONTEXT_AND_DOCUMENTATION>
+
+    <BEFORE_WRITING_CODE>
+        Before writing any code, please confirm with me all the action items you are going to implement -- this ensures we are on the same page and that you are not going to implement any unnecessary or unwanted features.
+    </BEFORE_WRITING_CODE>
 </CURRENT_MAJOR_TASK>
+
+<PERTINENT_DOCS>
+    Important and pertinent items relating to code or patterns that are major points of hallucination/issues that need to be taken into account constantly.
+
+    - When calling RPC methods from C#, the proper way is:
+    ```
+    using Godot;
+
+    ...
+
+    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true)]
+    public void RpcMethodName(string arg1, int arg2)
+    {
+        // Method implementation
+    }
+
+    ...
+
+    public void SomeMethod()
+    {
+        Rpc(MethodName.RpcMethodName, arg1, arg2);
+    }
+
+    ```
+
+    ❌ *Not* by directly calling the method! 
+    ✅ You *need* to call the `Rpc` method.
+
+    Methods marked Rpc *also need to be public!*
+
+</PERTINENT_DOCS>
