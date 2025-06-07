@@ -46,12 +46,28 @@ func on_peer_connected(peer_id: int):
 func on_peer_disconnected(peer_id: int):
 	print("Peer disconnected: ", peer_id)
 
+	# Unregister the player from PlayerManager
+	var player_manager = get_node("/root/PlayerManager")
+	if player_manager:
+		player_manager.UnregisterPlayer(peer_id)
+		print("Unregistered player ", peer_id, " from PlayerManager")
+	else:
+		push_error("PlayerManager not found when trying to unregister player ", peer_id)
+
 func _add_player_to_game(id: int):
 	var player = multiplayer_scene.instantiate()
 	player.player_id = id
 	player.name = "Player_" + str(id)
 
 	_player_spawn_node.add_child(player, true)
+
+	# Register the player with PlayerManager
+	var player_manager = get_node("/root/PlayerManager")
+	if player_manager:
+		player_manager.RegisterPlayer(id, player)
+		print("Registered player ", id, " with PlayerManager")
+	else:
+		push_error("PlayerManager not found when trying to register player ", id)
 
 func join_server(_address: String):
 	var client_peer = ENetMultiplayerPeer.new()

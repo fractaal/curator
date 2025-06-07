@@ -25,6 +25,7 @@ driver/mix_rate=48000
 
 EventBus="*res://Scripts/EventBus.cs"
 Config="*res://Scripts/Config.cs"
+PlayerManager="*res://Scripts/PlayerManager.cs"
 Curator="*res://Curator/Curator.tscn"
 LLMInterface="*res://DeclarativeGameInterface/LLMInterface.cs"
 TargetResolution="*res://Scripts/TargetResolution.cs"
@@ -208,8 +209,11 @@ cycle_debug_menu={
 [physics]
 
 3d/run_on_separate_thread=true
-common/physics_ticks_per_second=50
-common/max_physics_steps_per_frame=16
+common/physics_ticks_per_second=100
+common/max_physics_steps_per_frame=32
+3d/default_gravity=6.0
+3d/solver/solver_iterations=32
+common/physics_interpolation=true
 jolt_3d/collisions/areas_detect_static_bodies=true
 jolt_3d/limits/max_temporary_memory=128
 

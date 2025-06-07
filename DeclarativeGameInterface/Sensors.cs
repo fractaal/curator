@@ -21,8 +21,9 @@ public partial class Sensors : Node
 	private List<EventMessage> SystemFeedback = new();
 	private List<Message> History = new();
 
-	private Node3D Player;
+	private Node3D Player; // Kept for backward compatibility, will use first player
 	private Node3D Ghost;
+	private PlayerManager PlayerMgr;
 
 	private EventBus Bus;
 
@@ -187,6 +188,8 @@ Ghost Backstory:
 			where e.time > LLMPromptedTime
 			select e;
 
+		var playerStatus = Player != null ? Player.Call("getStatus").AsString() : "No players currently in game";
+
 		result =
 			$@"CURRENT TIME {Time.GetTicksMsec() / 1000f}s
 
@@ -198,7 +201,7 @@ Ghost Backstory:
 {GetContextualAttentionMarkers()}
 
 # PLAYER
-{Player.Call("getStatus").AsString()}
+{playerStatus}
 
 {GetContextualAttentionMarkers()}
 
@@ -421,10 +424,22 @@ Ghost Backstory:
 			GD.PrintErr("Failed to parse SENSOR_READ_INTERVAL: " + e.Message);
 		}
 
-		Player = GetTree().CurrentScene.GetNode<Node3D>("Player");
-		Stats = Player.GetNode<PlayerStats>("PlayerStats");
+		// Initialize PlayerManager
+		PlayerMgr = PlayerManager.Get();
+
+		// Get the first player (will be null initially until multiplayer spawns players)
+		Player = PlayerMgr.GetFirstPlayer();
+		Stats = PlayerMgr.GetFirstPlayerStats();
 
 		Ghost = GetTree().CurrentScene.GetNode<Node3D>("Ghost");
+
+		if (Ghost == null)
+		{
+			GD.PrintErr("Failed to find ghost node");
+		}
+
+		// Note: Player and Stats may be null initially - this is expected in the new multiplayer architecture
+		// They will be populated when MultiplayerManager registers players
 
 		Interface = GetNode<LLMInterface>("/root/LLMInterface");
 		GhostData = GetNode<Node>("/root/GhostData");
@@ -665,6 +680,13 @@ Ghost Backstory:
 
 	public override void _PhysicsProcess(double delta)
 	{
+		// Refresh player references if needed
+		if (Player == null || Stats == null)
+		{
+			Player = PlayerMgr.GetFirstPlayer();
+			Stats = PlayerMgr.GetFirstPlayerStats();
+		}
+
 		if (Input.IsActionJustPressed("GenerateBackstory"))
 		{
 			GenerateBackstory();
@@ -680,7 +702,7 @@ Ghost Backstory:
 			);
 		}
 
-		if (Stats.HasPlayerSteppedInsideHouse && !PerformedInitialSilentAIEnable)
+		if (Stats != null && Stats.HasPlayerSteppedInsideHouse && !PerformedInitialSilentAIEnable)
 		{
 			if (OS.HasFeature("standalone"))
 			{
@@ -732,6 +754,13 @@ Ghost Backstory:
 				return;
 			}
 
+			if (Player == null)
+			{
+				GD.Print("No players available, skipping sensor read.");
+				SensorReadElapsed = SensorReadInterval - 1;
+				return;
+			}
+
 			if (Player.Get("dead").AsBool())
 			{
 				GD.Print("Player dead, skipping sensor read.");
@@ -777,7 +806,7 @@ Ghost Backstory:
 				"### 🛑 A CHASE HAS JUST ENDED - COOL OFF AND LET THE PLAYER BREATH FOR A MOMENT 🛑 ###\n";
 		}
 
-		if (Player.GetNode("Locator").Get("Room").AsString() == "None")
+		if (Player != null && Player.GetNode("Locator").Get("Room").AsString() == "None")
 		{
 			markers +=
 				"### 🤚 PLAYER IS OUTSIDE THE HOUSE - GHOST CANNOT CHASE OUTSIDE THE HOUSE - BE SUBTLER, MAKE THE HOUSE MORE APPEALING, LURE PLAYER BACK IN, DON'T LOCK ENTRANCE DOOR ✋ ###\n";

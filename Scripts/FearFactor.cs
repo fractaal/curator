@@ -18,7 +18,7 @@ public partial class FearFactor : Node
             {
                 FearFactorValue += 5;
             }
-            else if (verb == "chaseplayerasghost")
+            else if (verb == "chaseplayerasghost" || verb == "chasetargetasghost")
             {
                 FearFactorValue += 30;
             }

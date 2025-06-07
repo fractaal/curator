@@ -6,10 +6,12 @@ public partial class EndgameHandler : Node
     EventBus bus;
     Node3D player;
     Node3D ghost;
+    PlayerManager playerMgr;
 
     public override void _Ready()
     {
-        player = GetTree().CurrentScene.GetNode<Node3D>("Player");
+        playerMgr = PlayerManager.Get();
+        player = playerMgr.GetFirstPlayer(); // Use PlayerManager for player reference
         ghost = GetTree().CurrentScene.GetNode<Node3D>("Ghost");
 
         bus = EventBus.Get();
