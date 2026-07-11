@@ -96,7 +96,10 @@ public class GhostAgent : IAgenticBehavior
 	{
 		var messages = new List<LLMMessage>
 		{
-			LLMMessage.FromText("system", Sensors.SystemPrompt),
+			// The persona is the only fully stable prefix (game info below it mutates with
+			// room state), so the provider-side prompt cache breakpoint sits here. The message
+			// is freshly built each turn, so marking it never mutates shared history.
+			LLMMessage.FromText("system", Sensors.SystemPrompt).WithCacheBreakpoint(),
 			LLMMessage.FromText("user", Sensors.GetGameInfo()),
 		};
 
