@@ -22,19 +22,13 @@ AUX_MODEL=google/gemini-2.5-flash-preview-05-20
 MODEL_TEMPERATURE=0.7
 AUX_MODEL_TEMPERATURE=0.7
 
-# AI model penalty settings (optional, defaults to 1.0 if not specified)
-MODEL_FREQUENCY_PENALTY=1.0
-MODEL_PRESENCE_PENALTY=1.0
-MODEL_REPETITION_PENALTY=0.0
-
-AUX_MODEL_FREQUENCY_PENALTY=1.0
-AUX_MODEL_PRESENCE_PENALTY=1.0
-AUX_MODEL_REPETITION_PENALTY=0.0
-
-# Maximum tokens in AI responses
-RESPONSE_MAX_TOKENS=1024
+# NOTE: The legacy penalty/max-token knobs (MODEL_FREQUENCY_PENALTY, MODEL_PRESENCE_PENALTY,
+# MODEL_REPETITION_PENALTY, RESPONSE_MAX_TOKENS and their AUX_ variants) are no longer used
+# since the AgenticCore runtime swap — the model acts via native tool calls, which modern
+# models handle without penalty tuning.
 
 # Number of conversation history entries to keep for AI context
+# (scaled internally: the runtime keeps roughly 6 messages per historical AI turn)
 MAX_HISTORY=30
 
 # How often (in seconds) the AI reads game state and makes decisions
