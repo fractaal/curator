@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://1byeomihd589o"]
+
+[ext_resource type="Script" path="res://DeclarativeGameInterface/MockTest/GhostMindMockTest.cs" id="1_mocktest"]
+
+[node name="GhostMindMockTest" type="Node"]
+script = ExtResource("1_mocktest")
