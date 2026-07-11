@@ -208,6 +208,21 @@ ReasoningEngine scene (or the autoload entirely if nothing else lives there), th
 sections of `Main.txt`/`BehaviorPrompt.txt`, and the `FuzzySharp` verb-rescue path
 (FuzzySharp the package stays only if `FuzzySharpGodotBridge`/TargetResolution still uses it — verify).
 
+## As-built deviations (post-review, 2026-07-12)
+
+- **Scene 4's `OnBeforeRequestSubmit` flush is not used.** Sensors snapshots the volatile turn
+  context once per think dispatch instead (stable across re-prompts; mid-turn events ride the
+  next turn — exactly the old single-shot semantics). More faithful than the hook.
+- **The "AI director performed no commands!" nudge is replaced** by AgenticCore's built-in
+  `WarnOnNoToolCalls` (in-context, same-turn delivery). Nothing instruments the legacy string.
+- **`FailureStatistics.BaseFailures` goes permanently quiet**: "command doesn't exist" is
+  structurally impossible under schema-constrained tool calls — itself a thesis-relevant result.
+- **Debug readouts degrade cosmetically**: ModeReadout's INTERPRET phase is invisible and the
+  latency bar snaps, because chunk signals now fire once, same-frame, at completion. Accepted;
+  there is no streaming phase left to indicate.
+- **The legacy player-effect false-error bug is not reproduced** (old Interpreter emitted a
+  spurious "command does not exist" after every player-effect command — missing `continue`).
+
 ## Non-goals (V1)
 
 Ghost `MemoryIndex`, telemetry viewer wiring, AgenticCore Godot-tier interactable adoption,

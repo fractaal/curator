@@ -74,7 +74,6 @@ public partial class Sensors : Node
 	// Per-turn volatile snapshots. Assembled ONCE per think dispatch (before LLMPromptedTime
 	// is bumped) so the "since last prompt" event filters cover everything since the previous
 	// turn, and re-prompts within the same cycle see a stable turn context.
-	public string CurrentTurnFeedback { get; private set; } = "";
 	public string CurrentTurnStatusPrompt { get; private set; } = "";
 	public string CurrentTurnAttentionMarkers { get; private set; } = "";
 
@@ -263,15 +262,17 @@ Ghost Backstory:
 		EnsureMind();
 
 		// Snapshot the volatile turn context BEFORE bumping LLMPromptedTime.
-		CurrentTurnFeedback = GetSystemFeedback();
+		var turnFeedback = GetSystemFeedback();
 		CurrentTurnStatusPrompt = GetNextPromptWithPlayerAndGhostStatus();
 		CurrentTurnAttentionMarkers = GetContextualAttentionMarkers() + " " + GetFearFactor();
 
 		// Persist this turn's feedback + timeline into the rolling history (parity with the
-		// old History.Add calls; the entity autocompacts past MaxHistoryMessages).
-		if (CurrentTurnFeedback != "")
+		// old History.Add calls; the entity autocompacts past MaxHistoryMessages). Feedback
+		// persisted here lands at the end of the persistent middle — the same slot the old
+		// assembler gave it — so GhostAgent must NOT add it again in the ephemeral tail.
+		if (turnFeedback != "")
 		{
-			Entity.AddMessage(LLMMessage.FromText("user", CurrentTurnFeedback));
+			Entity.AddMessage(LLMMessage.FromText("user", turnFeedback));
 		}
 
 		Entity.AddMessage(LLMMessage.FromText("user", GetArchivedPrompt()));

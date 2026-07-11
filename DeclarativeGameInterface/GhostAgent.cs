@@ -103,12 +103,10 @@ public class GhostAgent : IAgenticBehavior
 			LLMMessage.FromText("user", Sensors.GetGameInfo()),
 		};
 
+		// This turn's system feedback is already the last persistent message (Sensors persists
+		// it right before Think), which lands it in the same slot the old assembler used —
+		// re-adding it here would double it within the turn.
 		messages.AddRange(persistentContext);
-
-		if (Sensors.CurrentTurnFeedback != "")
-		{
-			messages.Add(LLMMessage.FromText("user", Sensors.CurrentTurnFeedback));
-		}
 
 		messages.Add(LLMMessage.FromText("user", Sensors.BehaviorPrompt));
 		messages.Add(LLMMessage.FromText("user", Sensors.CurrentTurnStatusPrompt));
@@ -127,6 +125,9 @@ public class GhostAgent : IAgenticBehavior
 		return await ToolSource.Invoke(toolCall, null);
 	}
 
+	// The old Interpreter's "AI director performed no commands!" SystemFeedback is deliberately
+	// NOT reproduced here: AgenticCore's WarnOnNoToolCalls (left on in EnsureMind) injects the
+	// equivalent nag directly into the context, with better delivery (same turn, not next).
 	public void OnThinkingCompleted(bool wasInterrupted = false)
 	{
 		if (wasInterrupted)
