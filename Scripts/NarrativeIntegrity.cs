@@ -6,7 +6,6 @@ using Godot;
 
 public partial class NarrativeIntegrity : Node
 {
-	private LLMInterface Interface;
 	private Node GhostData;
 
 	private string SanitizerPrompt = FileAccess
@@ -54,7 +53,6 @@ public partial class NarrativeIntegrity : Node
 
 	public override void _Ready()
 	{
-		Interface = GetNode<LLMInterface>("/root/LLMInterface");
 		GhostData = GetNode<Node>("/root/GhostData");
 		Bus = EventBus.Get();
 
@@ -105,60 +103,49 @@ public partial class NarrativeIntegrity : Node
 
 		if (problemSubstrings.Count > 0)
 		{
-			var sanitized = await Interface.SendIsolated(
-				new List<Message>()
+			var sanitized = await GhostMind.AuxCompleteAsync(
+				new List<LLMMessage>()
 				{
-					new() { content = SanitizerPrompt, role = "system" },
-					new()
-					{
-						content = "\"I see you.\", voice=distorted, filter=low, distant.",
-						role = "user"
-					},
-					new()
-					{
-						content =
-							"VERDICT: Hallucinated configuration parameters. Text should *just be natural language.*\nI see you.",
-						role = "assistant"
-					},
-					new() { content = "Whispered message", role = "user", },
-					new()
-					{
-						content =
-							"VERDICT: Vague, roleplaying, descriptive prose - nonsensical or out of context in the context of in-universe speech.",
-						role = "assistant"
-					},
-					new() { content = "Low, growling, whispered message", role = "user", },
-					new()
-					{
-						content =
-							"VERDICT: Vague, roleplaying, descriptive prose - nonsensical or out of context in the context of in-universe speech.",
-						role = "assistant"
-					},
-					new() { content = "*Laughing.* You think you can catch me?", role = "user", },
-					new()
-					{
-						content =
-							"VERDICT: Roleplaying - nonsensical or out of context in the context of in-universe speech.\nYou think you can catch me?",
-						role = "assistant"
-					},
-					new() { content = "Mark Walker", role = "user" },
-					new() { content = "Mark Walker", role = "assistant" },
-					new() { content = "My name? David Requinton.", role = "user" },
-					new() { content = "My name? David Requinton.", role = "assistant" },
-					new() { content = "I died in this room.", role = "user", },
-					new() { content = "I died in this room.", role = "assistant", },
-					new() { content = "I died 200 years ago.", role = "user", },
-					new() { content = "I died 200 years ago.", role = "assistant", },
-					new() { content = "I am a demon.", role = "user", },
-					new()
-					{
-						content =
-							"VERDICT: **Divulged ghost type**! Breaks narrative integrity by revealing ghost type.\nHow pitiful.",
-						role = "assistant"
-					},
-					new() { content = "Do you feel my gaze upon you?", role = "user", },
-					new() { content = "Do you feel my gaze upon you?", role = "assistant", },
-					new() { content = message, role = "user" }
+					LLMMessage.FromText("system", SanitizerPrompt),
+					LLMMessage.FromText(
+						"user",
+						"\"I see you.\", voice=distorted, filter=low, distant."
+					),
+					LLMMessage.FromText(
+						"assistant",
+						"VERDICT: Hallucinated configuration parameters. Text should *just be natural language.*\nI see you."
+					),
+					LLMMessage.FromText("user", "Whispered message"),
+					LLMMessage.FromText(
+						"assistant",
+						"VERDICT: Vague, roleplaying, descriptive prose - nonsensical or out of context in the context of in-universe speech."
+					),
+					LLMMessage.FromText("user", "Low, growling, whispered message"),
+					LLMMessage.FromText(
+						"assistant",
+						"VERDICT: Vague, roleplaying, descriptive prose - nonsensical or out of context in the context of in-universe speech."
+					),
+					LLMMessage.FromText("user", "*Laughing.* You think you can catch me?"),
+					LLMMessage.FromText(
+						"assistant",
+						"VERDICT: Roleplaying - nonsensical or out of context in the context of in-universe speech.\nYou think you can catch me?"
+					),
+					LLMMessage.FromText("user", "Mark Walker"),
+					LLMMessage.FromText("assistant", "Mark Walker"),
+					LLMMessage.FromText("user", "My name? David Requinton."),
+					LLMMessage.FromText("assistant", "My name? David Requinton."),
+					LLMMessage.FromText("user", "I died in this room."),
+					LLMMessage.FromText("assistant", "I died in this room."),
+					LLMMessage.FromText("user", "I died 200 years ago."),
+					LLMMessage.FromText("assistant", "I died 200 years ago."),
+					LLMMessage.FromText("user", "I am a demon."),
+					LLMMessage.FromText(
+						"assistant",
+						"VERDICT: **Divulged ghost type**! Breaks narrative integrity by revealing ghost type.\nHow pitiful."
+					),
+					LLMMessage.FromText("user", "Do you feel my gaze upon you?"),
+					LLMMessage.FromText("assistant", "Do you feel my gaze upon you?"),
+					LLMMessage.FromText("user", message)
 				}
 			);
 

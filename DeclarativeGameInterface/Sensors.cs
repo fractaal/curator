@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
+/// <summary>
+/// The ghost's sensory organ and think-cadence driver. Accumulates notable events and system
+/// feedback, assembles the per-turn world snapshot, and paces the AgenticCore entity
+/// (GhostAgent + GhostTools) that replaced the old streaming-DSL pipeline.
+/// </summary>
 public partial class Sensors : Node
 {
 	public struct EventMessage
@@ -12,14 +17,10 @@ public partial class Sensors : Node
 		public ulong time;
 	}
 
-	public Message CurrentGameMessage;
-	public Message CurrentLLMMessage;
-
 	private static int LoopCount = 0;
 
 	private List<EventMessage> NotableEvents = new();
 	private List<EventMessage> SystemFeedback = new();
-	private List<Message> History = new();
 
 	private Node3D Player; // Kept for backward compatibility, will use first player
 	private Node3D Ghost;
@@ -33,29 +34,12 @@ public partial class Sensors : Node
 	[Export]
 	private RichTextLabel PromptDebugView;
 
-	private LLMInterface Interface;
-	private string SummarizerPrompt;
-	private string ExamplePromptToSummarize = FileAccess
-		.Open(
-			"res://DeclarativeGameInterface/prompts/Summarizer/ExamplePromptToSummarize.txt",
-			FileAccess.ModeFlags.Read
-		)
-		.GetAsText();
-
-	private string ExampleSummarizedResult = FileAccess
-		.Open(
-			"res://DeclarativeGameInterface/prompts/Summarizer/ExampleSummarizedResult.txt",
-			FileAccess.ModeFlags.Read
-		)
-		.GetAsText();
+	private NarrativeIntegrity Integrity;
 
 	private bool GameEnded = false;
 
-	private ulong LLMFirstResponseChunkTime = 0;
 	private ulong LLMPromptedTime = 0;
 
-	private ulong AIReasoningTime = 0;
-	private bool DoneSummarizing = true;
 	private Node GhostData;
 	private double TickInterval = 0.5;
 	private double TickElapsed = 0;
@@ -71,7 +55,6 @@ public partial class Sensors : Node
 
 	private int MAX_HISTORY = 10;
 
-	private ulong TimeSinceLastChase = 0;
 	private ulong TimeSinceLastEvidenceDeposit = 0;
 
 	private string GhostBackstory = "No backstory yet...";
@@ -81,6 +64,19 @@ public partial class Sensors : Node
 	private bool PerformedInitialSilentAIEnable = false;
 
 	private int FearFactor = 0;
+
+	// ---- The AgenticCore mind ----
+	private AgenticEntity Entity;
+	private GhostAgent Behavior;
+	private GhostTools Tools;
+	private int ContextCountAtTurnStart = 0;
+
+	// Per-turn volatile snapshots. Assembled ONCE per think dispatch (before LLMPromptedTime
+	// is bumped) so the "since last prompt" event filters cover everything since the previous
+	// turn, and re-prompts within the same cycle see a stable turn context.
+	public string CurrentTurnFeedback { get; private set; } = "";
+	public string CurrentTurnStatusPrompt { get; private set; } = "";
+	public string CurrentTurnAttentionMarkers { get; private set; } = "";
 
 	private string SYSTEM_PROMPT = FileAccess
 		.Open("res://DeclarativeGameInterface/prompts/Main.txt", FileAccess.ModeFlags.Read)
@@ -100,6 +96,9 @@ public partial class Sensors : Node
 		)
 		.GetAsText();
 
+	public string SystemPrompt => SYSTEM_PROMPT;
+	public string BehaviorPrompt => BEHAVIOR_PROMPT;
+
 	private string GetTimeSinceLastChase()
 	{
 		string result = "TIME SINCE LAST CHASE: ";
@@ -118,7 +117,7 @@ public partial class Sensors : Node
 		return result;
 	}
 
-	private string GetGameInfo()
+	public string GetGameInfo()
 	{
 		return $@"Room Information:
 {Room.GetAllRoomInformation()}
@@ -183,11 +182,6 @@ Ghost Backstory:
 			where e.content.ToLower().Contains("player")
 			select e;
 
-		var systemFeedback =
-			from EventMessage e in SystemFeedback
-			where e.time > LLMPromptedTime
-			select e;
-
 		var playerStatus = Player != null ? Player.Call("getStatus").AsString() : "No players currently in game";
 
 		result =
@@ -217,7 +211,37 @@ Ghost Backstory:
 		return result;
 	}
 
-	private void SendDataToLLM()
+	private void EnsureMind()
+	{
+		if (Entity != null)
+		{
+			return;
+		}
+
+		Tools = new GhostTools(Bus, Integrity, () => Player);
+		Behavior = new GhostAgent(this, Tools);
+		Entity = new AgenticEntity(Behavior);
+		Behavior.Agentic = Entity;
+
+		Entity.Config = new AgenticEntityConfig
+		{
+			// Sensors paces the think cadence itself (SENSOR_READ_INTERVAL, chase-accelerated),
+			// so the entity's own pacing floor is zeroed out.
+			OptimalTurnaroundTime = 0.0,
+			InitialStartDelay = 0.0,
+			MaxHistoryMessages = Math.Max(MAX_HISTORY, 1) * 6,
+		};
+
+		Entity.ThinkingFinished += (_) =>
+		{
+			LoopCompleted = true;
+			LoopCount++;
+		};
+
+		Entity.LLMProcessingCompleted += OnLLMResponseCompleted;
+	}
+
+	private void PrepareTurnAndThink()
 	{
 		// Only the server should make LLM requests in multiplayer
 		if (!Multiplayer.IsServer())
@@ -226,73 +250,73 @@ Ghost Backstory:
 			return;
 		}
 
-		var allRoomInfo = Room.GetAllRoomInformation();
-		var systemFeedback = GetSystemFeedback();
+		EnsureMind();
 
-		List<Message> messages =
-			new()
-			{
-				new Message { role = "system", content = SYSTEM_PROMPT },
-				new Message { role = "user", content = GetGameInfo() },
-			};
+		// Snapshot the volatile turn context BEFORE bumping LLMPromptedTime.
+		CurrentTurnFeedback = GetSystemFeedback();
+		CurrentTurnStatusPrompt = GetNextPromptWithPlayerAndGhostStatus();
+		CurrentTurnAttentionMarkers = GetContextualAttentionMarkers() + " " + GetFearFactor();
 
-		var history = History.TakeLast(MAX_HISTORY);
-
-		while (history.Count() > 0 && history.First().role == "assistant")
+		// Persist this turn's feedback + timeline into the rolling history (parity with the
+		// old History.Add calls; the entity autocompacts past MaxHistoryMessages).
+		if (CurrentTurnFeedback != "")
 		{
-			history = history.Skip(1).ToList();
+			Entity.AddMessage(LLMMessage.FromText("user", CurrentTurnFeedback));
 		}
 
-		if (history.Count() == 0)
-		{
-			GD.PushError("History list was exhausted? This should not happen!!!");
-		}
-
-		messages.AddRange(History.TakeLast(MAX_HISTORY).ToList());
-
-		if (systemFeedback != "")
-		{
-			messages.Add(new Message { role = "user", content = systemFeedback });
-		}
-
-		var comprehensivePrompt =
-			"[!!!] IMPORTANT INSTRUCTION: Unlike your previous responses, for the next one, be concise, but *COMPREHENSIVE*. Show your solution. Your latest one should be detailed, following step-by-step train-of-thought reasoning, as explained to you previously. Execute commands in-line with your reasoning to minimize latency.";
-
-		messages.AddRange(
-			new List<Message>
-			{
-				new Message { role = "user", content = BEHAVIOR_PROMPT },
-				new Message { role = "user", content = GetNextPromptWithPlayerAndGhostStatus() },
-				new Message { role = "user", content = comprehensivePrompt },
-				new Message
-				{
-					role = "user",
-					content = GetContextualAttentionMarkers() + " " + GetFearFactor()
-				},
-			}
-		);
-
-		PromptDebugView.Text = messages.Aggregate(
-			"",
-			(acc, message) =>
-				acc
-				+ "\n [color=\"#ff0000\"][b]"
-				+ message.role
-				+ "[/b][/color]: "
-				+ message.content
-				+ "\n"
-		);
-
-		if (systemFeedback != "")
-		{
-			History.Add(new Message { role = "user", content = systemFeedback });
-		}
-		History.Add(new Message { role = "user", content = GetArchivedPrompt() });
+		Entity.AddMessage(LLMMessage.FromText("user", GetArchivedPrompt()));
 
 		Bus.EmitSignal(EventBus.SignalName.GameDataRead, "");
 
 		LLMPromptedTime = Time.GetTicksMsec();
-		Interface.Send(messages);
+		ContextCountAtTurnStart = Entity.PersistentContext.Count;
+		LoopCompleted = false;
+
+		Bus.EmitSignal(EventBus.SignalName.LLMPrompted, "");
+
+		_ = Entity.Think();
+	}
+
+	// Emits the legacy LLM lifecycle signals once per completed response, so Logger,
+	// LatencyStatistics, ModeReadout, and log-parser.py keep working unchanged.
+	private void OnLLMResponseCompleted()
+	{
+		if (Entity == null)
+		{
+			return;
+		}
+
+		var texts = Entity
+			.PersistentContext
+			.Skip(ContextCountAtTurnStart)
+			.Where(m => m != null && m.Role == "assistant")
+			.Select(m => GhostMind.ExtractText(m))
+			.Where(t => !string.IsNullOrWhiteSpace(t));
+
+		var response = string.Join("\n", texts).Trim();
+
+		LogManager.UpdateLog("llmResponse", response);
+
+		if (PromptDebugView != null && Entity.LastSentContext != null)
+		{
+			PromptDebugView.Text = Entity
+				.LastSentContext
+				.Aggregate(
+					"",
+					(acc, message) =>
+						acc
+						+ "\n [color=\"#ff0000\"][b]"
+						+ message.Role
+						+ "[/b][/color]: "
+						+ GhostMind.ExtractText(message)
+						+ "\n"
+				);
+		}
+
+		Bus.EmitSignal(EventBus.SignalName.LLMFirstResponseChunk, response);
+		Bus.EmitSignal(EventBus.SignalName.LLMResponseChunk, response);
+		Bus.EmitSignal(EventBus.SignalName.LLMLastResponseChunk, response);
+		Bus.EmitSignal(EventBus.SignalName.LLMFullResponse, response);
 	}
 
 	private void OnNotableEventOccurred(string message, ulong time)
@@ -355,13 +379,13 @@ Ghost Backstory:
 		additionalGameInfo += Ghost.Call("getStatusStateless").AsString() + "\n\n";
 		additionalGameInfo += GetGameInfo() + "\n\n";
 
-		var response = await Interface.SendIsolated(
-			new List<Message>()
+		var response = await GhostMind.AuxCompleteAsync(
+			new List<LLMMessage>()
 			{
-				new Message { content = ENDGAME_SUMMARY_PROMPT, role = "system" },
-				new Message { content = additionalGameInfo, role = "user" },
-				new Message { content = "Events to summarize to follow: ", role = "user" },
-				new Message { content = allEvents, role = "user" }
+				LLMMessage.FromText("system", ENDGAME_SUMMARY_PROMPT),
+				LLMMessage.FromText("user", additionalGameInfo),
+				LLMMessage.FromText("user", "Events to summarize to follow: "),
+				LLMMessage.FromText("user", allEvents)
 			}
 		);
 
@@ -413,13 +437,6 @@ Ghost Backstory:
 			MAX_HISTORY = 10;
 		}
 
-		SummarizerPrompt = FileAccess
-			.Open(
-				"res://DeclarativeGameInterface/prompts/SummarizerPrompt.txt",
-				FileAccess.ModeFlags.Read
-			)
-			.GetAsText();
-
 		Bus = EventBus.Get();
 
 		try
@@ -448,7 +465,7 @@ Ghost Backstory:
 		// Note: Player and Stats may be null initially - this is expected in the new multiplayer architecture
 		// They will be populated when MultiplayerManager registers players
 
-		Interface = GetNode<LLMInterface>("/root/LLMInterface");
+		Integrity = GetNode<NarrativeIntegrity>("/root/NarrativeIntegrity");
 		GhostData = GetNode<Node>("/root/GhostData");
 
 		Bus.FearFactorChanged += (int value) =>
@@ -559,18 +576,6 @@ Ghost Backstory:
 			LastTimeChased = Time.GetTicksMsec();
 		};
 
-		Bus.LLMFirstResponseChunk += (chunk) =>
-		{
-			AIReasoningTime = Time.GetTicksMsec();
-			LLMFirstResponseChunkTime = Time.GetTicksMsec();
-		};
-
-		Bus.LLMLastResponseChunk += (chunk) =>
-		{
-			LoopCompleted = true;
-			LoopCount++;
-		};
-
 		Bus.GameWon += (string message) =>
 		{
 			GameEnded = true;
@@ -582,48 +587,17 @@ Ghost Backstory:
 			EndgameSummarization();
 		};
 
-		Bus.LLMFullResponse += async (message) =>
+		Bus.OperatorNote += (string message) =>
 		{
-			// Only the server should make LLM requests in multiplayer
 			if (!Multiplayer.IsServer())
 			{
-				GD.Print("Sensors: Skipping LLM summarization - not server");
-				DoneSummarizing = true;
 				return;
 			}
 
-			if (!AIEnabled)
-			{
-				GD.Print("AI disabled, skipping LLM summarization.");
-				DoneSummarizing = true;
-				return;
-			}
-
-			if (message == "")
-			{
-				GD.Print("Empty message, skipping LLM summarization.");
-				DoneSummarizing = true;
-				return;
-			}
-
-			var response = await Interface.SendIsolated(
-				new List<Message>
-				{
-					new Message { role = "system", content = SummarizerPrompt },
-					new Message { role = "user", content = ExamplePromptToSummarize },
-					new Message { role = "assistant", content = ExampleSummarizedResult },
-					new Message { role = "user", content = message }
-				}
+			EnsureMind();
+			Entity.AddMessage(
+				LLMMessage.FromText("user", "🎙 OPERATOR NOTE (out-of-game director): " + message)
 			);
-
-			if (response == "")
-			{
-				GD.PushWarning("Empty response! LLM won't have memory of this cycle");
-			}
-
-			History.Add(new Message { role = "assistant", content = response });
-
-			DoneSummarizing = true;
 		};
 
 		await ToSignal(GetTree().CreateTimer(1), "timeout");
@@ -650,20 +624,19 @@ Ghost Backstory:
 			)
 			.GetAsText();
 
-		GhostBackstory = await Interface.SendIsolated(
-			new List<Message>
+		GhostBackstory = await GhostMind.AuxCompleteAsync(
+			new List<LLMMessage>
 			{
-				new Message { role = "system", content = backstoryPrompt },
-				new Message { role = "user", content = Ghost.Call("getStatusStateless").ToString() }
+				LLMMessage.FromText("system", backstoryPrompt),
+				LLMMessage.FromText("user", Ghost.Call("getStatusStateless").ToString())
 			}
 		);
 
-		// var sanitizedBackstory = ghostData.Call("StripGhostTypes", ghostBackstory);
-		var sanitizedBackstory = await Interface.SendIsolated(
-			new List<Message>
+		var sanitizedBackstory = await GhostMind.AuxCompleteAsync(
+			new List<LLMMessage>
 			{
-				new Message { role = "system", content = backstoryForPlayerPrompt },
-				new Message { role = "user", content = GhostBackstory }
+				LLMMessage.FromText("system", backstoryForPlayerPrompt),
+				LLMMessage.FromText("user", GhostBackstory)
 			}
 		);
 
@@ -738,6 +711,8 @@ Ghost Backstory:
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
+		Entity?.Process(delta);
+
 		TickElapsed += delta;
 		SensorReadElapsed += delta;
 
@@ -753,14 +728,6 @@ Ghost Backstory:
 		)
 		{
 			SensorReadElapsed = 0;
-			// return;
-
-			if (!DoneSummarizing)
-			{
-				GD.Print("Summarizing in progress, skipping sensor read.");
-				SensorReadElapsed = SensorReadInterval - 1;
-				return;
-			}
 
 			if (!AIEnabled)
 			{
@@ -797,8 +764,7 @@ Ghost Backstory:
 				return;
 			}
 
-			SendDataToLLM();
-			LoopCompleted = false;
+			PrepareTurnAndThink();
 		}
 	}
 

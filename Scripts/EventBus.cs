@@ -46,6 +46,11 @@ public partial class EventBus : Node
 	[Signal]
 	public delegate void InterpreterCommandRecognizedEventHandler(string command);
 
+	// Debug affordance: text typed into the in-game CommandLine, injected into the ghost's
+	// context as an out-of-game note (replaced the old fake-token-stream injection).
+	[Signal]
+	public delegate void OperatorNoteEventHandler(string message);
+
 	[Signal]
 	public delegate void NotableEventOccurredEventHandler(string message);
 
