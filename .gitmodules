@@ -1,0 +1,3 @@
+[submodule "AgenticCore"]
+	path = AgenticCore
+	url = https://github.com/fractaal/AgenticCore
