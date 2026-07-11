@@ -239,6 +239,16 @@ Ghost Backstory:
 		};
 
 		Entity.LLMProcessingCompleted += OnLLMResponseCompleted;
+
+		// The old LLMInterface surfaced connection trouble via CriticalMessage; the closest
+		// honest signal in the new runtime (which retries internally) is the too-long event.
+		Entity.ThinkingTakingTooLong += () =>
+		{
+			Bus.EmitSignal(
+				EventBus.SignalName.CriticalMessage,
+				"[color=\"#FF0000\"]The AI is taking unusually long to respond — your internet connection may be unstable.[/color]"
+			);
+		};
 	}
 
 	private void PrepareTurnAndThink()
