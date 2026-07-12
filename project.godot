@@ -38,6 +38,8 @@ FuzzySharpGodotBridge="*res://Scripts/FuzzySharpGodotBridge.cs"
 MultiplayerManager="*res://Multiplayer/MultiplayerManager.gd"
 RPCUtils="*res://Multiplayer/RPCUtils.gd"
 PlayerManager="*res://Scripts/PlayerManager.cs"
+EventBusRelay="*res://Multiplayer/EventBusRelay.cs"
+LanDiscovery="*res://Multiplayer/LanDiscovery.cs"
 
 [display]
 

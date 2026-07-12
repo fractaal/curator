@@ -2442,7 +2442,7 @@ anchors_preset = 0
 offset_left = 21.0
 offset_top = 18.0
 offset_right = 362.0
-offset_bottom = 106.0
+offset_bottom = 300.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MultiplayerHUD/Join"]
 layout_mode = 1
@@ -2452,6 +2452,16 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
+
+[node name="LobbyList" type="ItemList" parent="MultiplayerHUD/Join/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+
+[node name="AddressField" type="LineEdit" parent="MultiplayerHUD/Join/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "IP address (VPN / manual join)"
 
 [node name="HostGameButton" type="Button" parent="MultiplayerHUD/Join/VBoxContainer"]
 unique_name_in_owner = true
