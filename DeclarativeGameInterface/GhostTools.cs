@@ -20,7 +20,6 @@ public class GhostTools
 
 	private readonly EventBus Bus;
 	private readonly NarrativeIntegrity Integrity;
-	private readonly Func<Node3D> GetPlayer;
 
 	/// <summary>Fired with the legacy-lowercase verb after a tool successfully performs
 	/// (GhostAgent uses this for repetition/cadence housekeeping).</summary>
@@ -30,11 +29,10 @@ public class GhostTools
 	// verb/objectType/target — the same key the old Interpreter used.
 	private readonly Dictionary<string, TaskCompletionSource<bool>> PendingAcks = new();
 
-	public GhostTools(EventBus bus, NarrativeIntegrity integrity, Func<Node3D> getPlayer)
+	public GhostTools(EventBus bus, NarrativeIntegrity integrity)
 	{
 		Bus = bus;
 		Integrity = integrity;
-		GetPlayer = getPlayer;
 
 		Bus.ObjectInteractionAcknowledged += (verb, objectType, target) =>
 		{
@@ -43,6 +41,14 @@ public class GhostTools
 				tcs.TrySetResult(true);
 			}
 		};
+	}
+
+	private Node3D NearestLivingPlayer()
+	{
+		var ghost = Bus.GetTree().CurrentScene.GetNodeOrNull<Node3D>("Ghost");
+		return PlayerManager
+			.Get()
+			.GetNearestLivingPlayer(ghost != null ? ghost.GlobalPosition : Vector3.Zero);
 	}
 
 	// ------------------------------------------------------------------
@@ -137,19 +143,22 @@ public class GhostTools
 	public Task<ToolCallResult> MoveAsGhost([ToolArg("target", "room name | player")] string target)
 		=> GhostMove("moveasghost", target);
 
-	[Tool("chasePlayerAsGhost", "Engage in a terrifying, high-octane audio-visual chase for half a minute. If the ghost makes contact, the player dies and the game ends. Locks the entrance. Only works while the player is inside the house.")]
+	[Tool("chasePlayerAsGhost", "Engage in a terrifying, high-octane audio-visual chase for half a minute. The ghost hunts the nearest player; on contact they die and the game ends. Locks the entrance. Only works while a player is inside the house.")]
 	public Task<ToolCallResult> ChasePlayerAsGhost(
 		[ToolArg("speed", "slow | fast", required: false)] string speed
 	)
 	{
-		var player = GetPlayer();
+		var anyLivingPlayerInside = PlayerManager
+			.Get()
+			.GetLivingPlayers()
+			.Any(p => p.GetNode("Locator").Get("Room").AsString() != "None");
 
-		if (player == null || player.GetNode("Locator").Get("Room").AsString() == "None")
+		if (!anyLivingPlayerInside)
 		{
 			EmitRecognized($"chaseplayerasghost({speed})");
 			return Task.FromResult(
 				Results.FailText(
-					"Cannot chase: the player is outside the house. Lure them back inside first."
+					"Cannot chase: no living player is inside the house. Lure them back inside first."
 				)
 			);
 		}
@@ -234,14 +243,20 @@ public class GhostTools
 	// Player effects
 	// ------------------------------------------------------------------
 
-	[Tool("pullPlayerToGhost", "Forcefully yank the player towards the ghost.")]
-	public Task<ToolCallResult> PullPlayerToGhost() => PlayerEffect("pullplayertoghost");
+	[Tool("pullPlayerToGhost", "Forcefully yank a player towards the ghost.")]
+	public Task<ToolCallResult> PullPlayerToGhost(
+		[ToolArg("target", "player number (see PLAYERS) | all", required: false)] string target
+	) => PlayerEffect("pullplayertoghost", target);
 
-	[Tool("throwPlayerAround", "Forcefully throw the player in a random direction.")]
-	public Task<ToolCallResult> ThrowPlayerAround() => PlayerEffect("throwplayeraround");
+	[Tool("throwPlayerAround", "Forcefully throw a player in a random direction.")]
+	public Task<ToolCallResult> ThrowPlayerAround(
+		[ToolArg("target", "player number (see PLAYERS) | all", required: false)] string target
+	) => PlayerEffect("throwplayeraround", target);
 
-	[Tool("dimPlayerFlashlight", "Force the player's flashlight to operate at a lower brightness for a short period.")]
-	public Task<ToolCallResult> DimPlayerFlashlight() => PlayerEffect("dimplayerflashlight");
+	[Tool("dimPlayerFlashlight", "Force a player's flashlight to operate at a lower brightness for a short period.")]
+	public Task<ToolCallResult> DimPlayerFlashlight(
+		[ToolArg("target", "player number (see PLAYERS) | all", required: false)] string target
+	) => PlayerEffect("dimplayerflashlight", target);
 
 	// ------------------------------------------------------------------
 	// Internal
@@ -271,6 +286,28 @@ public class GhostTools
 		var target = TargetResolution.NormalizeTargetString(rawTarget ?? "");
 
 		EmitRecognized($"{verb}{objectType}({target})");
+
+		// "player" is a semantic target — translate it to the nearest living player's room
+		// here, at the single choke point, so interactables only ever see room names or "all".
+		if (target == "player")
+		{
+			var nearest = NearestLivingPlayer();
+			var room = nearest?.GetNode("Locator").Get("Room").AsString();
+
+			if (nearest == null || room == "None")
+			{
+				var playerError =
+					nearest == null
+						? $"TARGET DOESN'T EXIST: Trying to {verb} {objectType} at the player FAILED because no player is alive."
+						: $"TARGET DOESN'T EXIST: Trying to {verb} {objectType} at the player FAILED because the nearest player is outside the house.";
+
+				Bus.EmitSignal(EventBus.SignalName.SystemFeedback, playerError);
+
+				return Results.FailText(playerError);
+			}
+
+			target = room.ToLower();
+		}
 
 		if (!TargetResolution.IsValidTarget(target))
 		{
@@ -369,19 +406,47 @@ public class GhostTools
 		return Task.FromResult(Results.OkText($"Performed {verb}({args})."));
 	}
 
-	private Task<ToolCallResult> PlayerEffect(string verb)
+	private Task<ToolCallResult> PlayerEffect(string verb, string rawTarget)
 	{
-		EmitRecognized($"{verb}()");
+		var raw = (rawTarget ?? "").Trim().ToLower().Replace("player", "").Trim();
+
+		long targetPeer = 0;
+		var targetNumber = 0;
+		var resolved = raw is "" or "all" or "everyone";
+
+		if (!resolved && int.TryParse(raw, out targetNumber))
+		{
+			resolved = PlayerManager.Get().TryGetPeerForPlayerNumber(targetNumber, out var peerId);
+			targetPeer = peerId;
+		}
+
+		if (!resolved)
+		{
+			EmitRecognized($"{verb}({rawTarget})");
+
+			var numbers = string.Join(", ", PlayerManager.Get().GetPlayerNumbers());
+			var error =
+				$"TARGET DOESN'T EXIST: {verb}({rawTarget}) FAILED because there is no such player. "
+				+ $"Valid targets: \"all\"{(numbers == "" ? "" : $" or a player number ({numbers})")}.";
+
+			Bus.EmitSignal(EventBus.SignalName.SystemFeedback, error);
+
+			return Task.FromResult(Results.FailText(error));
+		}
+
+		var label = targetPeer == 0 ? "all players" : $"Player {targetNumber}";
+
+		EmitRecognized($"{verb}({(targetPeer == 0 ? "all" : targetNumber.ToString())})");
 
 		Bus.EmitSignal(
 			EventBus.SignalName.NotableEventOccurred,
-			$"Ghost meddled with player - {verb}"
+			$"Ghost meddled with {label} - {verb}"
 		);
-		Bus.EmitSignal(EventBus.SignalName.PlayerEffect, verb, "");
+		Bus.EmitSignal(EventBus.SignalName.PlayerEffect, verb, "", targetPeer);
 
 		CommandExecuted?.Invoke(verb);
 
-		return Task.FromResult(Results.OkText($"Performed {verb} on the player."));
+		return Task.FromResult(Results.OkText($"Performed {verb} on {label}."));
 	}
 
 	// The legacy Interpreter emitted this signal for every command it recognized in the

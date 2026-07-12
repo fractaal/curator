@@ -22,7 +22,6 @@ public partial class Sensors : Node
 	private List<EventMessage> NotableEvents = new();
 	private List<EventMessage> SystemFeedback = new();
 
-	private Node3D Player; // Kept for backward compatibility, will use first player
 	private Node3D Ghost;
 	private PlayerManager PlayerMgr;
 
@@ -58,8 +57,6 @@ public partial class Sensors : Node
 	private ulong TimeSinceLastEvidenceDeposit = 0;
 
 	private string GhostBackstory = "No backstory yet...";
-
-	private PlayerStats Stats;
 
 	private bool PerformedInitialSilentAIEnable = false;
 
@@ -171,6 +168,28 @@ Ghost Backstory:
 		return result;
 	}
 
+	private string GetCrewStatus()
+	{
+		var all = PlayerMgr.GetAllPlayers();
+
+		if (all.Count == 0)
+		{
+			return "No players currently in game";
+		}
+
+		var lines = all.Values
+			.Where(GodotObject.IsInstanceValid)
+			.OrderBy(p => p.Get("player_number").AsInt32())
+			.Select(p =>
+			{
+				var number = p.Get("player_number").AsInt32();
+				var label = number == 1 ? "Player 1 (host)" : $"Player {number}";
+				return $"{label}: {p.Call("getStatus").AsString()}";
+			});
+
+		return string.Join("\n", lines);
+	}
+
 	private string GetNextPromptWithPlayerAndGhostStatus()
 	{
 		var result = "";
@@ -180,8 +199,6 @@ Ghost Backstory:
 			where e.time > LLMPromptedTime
 			where e.content.ToLower().Contains("player")
 			select e;
-
-		var playerStatus = Player != null ? Player.Call("getStatus").AsString() : "No players currently in game";
 
 		result =
 			$@"CURRENT TIME {Time.GetTicksMsec() / 1000f}s
@@ -193,8 +210,8 @@ Ghost Backstory:
 
 {GetContextualAttentionMarkers()}
 
-# PLAYER
-{playerStatus}
+# PLAYERS
+{GetCrewStatus()}
 
 {GetContextualAttentionMarkers()}
 
@@ -217,7 +234,7 @@ Ghost Backstory:
 			return;
 		}
 
-		Tools = new GhostTools(Bus, Integrity, () => Player);
+		Tools = new GhostTools(Bus, Integrity);
 		Behavior = new GhostAgent(this, Tools);
 		Entity = new AgenticEntity(Behavior);
 		Behavior.Agentic = Entity;
@@ -378,6 +395,13 @@ Ghost Backstory:
 
 	public async void EndgameSummarization()
 	{
+		// Clients receive the finished summary via EventBusRelay; generating here
+		// would emit an empty one (AuxCompleteAsync is host-gated).
+		if (!Multiplayer.IsServer())
+		{
+			return;
+		}
+
 		string allEvents = "";
 
 		foreach (EventMessage e in NotableEvents)
@@ -459,12 +483,11 @@ Ghost Backstory:
 			GD.PrintErr("Failed to parse SENSOR_READ_INTERVAL: " + e.Message);
 		}
 
-		// Initialize PlayerManager
+		// Players register themselves on spawn (player.gd _ready) and unregister on despawn;
+		// the crew is read live from PlayerManager every turn.
 		PlayerMgr = PlayerManager.Get();
 
-		// Get the first player (will be null initially until multiplayer spawns players)
-		Player = PlayerMgr.GetFirstPlayer();
-		Stats = PlayerMgr.GetFirstPlayerStats();
+		AddToGroup("late_join_synced");
 
 		Ghost = GetTree().CurrentScene.GetNode<Node3D>("Ghost");
 
@@ -472,9 +495,6 @@ Ghost Backstory:
 		{
 			GD.PrintErr("Failed to find ghost node");
 		}
-
-		// Note: Player and Stats may be null initially - this is expected in the new multiplayer architecture
-		// They will be populated when MultiplayerManager registers players
 
 		Integrity = GetNode<NarrativeIntegrity>("/root/NarrativeIntegrity");
 		GhostData = GetNode<Node>("/root/GhostData");
@@ -621,6 +641,13 @@ Ghost Backstory:
 
 	public async void GenerateBackstory()
 	{
+		// Host-only: clients get the sanitized result via EventBusRelay, or via the
+		// late-join sync below if they connect after it was generated.
+		if (!Multiplayer.IsServer())
+		{
+			return;
+		}
+
 		var backstoryPrompt = FileAccess
 			.Open(
 				"res://DeclarativeGameInterface/prompts/BackstoryPrompt.txt",
@@ -653,6 +680,25 @@ Ghost Backstory:
 
 		sanitizedBackstory = GhostData.Call("StripGhostTypes", sanitizedBackstory).AsString();
 
+		SanitizedBackstoryForPlayers = sanitizedBackstory;
+		Bus.EmitSignal(EventBus.SignalName.GhostBackstory, sanitizedBackstory);
+	}
+
+	private string SanitizedBackstoryForPlayers = "";
+
+	// Group-protocol name (see MultiplayerManager._late_join_sync): the backstory is
+	// generated and emitted before any client connects, so joiners get it pushed here.
+	public void late_join_sync(int peerId)
+	{
+		if (SanitizedBackstoryForPlayers != "")
+		{
+			RpcId(peerId, MethodName.ApplyBackstory, SanitizedBackstoryForPlayers);
+		}
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.Authority)]
+	private void ApplyBackstory(string sanitizedBackstory)
+	{
 		Bus.EmitSignal(EventBus.SignalName.GhostBackstory, sanitizedBackstory);
 	}
 
@@ -679,13 +725,6 @@ Ghost Backstory:
 
 	public override void _PhysicsProcess(double delta)
 	{
-		// Refresh player references if needed
-		if (Player == null || Stats == null)
-		{
-			Player = PlayerMgr.GetFirstPlayer();
-			Stats = PlayerMgr.GetFirstPlayerStats();
-		}
-
 		if (Input.IsActionJustPressed("GenerateBackstory"))
 		{
 			GenerateBackstory();
@@ -701,18 +740,23 @@ Ghost Backstory:
 			);
 		}
 
-		if (Stats != null && Stats.HasPlayerSteppedInsideHouse && !PerformedInitialSilentAIEnable)
+		var anyoneInsideHouse = PlayerMgr
+			.GetAllPlayerStats()
+			.Values
+			.Any(s => GodotObject.IsInstanceValid(s) && s.HasPlayerSteppedInsideHouse);
+
+		if (anyoneInsideHouse && !PerformedInitialSilentAIEnable)
 		{
 			if (OS.HasFeature("standalone"))
 			{
 				AIEnabled = true;
 				PerformedInitialSilentAIEnable = true;
-				GD.Print("Silently enabling AI because player has stepped inside the house.");
+				GD.Print("Silently enabling AI because a player has stepped inside the house.");
 			}
 			else
 			{
 				GD.Print(
-					"Would have silently enabled AI because player has stepped inside the house, but didn't (test build)"
+					"Would have silently enabled AI because a player has stepped inside the house, but didn't (test build)"
 				);
 				PerformedInitialSilentAIEnable = true;
 			}
@@ -747,16 +791,16 @@ Ghost Backstory:
 				return;
 			}
 
-			if (Player == null)
+			if (PlayerMgr.GetPlayerCount() == 0)
 			{
 				GD.Print("No players available, skipping sensor read.");
 				SensorReadElapsed = SensorReadInterval - 1;
 				return;
 			}
 
-			if (Player.Get("dead").AsBool())
+			if (PlayerMgr.GetLivingPlayers().Count == 0)
 			{
-				GD.Print("Player dead, skipping sensor read.");
+				GD.Print("All players dead, skipping sensor read.");
 				SensorReadElapsed = SensorReadInterval - 1;
 				return;
 			}
@@ -798,10 +842,23 @@ Ghost Backstory:
 				"### 🛑 A CHASE HAS JUST ENDED - COOL OFF AND LET THE PLAYER BREATH FOR A MOMENT 🛑 ###\n";
 		}
 
-		if (Player != null && Player.GetNode("Locator").Get("Room").AsString() == "None")
+		var living = PlayerMgr.GetLivingPlayers();
+		var outside = living
+			.Where(p => p.GetNode("Locator").Get("Room").AsString() == "None")
+			.ToList();
+
+		if (living.Count > 0 && outside.Count == living.Count)
 		{
 			markers +=
-				"### 🤚 PLAYER IS OUTSIDE THE HOUSE - GHOST CANNOT CHASE OUTSIDE THE HOUSE - BE SUBTLER, MAKE THE HOUSE MORE APPEALING, LURE PLAYER BACK IN, DON'T LOCK ENTRANCE DOOR ✋ ###\n";
+				"### 🤚 ALL PLAYERS ARE OUTSIDE THE HOUSE - GHOST CANNOT CHASE OUTSIDE THE HOUSE - BE SUBTLER, MAKE THE HOUSE MORE APPEALING, LURE THEM BACK IN, DON'T LOCK ENTRANCE DOOR ✋ ###\n";
+		}
+		else
+		{
+			foreach (var player in outside)
+			{
+				markers +=
+					$"### 🤚 Player {player.Get("player_number").AsInt32()} is outside the house - they cannot be chased or targeted out there ✋ ###\n";
+			}
 		}
 
 		return markers;

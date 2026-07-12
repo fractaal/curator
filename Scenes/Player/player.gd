@@ -34,10 +34,20 @@ func color_from_id(id: int):
 
 		%_DebugCylinderMesh.set_surface_override_material(0, mat)
 
+# Human-facing crew slot (1 = host, then 2, 3, ...), assigned by the server at
+# spawn and replicated. Peer ids (player_id) are random 32-bit ints in Godot 4,
+# so prompts, events, and tool targets use this number instead.
+var player_number: int = 1
+
 func _enter_tree() -> void:
 	var peer_id = str(name).split("_")[1]
 
 	player_id = int(peer_id)
+
+func _exit_tree() -> void:
+	var player_manager = get_node_or_null("/root/PlayerManager")
+	if player_manager:
+		player_manager.UnregisterPlayer(player_id)
 
 var footstepSounds: Array[AudioStreamPlayer3D] = []
 
@@ -86,6 +96,16 @@ var flashlight_dimmed = false
 @export var telekinesis_stream_player: AudioStreamPlayer3D
 @export var telekinesis_intense_stream_player: AudioStreamPlayer3D
 
+# Server-side entry point: routes the kill to the machine whose human owns
+# this player, so the death sequence runs on the victim's own screen.
+# Mode gotcha: "authority" would only accept calls FROM this node's authority
+# (the victim), so the server's call needs any_peer + a sender guard.
+@rpc("any_peer", "call_local")
+func kill_remote():
+	if multiplayer.get_remote_sender_id() > 1:
+		return # only the server may kill
+	kill()
+
 func kill():
 	dead = true
 
@@ -110,7 +130,10 @@ func _show_ghost_vignette():
 	
 	tween.play()
 
-func _on_player_effect(verb: String, arguments: String):
+func _on_player_effect(verb: String, arguments: String, target_peer: int):
+	if target_peer != 0 and target_peer != player_id:
+		return # effect aimed at another player
+
 	if verb == "pullplayertoghost":
 		_show_ghost_vignette()
 		telekinesis_intense_stream_player.pitch_scale = randf_range(0.9, 1.1)
@@ -141,6 +164,11 @@ func connect_to_event_bus():
 	EventBus.PlayerEffect.connect(_on_player_effect)
 
 func _ready():
+	# Every peer registers every player node that arrives (host-spawned or
+	# replicated via MultiplayerSpawner), so PlayerManager knows the full crew
+	# everywhere. By _ready the PlayerStats child exists.
+	get_node("/root/PlayerManager").RegisterPlayer(player_id, self)
+
 	if not is_multiplayer_authority():
 		print("Peer ", multiplayer.get_unique_id(), " not authority for ", name, ", skipping _ready")
 		# Disable processing for non-authority players

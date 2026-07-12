@@ -64,6 +64,12 @@ properties/5/replication_mode = 1
 properties/6/path = NodePath("SpotLight3D:spot_range")
 properties/6/spawn = true
 properties/6/replication_mode = 1
+properties/7/path = NodePath(".:dead")
+properties/7/spawn = true
+properties/7/replication_mode = 1
+properties/8/path = NodePath(".:player_number")
+properties/8/spawn = true
+properties/8/replication_mode = 1
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("stamina_exhausted", "stamina_indicator", "ghost_indicator", "proximity_indicator", "heartbeat_player", "local_uis", "flashlightAudio", "playerStats", "flashlight_dimmed_stream_player", "telekinesis_stream_player", "telekinesis_intense_stream_player") groups=["player"]]
 collision_layer = 2

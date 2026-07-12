@@ -4,15 +4,12 @@ using Godot;
 public partial class EndgameHandler : Node
 {
     EventBus bus;
-    Node3D player;
     Node3D ghost;
-    PlayerManager playerMgr;
 
     public override void _Ready()
     {
-        playerMgr = PlayerManager.Get();
-        player = playerMgr.GetFirstPlayer(); // Use PlayerManager for player reference
-        ghost = GetTree().CurrentScene.GetNode<Node3D>("Ghost");
+        // OrNull: headless test scenes have no Ghost; the handler below guards on it.
+        ghost = GetTree().CurrentScene.GetNodeOrNull<Node3D>("Ghost");
 
         bus = EventBus.Get();
 
@@ -27,6 +24,14 @@ public partial class EndgameHandler : Node
 
         bus.PlayerDecidedGhostType += async (message) =>
         {
+            // A client's guess arrives here via EventBusRelay; only the host may run the
+            // endgame (its effect emissions RPC out — running this on a client too would
+            // double every light/door effect).
+            if (!Multiplayer.IsServer() || ghost == null)
+            {
+                return;
+            }
+
             bus.EmitSignal(EventBus.SignalName.ObjectInteraction, "flicker", "lights", "all");
             audio.Play(0);
 

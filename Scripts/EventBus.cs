@@ -19,8 +19,9 @@ public partial class EventBus : Node
 	[Signal]
 	public delegate void GhostActionEventHandler(string verb, string arguments);
 
+	// targetPeerId: peer id of the affected player, or 0 for every player.
 	[Signal]
-	public delegate void PlayerEffectEventHandler(string verb, string arguments);
+	public delegate void PlayerEffectEventHandler(string verb, string arguments, long targetPeerId);
 
 	[Signal]
 	public delegate void LogUpdatedEventHandler(string id, string message);

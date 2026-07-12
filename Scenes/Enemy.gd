@@ -111,6 +111,10 @@ func _ready():
 
 	print("Ghost Type is ", GhostType)
 
+	# Identity was broadcast in _ready, before any client existed — late joiners
+	# get it via the late-join sync walk in MultiplayerManager.
+	add_to_group("late_join_synced")
+
 	EventBus.GhostAction.connect(_on_ghost_action)
 	lastLocationForRoomCheck = global_transform.origin
 
@@ -279,9 +283,13 @@ func chase(arguments):
 
 			# Only kill if target is a player with a kill method
 			if current_target.has_method("kill"):
-				current_target.kill()
-				EventBus.emit_signal("GameLost", "Player was caught by the ghost")
-				EventBus.emit_signal("NotableEventOccurred", "Game Lost - Player was caught by the ghost!")
+				# Death sequence must run on the victim's own machine
+				current_target.kill_remote.rpc_id(current_target.get_multiplayer_authority())
+				var victim = "Player"
+				if "player_number" in current_target:
+					victim = "Player %d" % current_target.player_number
+				EventBus.emit_signal("GameLost", victim + " was caught by the ghost")
+				EventBus.emit_signal("NotableEventOccurred", "Game Lost - " + victim + " was caught by the ghost!")
 			else:
 				print("Ghost reached target: ", current_target.name)
 			break
@@ -397,6 +405,9 @@ func _process(_delta):
 		lastLocationForRoomCheck = global_transform.origin
 		Locator.FindRoom()
 	
+func late_join_sync(peer_id: int):
+	_rpc_set_ghost_properties.rpc_id(peer_id, FirstName, LastName, GhostType, GhostAge, FavoriteRoom)
+
 func update_target_location(target_location):
 	nav_agent.target_position = target_location
 

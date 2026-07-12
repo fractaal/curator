@@ -74,7 +74,8 @@ public partial class TargetResolution : Node
 
         if (target == "player")
         {
-            return true;
+            // Only meaningful while someone is alive to aim at
+            return PlayerManager.Get().GetLivingPlayers().Count > 0;
         }
 
         if (target == "ghost")
@@ -101,7 +102,12 @@ public partial class TargetResolution : Node
 
         if (target == "player")
         {
-            return instance.GetTree().CurrentScene.FindChild("Player");
+            // Spawned players are named Player_<peer>, so a FindChild("Player") lookup
+            // matches nothing — "player" means the living player nearest to the ghost.
+            var ghost = instance.GetTree().CurrentScene.GetNodeOrNull<Node3D>("Ghost");
+            return PlayerManager
+                .Get()
+                .GetNearestLivingPlayer(ghost != null ? ghost.GlobalPosition : Vector3.Zero);
         }
         else if (target == "ghost")
         {

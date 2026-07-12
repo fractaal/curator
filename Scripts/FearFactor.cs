@@ -32,7 +32,7 @@ public partial class FearFactor : Node
             }
         };
 
-        Bus.PlayerEffect += (string verb, string arguments) =>
+        Bus.PlayerEffect += (string verb, string arguments, long targetPeerId) =>
         {
             if (verb == "pullplayertoghost")
             {
