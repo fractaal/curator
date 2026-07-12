@@ -94,12 +94,17 @@ public class GhostAgent : IAgenticBehavior
 
 	public List<LLMMessage> BuildEphemeralContext(List<LLMMessage> persistentContext)
 	{
+		// Hunt-instincts API docs ride inside the cached system prefix: they're multi-KB
+		// and only change when the code changes, so caching them is free after turn one.
+		// (Dynamic instinct STATUS goes in the ephemeral status prompt instead.)
+		var huntDocs = Sensors.HuntCoreRef != null ? "\n\n" + Sensors.HuntCoreRef.BuildApiDocsBlock() : "";
+
 		var messages = new List<LLMMessage>
 		{
 			// The persona is the only fully stable prefix (game info below it mutates with
 			// room state), so the provider-side prompt cache breakpoint sits here. The message
 			// is freshly built each turn, so marking it never mutates shared history.
-			LLMMessage.FromText("system", Sensors.SystemPrompt).WithCacheBreakpoint(),
+			LLMMessage.FromText("system", Sensors.SystemPrompt + huntDocs).WithCacheBreakpoint(),
 			LLMMessage.FromText("user", Sensors.GetGameInfo()),
 		};
 

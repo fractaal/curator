@@ -66,7 +66,11 @@ public partial class Sensors : Node
 	private AgenticEntity Entity;
 	private GhostAgent Behavior;
 	private GhostTools Tools;
+	private HuntCore Hunt;
 	private int ContextCountAtTurnStart = 0;
+	private bool PendingPoke = false;
+
+	public HuntCore HuntCoreRef => Hunt;
 
 	// Per-turn volatile snapshots. Assembled ONCE per think dispatch (before LLMPromptedTime
 	// is bumped) so the "since last prompt" event filters cover everything since the previous
@@ -208,6 +212,8 @@ Ghost Backstory:
 # GHOST
 {Ghost.Call("getStatus").AsString()}
 
+{(Hunt != null ? Hunt.BuildStatusBlock() : "")}
+
 {GetContextualAttentionMarkers()}
 
 # PLAYERS
@@ -235,6 +241,14 @@ Ghost Backstory:
 		}
 
 		Tools = new GhostTools(Bus, Integrity);
+
+		// The reflex layer. Two-phase: HuntCore's api bridge reflects over Tools,
+		// and Tools' hunt gate needs HuntCore back.
+		Hunt = new HuntCore();
+		AddChild(Hunt);
+		Hunt.Setup(Bus, Tools, this, Ghost);
+		Tools.Hunt = Hunt;
+
 		Behavior = new GhostAgent(this, Tools);
 		Entity = new AgenticEntity(Behavior);
 		Behavior.Agentic = Entity;
@@ -252,6 +266,14 @@ Ghost Backstory:
 		{
 			LoopCompleted = true;
 			LoopCount++;
+
+			// Coalesced early-think: N pokes during one in-flight cycle collapse
+			// to a single follow-up (mirrors StarshipAgent.PokeThink).
+			if (PendingPoke)
+			{
+				PendingPoke = false;
+				Callable.From(PrepareTurnAndThink).CallDeferred();
+			}
 		};
 
 		Entity.LLMProcessingCompleted += OnLLMResponseCompleted;
@@ -265,6 +287,34 @@ Ghost Backstory:
 				"[color=\"#FF0000\"]The AI is taking unusually long to respond — your internet connection may be unstable.[/color]"
 			);
 		};
+	}
+
+	/// <summary>Request an early think outside the normal sensor cadence — used by
+	/// HuntCore for promptLLM(urgent) and post-hunt debriefs. Coalesces: pokes that
+	/// arrive while a cycle is in flight collapse to one follow-up cycle.</summary>
+	public void PokeThink()
+	{
+		if (!Multiplayer.IsServer() || Entity == null)
+		{
+			return;
+		}
+		if (!LoopCompleted)
+		{
+			PendingPoke = true;
+			return;
+		}
+		PrepareTurnAndThink();
+	}
+
+	/// <summary>Persist a post-hunt debrief into the mind's context and reflect on it.</summary>
+	public void AddHuntDebrief(string debrief)
+	{
+		if (!Multiplayer.IsServer() || Entity == null || string.IsNullOrWhiteSpace(debrief))
+		{
+			return;
+		}
+		Entity.AddMessage(LLMMessage.FromText("user", debrief));
+		PokeThink();
 	}
 
 	private void PrepareTurnAndThink()
@@ -830,7 +880,16 @@ Ghost Backstory:
 		if (Ghost.Get("chasing").AsBool())
 		{
 			markers +=
-				"### 💥💥💥 GHOST IS CHASING PLAYER! GO CRAZY! - **INVOKE COMMANDS WITH RECKLESS ABANDON!** THROW OBJECTS! EXPLODE LIGHTS! **BE RELENTLESSLY AGGRESSIVE!**  **KEEP FEAR FACTOR AT 100!!!** 💥💥💥 ###\n";
+				"### 💥 A HUNT IS RUNNING ON YOUR INSTINCTS — the reflex script controls the pursuit. "
+				+ "Add ATMOSPHERE (sounds, lights, speech), do NOT micromanage movement. "
+				+ "If the instincts poke you with a problem, fix the script. 💥 ###\n";
+		}
+
+		if (Hunt != null && !Hunt.HasCompiledScript)
+		{
+			markers +=
+				"### 🧠 NO HUNT INSTINCTS INSTALLED — you CANNOT hunt until you write them. "
+				+ "Install update(ctx, api, inputs, state) via setHuntScript (see HUNT_INSTINCTS_API). ###\n";
 		}
 		else if (
 			!Ghost.Get("chasing").AsBool()

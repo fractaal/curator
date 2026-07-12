@@ -21,6 +21,10 @@ public class GhostTools
 	private readonly EventBus Bus;
 	private readonly NarrativeIntegrity Integrity;
 
+	/// <summary>The reflex layer. Set by Sensors.EnsureMind right after construction
+	/// (two-phase because HuntCore's api bridge needs this GhostTools instance).</summary>
+	public HuntCore Hunt { get; set; }
+
 	/// <summary>Fired with the legacy-lowercase verb after a tool successfully performs
 	/// (GhostAgent uses this for repetition/cadence housekeeping).</summary>
 	public event Action<string> CommandExecuted;
@@ -143,11 +147,22 @@ public class GhostTools
 	public Task<ToolCallResult> MoveAsGhost([ToolArg("target", "room name | player")] string target)
 		=> GhostMove("moveasghost", target);
 
-	[Tool("chasePlayerAsGhost", "Engage in a terrifying, high-octane audio-visual chase for half a minute. The ghost hunts the nearest player; on contact they die and the game ends. Locks the entrance. Only works while a player is inside the house.")]
+	[Tool("chasePlayerAsGhost", "Begin a hunt, driven by YOUR installed hunting instincts (see HUNT_INSTINCTS_API). Requires instincts installed via setHuntScript. On contact the victim dies and the game ends. Locks the entrance. Only works while a player is inside the house.")]
 	public Task<ToolCallResult> ChasePlayerAsGhost(
 		[ToolArg("speed", "slow | fast", required: false)] string speed
 	)
 	{
+		// The no-fallback ruling: no instincts, no hunt. There is no autopilot.
+		if (Hunt == null || !Hunt.HasCompiledScript)
+		{
+			EmitRecognized($"chaseplayerasghost({speed})");
+			var error =
+				"HUNT BLOCKED: you have no hunting instincts installed. "
+				+ "Write your update(ctx, api, inputs, state) script and install it with setHuntScript first.";
+			Bus.EmitSignal(EventBus.SignalName.SystemFeedback, error);
+			return Task.FromResult(Results.FailText(error));
+		}
+
 		var anyLivingPlayerInside = PlayerManager
 			.Get()
 			.GetLivingPlayers()
@@ -257,6 +272,169 @@ public class GhostTools
 	public Task<ToolCallResult> DimPlayerFlashlight(
 		[ToolArg("target", "player number (see PLAYERS) | all", required: false)] string target
 	) => PlayerEffect("dimplayerflashlight", target);
+
+	// ------------------------------------------------------------------
+	// Hunting instincts (the HuntTick script — see HUNT_INSTINCTS_API)
+	// ------------------------------------------------------------------
+
+	[Tool("setHuntScript", "Install or replace your FULL hunting instincts: JS source defining update(ctx, api, inputs, state), executed ~10x/sec during hunts. Compile-gated: bad source is rejected and any previously installed script stays untouched. See HUNT_INSTINCTS_API.")]
+	public Task<ToolCallResult> SetHuntScript(
+		[ToolArg("source", "Full JS source defining update(ctx, api, inputs, state).")] string source
+	)
+	{
+		EmitRecognized("sethuntscript(...)");
+
+		if (Hunt == null)
+		{
+			return Task.FromResult(Results.FailText("HuntCore not available."));
+		}
+		if (string.IsNullOrWhiteSpace(source))
+		{
+			return Task.FromResult(Results.FailText("Script source is empty."));
+		}
+
+		var warnings = HuntScriptLinter.Lint(source);
+		var lintText = HuntScriptLinter.BuildWarningText(warnings);
+
+		if (!Hunt.TrySetScriptSource(source, out var error))
+		{
+			var fail =
+				"SCRIPT COMPILATION FAILED — your instincts are NOT installed and you cannot hunt.\n"
+				+ "Fix the error and call setHuntScript again.\n\nError: " + error;
+			return Task.FromResult(
+				Results.FailText(string.IsNullOrWhiteSpace(lintText) ? fail : $"{fail}\n\n{lintText}")
+			);
+		}
+
+		CommandExecuted?.Invoke("sethuntscript");
+
+		var ok = "Hunting instincts installed and compiled.";
+		return Task.FromResult(
+			Results.OkText(string.IsNullOrWhiteSpace(lintText) ? ok : $"{ok}\n\n{lintText}")
+		);
+	}
+
+	[Tool("getHuntScript", "Read back your currently installed hunting instincts source.")]
+	public Task<ToolCallResult> GetHuntScript()
+	{
+		EmitRecognized("gethuntscript()");
+
+		if (Hunt == null)
+		{
+			return Task.FromResult(Results.FailText("HuntCore not available."));
+		}
+		var source = Hunt.GetScriptSource();
+		return Task.FromResult(
+			Results.OkText(string.IsNullOrWhiteSpace(source) ? "No instincts installed." : source)
+		);
+	}
+
+	[Tool("patchHuntScript", "Surgically edit your installed instincts by replacing an exact substring. Fails loudly if old_string is missing or ambiguous; on ANY failure (patch miss, compile error) the running script is UNCHANGED.")]
+	public Task<ToolCallResult> PatchHuntScript(
+		[ToolArg("old_string", "Exact substring to replace. Must be unique unless replace_all. Whitespace is significant.")] string oldString,
+		[ToolArg("new_string", "Replacement text. May be empty to delete old_string.")] string newString,
+		[ToolArg("replace_all", "Replace every occurrence without requiring uniqueness.", required: false)] bool replaceAll = false
+	)
+	{
+		EmitRecognized("patchhuntscript(...)");
+
+		if (Hunt == null)
+		{
+			return Task.FromResult(Results.FailText("HuntCore not available."));
+		}
+
+		var currentSource = Hunt.GetScriptSource();
+		if (string.IsNullOrWhiteSpace(currentSource))
+		{
+			return Task.FromResult(
+				Results.FailText("No instincts are installed. Use setHuntScript first.")
+			);
+		}
+
+		if (!ScriptPatcher.TryPatch(currentSource, oldString, newString, replaceAll, out var patched, out var patchError))
+		{
+			return Task.FromResult(
+				Results.FailText(
+					"PATCH FAILED — running instincts are UNCHANGED.\n" + patchError + "\n\n"
+						+ "Current source (line-numbered):\n" + ScriptPatcher.BuildNumberedSource(currentSource)
+				)
+			);
+		}
+
+		var warnings = HuntScriptLinter.Lint(patched);
+		var lintText = HuntScriptLinter.BuildWarningText(warnings);
+
+		if (!Hunt.TrySetScriptSource(patched, out var compileError))
+		{
+			// TrySetScriptSource restores the previous script itself on failure.
+			return Task.FromResult(
+				Results.FailText(
+					"PATCH COMPILE FAILED — previous instincts are still installed and running.\n"
+						+ "Compile error: " + compileError + "\n\n"
+						+ "Current (unchanged) source (line-numbered):\n"
+						+ ScriptPatcher.BuildNumberedSource(currentSource)
+				)
+			);
+		}
+
+		CommandExecuted?.Invoke("patchhuntscript");
+
+		var ok = "Instincts patched and recompiled.";
+		return Task.FromResult(
+			Results.OkText(string.IsNullOrWhiteSpace(lintText) ? ok : $"{ok}\n\n{lintText}")
+		);
+	}
+
+	[Tool("setHuntInputs", "Define your instincts' tuning knobs as a JSON schema: an array (or {inputs:[...]}) of {name, type, description, default}. Read them in the script as the 'inputs' argument; adjust live with setHuntInputValue.")]
+	public Task<ToolCallResult> SetHuntInputs(
+		[ToolArg("schemaJson", "JSON array of inputs or object with an 'inputs' array.")] string schemaJson
+	)
+	{
+		EmitRecognized("sethuntinputs(...)");
+
+		if (Hunt == null)
+		{
+			return Task.FromResult(Results.FailText("HuntCore not available."));
+		}
+		if (!Hunt.SetInputSchemaJson(schemaJson, out var error))
+		{
+			return Task.FromResult(Results.FailText(error));
+		}
+		CommandExecuted?.Invoke("sethuntinputs");
+		return Task.FromResult(Results.OkText("Instinct input schema updated."));
+	}
+
+	[Tool("setHuntInputValue", "Set one of your instinct tuning knobs (defined via setHuntInputs) to a new value.")]
+	public Task<ToolCallResult> SetHuntInputValue(
+		[ToolArg("key", "Input name.")] string key,
+		[ToolArg("value", "New value (number, true/false, or string).")] string value
+	)
+	{
+		EmitRecognized($"sethuntinputvalue({key})");
+
+		if (Hunt == null)
+		{
+			return Task.FromResult(Results.FailText("HuntCore not available."));
+		}
+		if (!Hunt.SetInputValue(key, value, out var error))
+		{
+			return Task.FromResult(Results.FailText(error));
+		}
+		CommandExecuted?.Invoke("sethuntinputvalue");
+		return Task.FromResult(Results.OkText($"Input '{key}' set to {value}."));
+	}
+
+	[Tool("getHuntInputs", "Read your instinct input schema and current values (JSON).")]
+	public Task<ToolCallResult> GetHuntInputs()
+	{
+		EmitRecognized("gethuntinputs()");
+
+		if (Hunt == null)
+		{
+			return Task.FromResult(Results.FailText("HuntCore not available."));
+		}
+		return Task.FromResult(Results.OkText(Hunt.GetInputsJson()));
+	}
 
 	// ------------------------------------------------------------------
 	// Internal
