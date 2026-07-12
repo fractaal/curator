@@ -98,7 +98,8 @@ construction. Edits to existing GDScript files stay GDScript.
 ```csharp
 // Inbound crossings:  PlayerTalked(string), NotableEventOccurred(string),
 //                     PlayerDecidedGhostType(string)
-// Outbound crossings: PlayerEffect(string, string), GameWon(string), GameLost(string)
+// Outbound crossings: PlayerEffect(string, string, long targetPeer), GameWon(string),
+//                     GameLost(string), EndgameSummary(string), GhostBackstory(string)
 // INBOUND ∩ OUTBOUND must stay empty (loop safety). One method pair per crossing:
 
 Bus.PlayerTalked += msg => {
@@ -149,10 +150,14 @@ void ClientPlayerEffect(string verb, string args) =>
     // each client's own player/UI reacts locally
 ```
 
-Legacy semantics are "the player" (singular) — with a crew, `PlayerEffect`
-applies to **all** players (each peer's authority player applies the shove/
-flashlight-dim to itself). That is the correct parity reading for Phase 1;
-per-victim targeting is a brain feature and belongs to Story 4.
+`PlayerEffect` carries a target: the tools (pullPlayerToGhost,
+throwPlayerAround, dimPlayerFlashlight) take an optional `target` argument —
+a player number or "all" (default). GhostTools resolves the number to a peer
+id via PlayerManager (failing loudly with the valid numbers listed, same
+shape as bad room targets); the signal broadcasts to every peer and each
+peer's authority player applies the effect only if it is the target (or the
+target is everyone). The host bus still fires unconditionally so FearFactor
+hears every effect regardless of victim.
 
 ## Non-consequence: FearFactor needs no change
 
@@ -221,6 +226,16 @@ tool quietly broke even in solo-hosted play.
 This is the thesis-interesting story: the prompt stops describing a victim
 and starts describing a crew the ghost chooses from.
 
+## Consequence: `player_number` — stable human-facing crew numbers
+
+Godot 4 client peer ids are **random 32-bit ints** (only the server is 1) —
+"Player 1268801932" is unusable in a prompt, an event log, or a tool target.
+So the server assigns a monotonic `player_number` at spawn (1 = host, then
+2, 3, ...; never reused within a session), replicated to every peer via the
+player's spawn config. Peer ids keep driving authority and RPC routing under
+the hood; every human- and LLM-facing surface (crew status, attributions,
+tool targets, victim names) speaks in player numbers.
+
 ## Consequence: Sensors speak in plural
 
 ```csharp
@@ -233,10 +248,11 @@ foreach ((id, stats) in PlayerMgr.GetAllPlayerStats()):
 - The `Player`/`Stats` singular fields go away; every consumer inside
   Sensors iterates the crew (status, attention markers, dead-gate,
   chase-cadence warnings).
-- Speaker identity rides the relay from Story 1: the host-side re-emit of
-  `PlayerTalked` prefixes the sender (`"Player 2 said: …"`), so the ghost
-  knows *who* taunted it. (Relay knows the sender peer id;
-  `NotableEventOccurred` gets the same prefix treatment.)
+- Speaker identity is attributed **at the source**, not in the relay: the
+  emitting site knows who acted (SaySomething and VoiceWebServer look up the
+  local player's number; Door/Radio/Switch use the interacting player passed
+  to `interact()`; Enemy names the caught victim). Messages relay verbatim,
+  so host and client emissions read identically.
 - `TargetResolution.GetTarget("player")` → nearest living player to the
   ghost via `PlayerManager` (fuzzy "player" target = "closest victim", the
   most defensible reading). `GhostTools`' `GetPlayer` closure gets the same
@@ -279,11 +295,13 @@ No external services, no master server. The paved LAN pattern:
 ```gdscript
 # Host, after start_host succeeds — 1 Hz heartbeat:
 beacon = PacketPeerUDP.new(); beacon.set_broadcast_enabled(true)
-every 1.0s: beacon.set_dest_address("255.255.255.255", DISCOVERY_PORT)
-            beacon.put_packet(JSON: {magic:"curator", name, port, players, max})
+every 1.0s: send JSON {magic, players, max} to 255.255.255.255:DISCOVERY_PORT
+            and a second copy to 127.0.0.1:DISCOVERY_PORT
+            # broadcast isn't delivered to same-machine listeners; the loopback
+            # copy never leaves the host (proven by the two-instance relay test)
 
 # Client, while lobby UI open:
-listener = UDPServer.new(); listener.listen(DISCOVERY_PORT)
+listener = PacketPeerUDP.new(); listener.bind(DISCOVERY_PORT)
 poll: collect beacons keyed by sender IP → lobby list entries
       drop entries not re-heard for 3s
 ```
@@ -307,16 +325,37 @@ at exactly this fix: `sync_state.rpc_id(multiplayer.get_remote_sender_id())`
 runs outside any RPC context (`get_remote_sender_id()` = 0, peer not even
 created yet at scene load) — a no-op at best.
 
-## Consequence: visual state derives from synced state on join
+## Consequence: server-pushed join sync via the `late_join_synced` group
 
-Delete the `_enter_tree` attempt. On the client, after the first
-synchronizer delivery (or simply in `_ready` deferred a frame on
-non-server peers), snap visuals to state: `if isOpen: _openStep(1.0)`.
-Same audit for `GameLight` (`isDead`/energy) — one snap-to-state function
-per interactable that owns synced flags.
+Delete the `_enter_tree` attempt. The working mechanism is server-driven:
+on `peer_connected`, `MultiplayerManager` walks the `late_join_synced`
+group and calls `late_join_sync(peer_id)` on each member, which
+`rpc_id`s its authoritative state to just that peer. Scripts that own
+one-shot state self-register in `_ready` — a group walk over `Interactable`
+child nodes was rejected because FloorLamp wraps its parts in a composite
+node and ceiling lights aren't in the `interactables` group at all.
 
-Invariant: late-join correctness only covers synchronizer-owned state.
-Transient effects (a flicker in progress) may be missed — accepted.
+Members: **Door** (mesh pose + locked), **GameLight** (isDead — in no
+replication config anywhere), **Radio** (power/playback), **Switch**
+(handle pose), **Enemy** (ghost identity — its `_rpc_set_ghost_properties`
+broadcast fires in `_ready`, before any client exists), and **Sensors**
+(the sanitized ghost backstory, generated before anyone joins).
+
+Invariant: transient effects (a flicker in progress) may be missed —
+accepted.
+
+## Consequence (discovered during the audit): Radio and Switch weren't multiplayer at all
+
+The wip commits RPC-ified doors, lights, and physics objects — but
+`Radio.gd` had **no RPC layer** (ghost-played freaky music was host-only
+audio) and `Switch.gd`'s handle flip was local-only. Radio's four verbs now
+route through `RPCUtils.try_rpc_call → *_impl` exactly like GameLight;
+Switch broadcasts its handle visual the same way while its light
+`ObjectInteraction` emission stays on the originating peer (GameLight
+already routes and broadcasts that — double-routing would storm).
+`VoiceWebServer` also got a guard (second same-machine instance can't bind
+port 6900 — voice input degrades gracefully instead of throwing in
+`_Ready`).
 
 ---
 
@@ -324,58 +363,58 @@ Transient effects (a flicker in progress) may be missed — accepted.
 
 | Surface | Change | Story |
 |---|---|---|
-| `Multiplayer/EventBusRelay.cs` | NEW C# autoload — the only network crossing for EventBus signals; explicit typed method pair per crossing + sender tagging | 1, 2, 3, 4 |
-| `Scenes/Player/player.gd` | `kill_remote()` RPC wrapper (any_peer + server-only sender guard) | 3 |
-| `Scenes/Player/player.tscn` | add `dead` to replication config | 3 |
-| `Scenes/Enemy.gd` | `current_target.kill.rpc_id(authority)` | 3 |
-| `DeclarativeGameInterface/Sensors.cs` | crew-plural status/markers/gates; drop `Player`/`Stats` singulars | 4 |
+| `Multiplayer/EventBusRelay.cs` | NEW C# autoload — the only network crossing for EventBus signals; explicit typed method pair per crossing | 1, 2, 3 |
+| `Scripts/EventBus.cs` | `PlayerEffect` gains `targetPeerId` (0 = everyone) | 2 |
+| `Scenes/Player/player.gd` | `kill_remote()` RPC wrapper (any_peer + server-only sender guard); target filter in `_on_player_effect`; `player_number`; self-registration in PlayerManager on every peer | 2, 3, 4 |
+| `Scenes/Player/player.tscn` | add `dead` + `player_number` to replication config | 3, 4 |
+| `Scenes/Enemy.gd` | `kill_remote.rpc_id(authority)`; victim named by number; ghost identity in `late_join_synced` | 3, 4, 6 |
+| `DeclarativeGameInterface/Sensors.cs` | crew-plural status/markers/gates; host-gated backstory/summary generation; backstory late-join push | 4, 6 |
 | `Scripts/TargetResolution.cs` | "player" → nearest living player via PlayerManager | 4 |
-| `DeclarativeGameInterface/GhostTools.cs` | `GetPlayer` closure = same nearest-player definition | 4 |
-| `DeclarativeGameInterface/prompts/Main.txt` | crew phrasing (1–2 lines) | 4 |
-| `Scripts/PlayerManager.cs` + spawn path | register on node arrival (every peer), not on host spawn call | 4 |
-| `Multiplayer/MultiplayerManager.gd` | MAX_CLIENTS=8, bind all interfaces, honor join address; drop redundant register calls | 4, 5 |
-| `Multiplayer/LanDiscovery.cs` | NEW C# — beacon + listener | 5 |
+| `DeclarativeGameInterface/GhostTools.cs` | targeted player effects; "player" object-target → nearest player's room at the choke point; crew-aware chase gate | 2, 4 |
+| `DeclarativeGameInterface/prompts/Main.txt` | PLAYERS section: crew, per-victim targeting | 4 |
+| `Scripts/PlayerManager.cs` | nearest-living/number lookups; registration driven by player nodes themselves | 2, 4 |
+| `Scripts/FearFactor.cs`, `Scripts/EndgameHandler.cs` | signal arity; host-only endgame gate | 2, 3 |
+| `Multiplayer/MultiplayerManager.gd` | MAX_CLIENTS, bind all interfaces, honor join address, free player nodes on disconnect, assign player numbers, drive late-join sync, start beacon | 3–6 |
+| `Multiplayer/LanDiscovery.cs` | NEW C# — beacon (broadcast + loopback copy) + listener | 5 |
 | `Multiplayer/MultiplayerHUD.gd` + `levels/node_3d.tscn` | lobby list + manual address field | 5 |
-| `Scenes/Door.gd`, `Scenes/GameLight.gd` | delete broken `_enter_tree` sync; snap-visuals-to-synced-state on join | 6 |
+| `Scenes/Door.gd`, `Scenes/GameLight.gd`, `Scenes/Radio.gd`, `Scenes/Switch.gd` | attribution by number; Radio/Switch RPC routing; `late_join_synced` membership | 4, 6 |
+| `SaySomething.gd`, `Scripts/VoiceWebServer.cs` | speech attributed by player number; voice server port guard | 1, 4 |
+| `Multiplayer/RelayTest/*` | NEW two-instance ENet loopback test of relay + discovery | verification |
 
 Explicitly untouched: everything under `AgenticCore/` and
 `DeclarativeGameInterface/GhostMind.cs`/`GhostAgent.cs` — the brain never
 learns multiplayer exists. `FearFactor`, `SpiritBox`, `RPCUtils`,
 `PhysicsObject`, holdables: already correct.
 
-# Phases & acceptance contract
+# Acceptance contract & verification evidence
 
-Each phase is independently mergeable and verified with **two instances on
-loopback** (host + client on this box; `godot --headless` where possible,
-windowed where feel matters). The host runs with a real or mock brain; the
-client needs no `settings.txt` — that's itself an assertion.
+Everything above ships as **one release** — there is no "simpler version
+now, better version later" tier anywhere in this plan (Ben's call,
+2026-07-12). What follows is what "done" means and how much of it is
+already machine-verified on this branch.
 
-**Phase 1 — Crossings (Stories 1, 2, 3 + the two `MultiplayerManager`
-constants).** The game becomes an actual co-op game:
-- Client types "is anyone there?" → the string appears in the host's next
-  prompt (PromptDebugView / log).
-- Client opens a door → `NotableEventOccurred` visible in host prompt.
-- Force `throwPlayerAround` (operator note / mock brain) → client's player
-  is physically shoved, SFX plays on client.
-- Ghost catches the client → client sees death cam; both machines show
-  endgame; client guess via journal triggers full win/lose spectacle on
-  both.
-- Solo host regression: mock e2e (`GhostMindMockTest`) still 7/7.
+**Machine-verified (automated, both green as of 2026-07-12):**
+- `godot --headless res://DeclarativeGameInterface/MockTest/GhostMindMockTest.tscn`
+  — 9/9: the solo-brain contract (interaction acks, failure feedback,
+  speech) **plus** targeted player effects (resolve player 2 → targeted
+  signal; bogus player 7 → loud failure listing valid numbers).
+- `Multiplayer/RelayTest/run.sh` — two headless instances over real ENet
+  loopback: all three inbound crossings reach the host bus; targeted
+  `PlayerEffect` + `GameLost` reach the client bus; LanDiscovery beacon
+  produces a lobby entry on the client. Both instances must exit 0.
+- `dotnet build` clean; the client instance runs with no `settings.txt`.
 
-**Phase 2 — Crew-aware brain (Story 4).**
-- Host prompt lists every player with room/status; two players in
-  different rooms are distinguishable.
-- `PlayerTalked` from client arrives attributed ("Player 2 said: …").
-- A "player"-targeted tool resolves to the nearest living player (was:
-  resolved to nothing) — assert via mock-brain tool call.
-
-**Phase 3 — Lobby + autodiscover (Story 5).**
-- Second machine on the LAN lists the hosted game within ~2s and joins by
-  click; manual IP join still works (Tailscale path).
-
-**Phase 4 — Late-join polish (Story 6).**
-- Join after the ghost opened a door / killed a light → client sees the
-  door open / light dead on arrival.
+**Playtest-verified (needs humans and a real house — Ben):**
+- Two windowed instances: client speech/door usage shows in the host
+  prompt attributed by number; ghost tools shove/dim the right victim;
+  ghost catches a client → death cam on the victim's screen, endgame on
+  both; client journal guess ends the game on both.
+- A second LAN machine sees the lobby within ~2s and joins by click;
+  manual IP join still works (Tailscale path).
+- Late join: door poses, dead lights, radio playback, ghost identity,
+  and backstory all correct on arrival.
+- The kill RPC path specifically — it is traced but not covered by the
+  automated tests (needs the full player scene + Enemy chase).
 
 # Non-goals
 
