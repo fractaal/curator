@@ -59,11 +59,19 @@ multiplayer authority in `player.gd`). The **crew** is all registered
 players on the host's `PlayerManager`.
 
 What already works through these membranes (verified in code, do not
-rebuild): ghost movement/appearance/chase on clients, doors/lights/radio/
-switch reacting to both ghost commands and client-player interactions,
-physics object torment, holdable pickup with authority transfer, spirit-box
-ghost speech TTS on every peer, chase target selection across all players
-(`Enemy.gd get_all_players`).
+rebuild): ghost movement/appearance/chase broadcast on clients,
+doors/lights reacting to both ghost commands and client-player
+interactions, physics object torment, holdable pickup with authority
+transfer, spirit-box ghost speech TTS on every peer.
+
+Corrected by review (2026-07-12): two claims of "already works" were false.
+`Enemy.gd`'s chase target selection helpers (`get_closest_player` etc.)
+existed but had ZERO callers — `current_target` was permanently null and a
+chase silently no-oped, so the ghost could never actually catch anyone.
+`chase()` now acquires the nearest living player. And two
+`current_target.has_property("dead")` calls used a method that does not
+exist in Godot 4 (runtime error aborting the chase-end path — doors stayed
+locked, `ChaseEnded` never fired); both are now `"dead" in current_target`.
 
 ---
 

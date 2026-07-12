@@ -238,6 +238,11 @@ func chase(arguments):
 		print("New chase command was suspiciously too near a newly-ended chase. Ignoring")
 		return
 
+	# Acquire the victim: the nearest living player (what the chase tool promises).
+	# Also re-acquires when the previous target died or despawned.
+	if not current_target or not is_instance_valid(current_target) or ("dead" in current_target and current_target.dead):
+		set_target(get_closest_player())
+
 	# If still no target, can't chase
 	if not current_target:
 		print("Ghost cannot chase - no target available")
@@ -301,7 +306,7 @@ func chase(arguments):
 
 	# Check if target is a player and handle death state
 	var target_is_dead = false
-	if current_target and current_target.has_method("kill") and current_target.has_property("dead"):
+	if current_target and current_target.has_method("kill") and "dead" in current_target:
 		target_is_dead = current_target.dead
 
 	if not target_is_dead:
@@ -393,7 +398,7 @@ func _process(_delta):
 
 	# Check if current target is a player and is dead
 	var target_is_dead = false
-	if current_target and current_target.has_method("kill") and current_target.has_property("dead"):
+	if current_target and current_target.has_method("kill") and "dead" in current_target:
 		target_is_dead = current_target.dead
 
 	if not target_is_dead: # Otherwise it looks like we're humping the target
@@ -440,15 +445,15 @@ func get_all_players() -> Array[Node3D]:
 	return players
 
 func get_closest_player() -> Node3D:
-	"""Get the closest player to the ghost"""
+	"""Get the closest living player to the ghost"""
 	var players = get_all_players()
-	if players.is_empty():
-		return null
 
 	var closest_player: Node3D = null
 	var closest_distance = INF
 
 	for player in players:
+		if "dead" in player and player.dead:
+			continue
 		var distance = global_position.distance_to(player.global_position)
 		if distance < closest_distance:
 			closest_distance = distance
