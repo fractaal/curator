@@ -276,6 +276,43 @@ hunt *well*, whether promptLLM moments feel eerie rather than laggy, and
 whether the debrief→patch loop produces visible behavioral evolution across
 a session. That last one is the thesis result.
 
+# As-built deviations (2026-07-12, implementation session)
+
+- **Main-thread execution only.** ComputerCore's worker-thread runtime was not
+  ported: it exists for fleets of ships ticking concurrently; curator has one
+  ghost with a tiny script under hard budgets (`MaxRuntimeMs` 50 — worst case
+  a 3-frame hitch, normal case sub-millisecond). The worker machinery is the
+  single biggest chunk of ComputerCore and it buys nothing here.
+- **Linter written fresh, not ported.** ComputerCoreLinter's checks are
+  starship doctrine (shield faces, weapon gating). `HuntScriptLinter` keeps
+  the structure and the transferable spirit with hunt-domain rules: HNT00
+  multiple update() definitions, HNT01 script never acts, HNT02 blind hunting
+  (never reads ctx senses), OBS01 no api.log. `ScriptPatcher` ported verbatim.
+- **Inputs simplified**: schema JSON stored verbatim + values typed by parse
+  (number/bool/string), instead of ComputerCore's full typed-definition
+  machinery. Same tool surface, ~150 fewer lines.
+- **Lunge mechanics** (engine constants in Enemy.gd, playtest-tunable): hunt
+  speed 3.0 slow / 3.8 fast, lunge 6.5 for ≤2.5s with 4s cooldown; during a
+  lunge the ghost tracks the victim only while LOS holds, then runs to the
+  last seen point. The old omniscient distance rubber-band is deleted with
+  the autopilot.
+- **current_target reinterpreted as the LOS probe** (nearest living player):
+  it drives `inLineOfSight` (player heartbeat UI — already replicated in
+  Ghost.tscn — and the lungeAt gate), never pursuit knowledge. While hunting,
+  the ghost faces its *movement direction* unless it actually sees someone —
+  facing through walls telegraphed knowledge it doesn't have.
+- **Runtime abort keeps the session debriefing**: `hunting` (ticking) and
+  `inSession` (ChaseStarted→ChaseEnded) are separate flags, so a crashed hunt
+  still delivers its debrief — crashed hunts need it most.
+- **Endgame execution got its own RPC broadcast** (`start_endgame_execution`)
+  — the old `chase("end")` ran host-only, so clients never saw the wrong-guess
+  cinematic at all (pre-existing gap, fixed in passing). It now kills the crew
+  sequentially, nearest first.
+- **Dead code deleted**: the `settargetasghost` verb branch (no tool ever
+  emitted it), `set_target()`, `get_random_player()`.
+- promptLLM(urgent=false) lands as a NotableEventOccurred (rides the next
+  scheduled turn); urgent=true additionally pokes an early think.
+
 # Non-goals
 
 - **Fallback of any kind** — ruled out. No autopilot resurrect, no
