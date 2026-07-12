@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://38zu1h5k4snle"]
+
+[ext_resource type="Script" path="res://DeclarativeGameInterface/MockTest/HuntTickMockTest.cs" id="1_hunttest"]
+
+[node name="HuntTickMockTest" type="Node"]
+script = ExtResource("1_hunttest")
