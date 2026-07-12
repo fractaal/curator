@@ -170,14 +170,6 @@ func _on_ghost_action(verb, arguments):
 		else:
 			print("Non-server tried to make ghost chase - ignoring")
 
-	elif verb == "settargetasghost":
-		# New action to set a specific target
-		var target_node = TargetResolution.GetTarget(arguments)
-		if target_node and target_node is Node3D:
-			set_target(target_node)
-		else:
-			print("Ghost cannot set target - invalid target: ", arguments)
-
 	elif verb == "appearasghost":
 		if multiplayer.is_server():
 			_rpc_appear.rpc()
@@ -225,105 +217,182 @@ func appear():
 		return
 	skeleton.visible = false
 
-# RPC method for ghost chase - called by server, executed on all clients
+# ==================================================================
+# HUNTS — driven by the LLM-authored HuntTick (HuntCore). The engine owns
+# the RULES (grace, timer, kill, speed clamps, lunge cooldown); the script
+# owns the BEHAVIOR (where to go, when to lunge). There is NO autopilot:
+# the old omniscient tracking loop is gone by design (no-fallback ruling).
+# ==================================================================
+
+const HUNT_GRACE_SEC := 5.0
+const HUNT_MIN_SEC := 30.0
+const HUNT_MAX_SEC := 45.0
+const HUNT_SPEED_SLOW := 3.0
+const HUNT_SPEED_FAST := 3.8
+const LUNGE_SPEED := 6.5
+const LUNGE_DURATION_SEC := 2.5
+const LUNGE_COOLDOWN_SEC := 4.0
+const KILL_RANGE := 1.25
+
+var hunt_in_grace := false
+var hunt_deadline_msec := 0
+var last_hunt_end_reason := ""
+var _lunge_target: Node3D = null
+var _lunge_until_msec := 0
+var _lunge_cooldown_until_msec := 0
+var _hunt_id := 0 # invalidates stale async timers when a hunt ends early
+var _endgame_execution := false
+
+var hunt_remaining_sec: float:
+	get:
+		if not chasing or hunt_deadline_msec == 0:
+			return 0.0
+		return max(0.0, (hunt_deadline_msec - Time.get_ticks_msec()) / 1000.0)
+
+var hunt_lunge_ready: bool:
+	get:
+		return chasing and not hunt_in_grace and Time.get_ticks_msec() >= _lunge_cooldown_until_msec
+
+# RPC method for hunt start - called by server, executed on all clients
 @rpc("authority", "call_local")
 func _rpc_chase(arguments):
-	chase(arguments)
+	start_hunt(arguments)
 
-func chase(arguments):
+func start_hunt(arguments):
 	if chasing or gameEnded:
 		return
 
 	if (Time.get_ticks_msec() - _last_chase_time) < 5000:
-		print("New chase command was suspiciously too near a newly-ended chase. Ignoring")
+		print("New hunt command was suspiciously too near a newly-ended hunt. Ignoring")
 		return
 
-	# Acquire the victim: the nearest living player (what the chase tool promises).
-	# Also re-acquires when the previous target died or despawned.
-	if not current_target or not is_instance_valid(current_target) or ("dead" in current_target and current_target.dead):
-		set_target(get_closest_player())
-
-	# If still no target, can't chase
-	if not current_target:
-		print("Ghost cannot chase - no target available")
-		return
-
-	EventBus.emit_signal("ChaseStarted")
-	chasing_EntireSequence = true
+	# All peers: visuals + SFX. ChaseStarted also wakes HuntCore on the host.
 	chasing = true
+	chasing_EntireSequence = true
+	hunt_in_grace = true
+	last_hunt_end_reason = ""
 	skeleton.visible = true
+	chaseSpeed = "fast" if arguments == "fast" else "slow"
 	huntGracePeriodSFX.play(0)
 	huntStartSFX.play(0)
+	EventBus.emit_signal("ChaseStarted")
 
-	if arguments == "end":
-		speed = 0
-		chaseSpeed = "end"
-	elif arguments == "fast":
-		chaseSpeed = "fast"
-	else:
-		chaseSpeed = "slow"
+	# Server only from here: the hunt's rules.
+	if not multiplayer.is_server():
+		return
 
-	skeleton.visible = true
+	_hunt_id += 1
+	var my_hunt := _hunt_id
+	speed = HUNT_SPEED_FAST if chaseSpeed == "fast" else HUNT_SPEED_SLOW
 
-	await get_tree().create_timer(5).timeout
+	await get_tree().create_timer(HUNT_GRACE_SEC).timeout
+	if my_hunt != _hunt_id or not chasing:
+		return
 
-	if arguments == "end":
-		speed = 35
+	hunt_in_grace = false
+	var hunt_time := randf_range(HUNT_MIN_SEC, HUNT_MAX_SEC)
+	hunt_deadline_msec = Time.get_ticks_msec() + int(hunt_time * 1000)
+	EventBus.emit_signal("NotableEventOccurred", "Ghost hunt started for " + str(int(hunt_time)) + " seconds - instincts are in control")
 
-	var huntTime = randf_range(30, 45) if arguments != "end" else 9999.0
-	EventBus.emit_signal("NotableEventOccurred", "Ghost chase started for " + str(huntTime) + " seconds. REMEMBER - TERRIFY THE PLAYER!")
-
-	for i in range(0, int(huntTime * 10)):
-		# Check if target still exists
-		if not is_instance_valid(current_target):
-			print("Chase target became invalid, ending chase")
-			break
-
-		skeleton.visible = true
-		update_target_location(current_target.global_transform.origin)
-		var length = (current_target.global_transform.origin - global_transform.origin).length()
-
-		if (length < 1.25):
-			jumpscareSFX.play(0)
-
-			# Only kill if target is a player with a kill method
-			if current_target.has_method("kill"):
-				# Death sequence must run on the victim's own machine
-				current_target.kill_remote.rpc_id(current_target.get_multiplayer_authority())
-				var victim = "Player"
-				if "player_number" in current_target:
-					victim = "Player %d" % current_target.player_number
-				EventBus.emit_signal("GameLost", victim + " was caught by the ghost")
-				EventBus.emit_signal("NotableEventOccurred", "Game Lost - " + victim + " was caught by the ghost!")
-			else:
-				print("Ghost reached target: ", current_target.name)
-			break
-
+	while chasing and not gameEnded and Time.get_ticks_msec() < hunt_deadline_msec:
 		await get_tree().create_timer(0.1).timeout
+		if my_hunt != _hunt_id:
+			return
 
+	if chasing and my_hunt == _hunt_id:
+		_rpc_finish_hunt.rpc("expired")
+
+# HuntCore steering: navigate toward a sensed position. A committed lunge overrides it.
+func hunt_move_toward(position: Vector3):
+	if not multiplayer.is_server() or not chasing or hunt_in_grace or gameEnded:
+		return
+	if _lunge_target != null:
+		return
+	update_target_location(position)
+
+# HuntCore commitment: a fast burst at a player the ghost can SEE. Engine-enforced
+# duration and cooldown; tracking only persists while line of sight holds.
+func hunt_lunge(target: Node3D) -> bool:
+	if not multiplayer.is_server() or not chasing or hunt_in_grace or gameEnded:
+		return false
+	if Time.get_ticks_msec() < _lunge_cooldown_until_msec:
+		return false
+	if target == null or not is_instance_valid(target):
+		return false
+
+	_lunge_target = target
+	_lunge_until_msec = Time.get_ticks_msec() + int(LUNGE_DURATION_SEC * 1000)
+	_lunge_cooldown_until_msec = _lunge_until_msec + int(LUNGE_COOLDOWN_SEC * 1000)
+	current_target = target # the LOS probe follows the victim during the burst
+	update_target_location(target.global_transform.origin)
+	return true
+
+# HuntCore abort: script error or script choice. Total cleanup, every peer.
+func abort_hunt(reason: String):
+	if not multiplayer.is_server() or not chasing:
+		return
+	_rpc_finish_hunt.rpc(reason)
+
+func _lunge_tick():
+	if _lunge_target == null:
+		return
+	if Time.get_ticks_msec() >= _lunge_until_msec or not is_instance_valid(_lunge_target):
+		_lunge_target = null
+		speed = HUNT_SPEED_FAST if chaseSpeed == "fast" else HUNT_SPEED_SLOW
+		return
+	speed = LUNGE_SPEED
+	# Track only while the victim is visible; when LOS breaks, the ghost keeps
+	# running to the last place it saw them.
+	if inLineOfSight:
+		update_target_location(_lunge_target.global_transform.origin)
+
+func _hunt_contact_check():
+	for player in get_all_players():
+		if "dead" in player and player.dead:
+			continue
+		if not player.has_method("kill"):
+			continue
+		if (player.global_transform.origin - global_transform.origin).length() >= KILL_RANGE:
+			continue
+
+		_rpc_play_jumpscare.rpc()
+		# Death sequence must run on the victim's own machine
+		player.kill_remote.rpc_id(player.get_multiplayer_authority())
+		var victim = "Player"
+		if "player_number" in player:
+			victim = "Player %d" % player.player_number
+		EventBus.emit_signal("GameLost", victim + " was caught by the ghost")
+		EventBus.emit_signal("NotableEventOccurred", "Game Lost - " + victim + " was caught by the ghost!")
+		_rpc_finish_hunt.rpc("caught " + victim)
+		return
+
+@rpc("authority", "call_local")
+func _rpc_play_jumpscare():
+	jumpscareSFX.play(0)
+
+@rpc("authority", "call_local")
+func _rpc_finish_hunt(reason: String):
+	if not chasing:
+		return
+
+	_hunt_id += 1 # cancels the server's pending grace/timer coroutines
 	chasing = false
+	hunt_in_grace = false
+	hunt_deadline_msec = 0
+	last_hunt_end_reason = reason
+	_lunge_target = null
 	speed = 2.5
 
-	# Check if target is a player and handle death state
-	var target_is_dead = false
-	if current_target and current_target.has_method("kill") and "dead" in current_target:
-		target_is_dead = current_target.dead
-
-	if not target_is_dead:
+	var caught := reason.begins_with("caught")
+	if not caught:
 		skeleton.visible = false
-
-	if target_is_dead:
+	else:
 		blackTexture.visible = true
 		var tween = create_tween()
-
 		endRevealText.text = "THE GHOST WAS A " + GhostType.to_upper()
-
 		tween.tween_property(blackTexture, "modulate", Color(0, 0, 0, 1), 0.25).set_trans(Tween.TRANS_EXPO).set_delay(1.75)
 		tween.tween_property(endRevealText, "modulate", Color(1, 1, 1, 1), 1).set_delay(3)
-
 		tween.play()
-
-		await tween.finished
 
 	chasing_EntireSequence = false
 	_last_chase_time = Time.get_ticks_msec()
@@ -331,9 +400,73 @@ func chase(arguments):
 	EventBus.emit_signal("ChaseEnded")
 	EventBus.emit_signal("ObjectInteraction", "unlock", "doors", "all")
 
+# ==================================================================
+# ENDGAME EXECUTION — the wrong-guess cinematic. Deterministic, omniscient,
+# and deliberately NOT a hunt: no LLM, no HuntCore, no ChaseStarted.
+# ==================================================================
+
+func start_endgame_execution():
+	if not multiplayer.is_server():
+		return
+	_rpc_endgame_execution.rpc()
+
+@rpc("authority", "call_local")
+func _rpc_endgame_execution():
+	_endgame_execution = true
+	chasing = true
+	chasing_EntireSequence = true
+	hunt_in_grace = false
+	skeleton.visible = true
+	huntStartSFX.play(0)
+
+	if not multiplayer.is_server():
+		return
+
+	speed = 0
+	await get_tree().create_timer(5).timeout
+	speed = 35
+
+	var revealed := false
+	while true:
+		var victim = get_closest_player()
+		if victim == null:
+			break
+
+		update_target_location(victim.global_transform.origin)
+		current_target = victim
+
+		if (victim.global_transform.origin - global_transform.origin).length() < KILL_RANGE:
+			_rpc_play_jumpscare.rpc()
+			if victim.has_method("kill"):
+				victim.kill_remote.rpc_id(victim.get_multiplayer_authority())
+			if not revealed:
+				revealed = true
+				_rpc_endgame_reveal.rpc()
+
+		await get_tree().create_timer(0.1).timeout
+
+@rpc("authority", "call_local")
+func _rpc_endgame_reveal():
+	blackTexture.visible = true
+	var tween = create_tween()
+	endRevealText.text = "THE GHOST WAS A " + GhostType.to_upper()
+	tween.tween_property(blackTexture, "modulate", Color(0, 0, 0, 1), 0.25).set_trans(Tween.TRANS_EXPO).set_delay(1.75)
+	tween.tween_property(endRevealText, "modulate", Color(1, 1, 1, 1), 1).set_delay(3)
+	tween.play()
+
 func _physics_process(delta):
 	if (!multiplayer.is_server()):
 		return
+
+	# The LOS probe: outside lunges and the endgame cinematic, current_target is
+	# simply the nearest living player — it drives inLineOfSight (player heartbeat
+	# UI + HuntCore's lunge gate), never pursuit knowledge by itself.
+	if _lunge_target == null and not _endgame_execution:
+		current_target = get_closest_player()
+
+	if chasing and not hunt_in_grace and not gameEnded and not _endgame_execution:
+		_hunt_contact_check()
+		_lunge_tick()
 
 	# If still no target, skip line of sight checks but continue with movement
 	if current_target:
@@ -368,9 +501,15 @@ func _physics_process(delta):
 
 	if manifesting or chasing:
 		$Skeleton3D/OmniLight3D.light_energy = randf_range(0.01, 0.05)
-		if current_target:
+		# Face the target only when the ghost can actually SEE it (or during the
+		# manifest/cinematic) — facing through walls telegraphs knowledge the
+		# hunting instincts don't have.
+		if current_target and (inLineOfSight or manifesting or _endgame_execution):
 			var direction = (current_target.global_transform.origin - global_transform.origin).normalized()
 			rotation.y = lerp_angle(rotation.y, atan2( - direction.x, -direction.z), delta * 5)
+		elif (current_location - next_location).length() > 0.1:
+			var move_direction = (next_location - current_location).normalized()
+			rotation.y = lerp_angle(rotation.y, atan2( - move_direction.x, -move_direction.z), delta * 5)
 
 	move_and_slide()
 
@@ -384,10 +523,8 @@ func _physics_process(delta):
 		huntTensionSFX.volume_db = (-(distance * 2)) - 10
 		huntTensionSFX.pitch_scale = 0.75 + clamp((1 / distance), 0, 1.25)
 
-		if chaseSpeed == "fast":
-			speed = 2.5 + (log(distance) * 1.25)
-		elif chaseSpeed == "slow":
-			speed = 2.25 + log(distance)
+		# Speed is engine-clamped (HUNT_SPEED_*/LUNGE_SPEED); the old omniscient
+		# distance rubber-band is gone with the autopilot.
 	else:
 		heartbeatSFX.volume_db = -80
 		huntTensionSFX.volume_db = -80
@@ -415,15 +552,6 @@ func late_join_sync(peer_id: int):
 
 func update_target_location(target_location):
 	nav_agent.target_position = target_location
-
-# Target management functions for multiplayer support
-func set_target(new_target: Node3D):
-	"""Set the ghost's current target to chase/stalk"""
-	current_target = new_target
-	if current_target:
-		print("Ghost target set to: ", current_target.name)
-	else:
-		print("Ghost target cleared")
 
 func get_all_players() -> Array[Node3D]:
 	"""Get all players in the game (both singleplayer and multiplayer)"""
@@ -460,14 +588,6 @@ func get_closest_player() -> Node3D:
 			closest_player = player
 
 	return closest_player
-
-func get_random_player() -> Node3D:
-	"""Get a random player from all available players"""
-	var players = get_all_players()
-	if players.is_empty():
-		return null
-
-	return players[randi() % players.size()]
 
 func getStatus():
 	var out = "Name: " + FirstName + " " + LastName + "\n"
