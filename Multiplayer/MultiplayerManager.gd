@@ -25,8 +25,14 @@ func start_host():
 
 	multiplayer.multiplayer_peer = server_peer
 
-	multiplayer.peer_connected.connect(on_peer_connected)
-	multiplayer.peer_disconnected.connect(on_peer_disconnected)
+	# Signals live on the persistent MultiplayerAPI, and hosting can happen again
+	# after an endgame Retry reload — guard against duplicate connections.
+	if not multiplayer.peer_connected.is_connected(on_peer_connected):
+		multiplayer.peer_connected.connect(on_peer_connected)
+	if not multiplayer.peer_disconnected.is_connected(on_peer_disconnected):
+		multiplayer.peer_disconnected.connect(on_peer_disconnected)
+
+	_next_player_number = 0 # fresh crew numbering for a fresh session
 
 	_add_player_to_game(1)
 

@@ -17,6 +17,14 @@ func _on_game_lost(_reason):
 	tween.play()
 	
 func _on_retry_clicked():
+	# In multiplayer a bare scene reload desyncs the session: tear this machine's
+	# session down first. Each machine that clicks Retry returns to a fresh scene
+	# with the lobby UI, and a new game gets hosted/joined from there.
+	if multiplayer.has_multiplayer_peer() and not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
+		multiplayer.multiplayer_peer.close()
+		multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+		LanDiscovery.StopBeacon()
+
 	get_tree().reload_current_scene()
 
 func _ready():
