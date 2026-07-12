@@ -13,6 +13,14 @@ using Godot;
 ///
 /// Exits 0 on PASS, 1 on FAIL (10s timeout).
 /// </summary>
+/// <summary>Stands in for player.gd: exposes the two script properties PlayerManager
+/// reads off real players (dead, player_number).</summary>
+public partial class FakeCrewPlayer : Node3D
+{
+	public bool dead = false;
+	public int player_number = 2;
+}
+
 public partial class GhostMindMockTest : Node
 {
 	private class TestBehavior : IAgenticBehavior
@@ -49,6 +57,7 @@ public partial class GhostMindMockTest : Node
 	private bool SawFlickerKitchen = false;
 	private bool SawGhostTalked = false;
 	private bool SawTargetFailFeedback = false;
+	private bool SawThrowAtPlayer2 = false;
 	private int RecognizedCount = 0;
 
 	public override void _Ready()
@@ -104,8 +113,21 @@ public partial class GhostMindMockTest : Node
 			RecognizedCount++;
 		};
 
+		bus.PlayerEffect += (verb, arguments, targetPeerId) =>
+		{
+			if (verb == "throwplayeraround" && targetPeerId == 2)
+			{
+				SawThrowAtPlayer2 = true;
+			}
+		};
+
+		// A fake registered crew member so player-targeted effects can resolve "2".
+		var fakePlayer = new FakeCrewPlayer { Name = "Player_2" };
+		AddChild(fakePlayer);
+		PlayerManager.Get().RegisterPlayer(2, fakePlayer);
+
 		var integrity = GetNode<NarrativeIntegrity>("/root/NarrativeIntegrity");
-		var tools = new GhostTools(bus, integrity, () => null);
+		var tools = new GhostTools(bus, integrity);
 		var behavior = new TestBehavior(new ReflectionToolSource(tools));
 
 		var script = new List<MockLLMClient.Step>
@@ -124,6 +146,16 @@ public partial class GhostMindMockTest : Node
 				"speakAsGhost",
 				new JsonObject { ["message"] = "Cold. Cold. Cold." },
 				assistantMsg: ""
+			),
+			MockLLMClient.MakeToolCall(
+				"throwPlayerAround",
+				new JsonObject { ["target"] = "2" },
+				assistantMsg: "Tormenting Player 2."
+			),
+			MockLLMClient.MakeToolCall(
+				"pullPlayerToGhost",
+				new JsonObject { ["target"] = "7" },
+				assistantMsg: "Trying a player that doesn't exist."
 			),
 			MockLLMClient.MakeAssistant("Done."),
 		};
@@ -175,6 +207,7 @@ public partial class GhostMindMockTest : Node
 
 		bool flickerSucceeded = toolMessages.Any(t => t.Contains("flicker") && t.Contains("kitchen"));
 		bool basementFailed = toolMessages.Any(t => t.Contains("TARGET DOESN'T EXIST"));
+		bool badPlayerFailed = toolMessages.Any(t => t.Contains("no such player"));
 
 		var checks = new List<(string name, bool pass)>
 		{
@@ -183,7 +216,9 @@ public partial class GhostMindMockTest : Node
 			("flickerLights(basement) failed with TARGET DOESN'T EXIST tool result", basementFailed),
 			("bad target also emitted legacy SystemFeedback", SawTargetFailFeedback),
 			("GhostTalked emitted for speakAsGhost", SawGhostTalked),
-			("InterpreterCommandRecognized emitted per tool call (>=3)", RecognizedCount >= 3),
+			("throwPlayerAround(2) emitted PlayerEffect targeted at peer 2", SawThrowAtPlayer2),
+			("pullPlayerToGhost(7) failed with no-such-player tool result", badPlayerFailed),
+			("InterpreterCommandRecognized emitted per tool call (>=5)", RecognizedCount >= 5),
 			("think cycle completed", Finished),
 		};
 

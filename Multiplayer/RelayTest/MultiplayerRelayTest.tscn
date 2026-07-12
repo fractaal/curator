@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://1oepn8i3bjptm"]
+
+[ext_resource type="Script" path="res://Multiplayer/RelayTest/MultiplayerRelayTest.cs" id="1_relaytest"]
+
+[node name="MultiplayerRelayTest" type="Node"]
+script = ExtResource("1_relaytest")
