@@ -82,25 +82,33 @@ This forces the first crossing direction: **inbound sensor relay**
 (client → host), because the brain's senses live exclusively on the host
 bus.
 
-## Consequence: `Multiplayer/EventBusRelay.gd` (new autoload), inbound half
+## Consequence: `Multiplayer/EventBusRelay.cs` (new autoload), inbound half
 
 One tiny autoload owns ALL crossings. Nothing else in the codebase may
 relay EventBus signals across the network — one file to audit, one place
 the two membranes touch.
 
-```gdscript
-# Enumerated, never wildcarded. INBOUND ∩ OUTBOUND must stay empty (loop safety).
-const INBOUND  := ["PlayerTalked", "NotableEventOccurred", "PlayerDecidedGhostType"]
-const OUTBOUND := ["PlayerEffect", "GameWon", "GameLost"]
+New relay/discovery modules are **C#** (Ben's call): `EventBus` is already
+C# with generated typed signal delegates, so each crossing is an explicit
+typed method pair — wrong arity or a typo'd signal name fails at
+`dotnet build`, not at runtime. There is no string-keyed dispatcher at all,
+which also removes the "client injects an arbitrary signal name" surface by
+construction. Edits to existing GDScript files stay GDScript.
 
-_on_local_inbound(sig, args):
-  if multiplayer.is_server(): return          # host emissions already reach the brain
-  _to_host.rpc_id(1, sig, args)
+```csharp
+// Inbound crossings:  PlayerTalked(string), NotableEventOccurred(string),
+//                     PlayerDecidedGhostType(string)
+// Outbound crossings: PlayerEffect(string, string), GameWon(string), GameLost(string)
+// INBOUND ∩ OUTBOUND must stay empty (loop safety). One method pair per crossing:
 
-@rpc("any_peer")
-_to_host(sig, args):
-  if sig not in INBOUND: return               # clients can't inject arbitrary signals
-  EventBus.emit_signal(sig, ...args)          # re-emit on the host bus → brain hears it
+Bus.PlayerTalked += msg => {
+    if (Multiplayer.IsServer()) return;       // host emissions already reach the brain
+    RpcId(1, MethodName.HostPlayerTalked, msg);
+};
+
+[Rpc(MultiplayerApi.RpcMode.AnyPeer)]
+void HostPlayerTalked(string msg) =>
+    Bus.EmitSignal(EventBus.SignalName.PlayerTalked, msg);  // host bus → brain hears it
 ```
 
 Invariants:
@@ -109,9 +117,9 @@ Invariants:
   that must never leak to clients, and wholesale sync invites re-emission
   loops.
 - Loop safety is structural, not behavioral: the inbound and outbound
-  signal sets are disjoint, and each direction gates on `is_server()`.
-- `_to_host` validates the signal name against `INBOUND` (any_peer RPC =
-  untrusted input).
+  signal sets are disjoint, and each direction gates on `IsServer()`.
+- Only enumerated, explicitly-typed RPC methods exist — nothing generic for
+  an untrusted peer to aim at.
 - Solo play (host, zero clients): relay is a no-op; behavior byte-identical
   to today.
 
@@ -128,14 +136,17 @@ This forces the outbound half of the relay.
 
 ## Consequence: EventBusRelay, outbound half
 
-```gdscript
-_on_local_outbound(sig, args):
-  if not multiplayer.is_server(): return
-  _to_clients.rpc(sig, args)                  # NOT call_local — host bus already fired
+```csharp
+Bus.PlayerEffect += (verb, args) => {
+    if (!Multiplayer.IsServer()) return;
+    if (Multiplayer.GetPeers().Length == 0) return;  // offline/solo: no-op
+    Rpc(MethodName.ClientPlayerEffect, verb, args);  // NOT CallLocal — host bus already fired
+};
 
-@rpc("authority")
-_to_clients(sig, args):
-  EventBus.emit_signal(sig, ...args)          # each client's own player/UI reacts locally
+[Rpc(MultiplayerApi.RpcMode.Authority)]
+void ClientPlayerEffect(string verb, string args) =>
+    Bus.EmitSignal(EventBus.SignalName.PlayerEffect, verb, args);
+    // each client's own player/UI reacts locally
 ```
 
 Legacy semantics are "the player" (singular) — with a crew, `PlayerEffect`
@@ -166,11 +177,15 @@ The mirror problem: when a client's guess ends the game (Story 1 delivers
 
 ```gdscript
 # Enemy.gd (server-side chase logic)
-current_target.kill.rpc_id(current_target.get_multiplayer_authority())
+current_target.kill_remote.rpc_id(current_target.get_multiplayer_authority())
 
-# player.gd
-@rpc("authority", "call_local")   # call_local keeps host-victim (solo) path identical
-func kill(): ...
+# player.gd — NOTE the rpc-mode gotcha: mode "authority" means "only the NODE's
+# authority may CALL this", and the node's authority is the victim, not the
+# server — the client would reject the server's RPC. So: any_peer + sender guard.
+@rpc("any_peer", "call_local")    # call_local keeps host-victim (solo) path identical
+func kill_remote():
+  if multiplayer.get_remote_sender_id() > 1: return   # only the server may kill
+  kill()
 ```
 
 - `kill()`'s side effects (death cam, mouse release, `ObjectInteraction
@@ -257,7 +272,7 @@ join_server(address):
   client_peer.create_client(address, SERVER_PORT)   # actually use the argument
 ```
 
-## Consequence: `Multiplayer/LanDiscovery.gd` — UDP broadcast beacon
+## Consequence: `Multiplayer/LanDiscovery.cs` — UDP broadcast beacon
 
 No external services, no master server. The paved LAN pattern:
 
@@ -309,8 +324,8 @@ Transient effects (a flicker in progress) may be missed — accepted.
 
 | Surface | Change | Story |
 |---|---|---|
-| `Multiplayer/EventBusRelay.gd` | NEW autoload — the only network crossing for EventBus signals; INBOUND/OUTBOUND sets + sender tagging | 1, 2, 3, 4 |
-| `Scenes/Player/player.gd` | `kill()` → `@rpc("authority", "call_local")` | 3 |
+| `Multiplayer/EventBusRelay.cs` | NEW C# autoload — the only network crossing for EventBus signals; explicit typed method pair per crossing + sender tagging | 1, 2, 3, 4 |
+| `Scenes/Player/player.gd` | `kill_remote()` RPC wrapper (any_peer + server-only sender guard) | 3 |
 | `Scenes/Player/player.tscn` | add `dead` to replication config | 3 |
 | `Scenes/Enemy.gd` | `current_target.kill.rpc_id(authority)` | 3 |
 | `DeclarativeGameInterface/Sensors.cs` | crew-plural status/markers/gates; drop `Player`/`Stats` singulars | 4 |
@@ -319,7 +334,7 @@ Transient effects (a flicker in progress) may be missed — accepted.
 | `DeclarativeGameInterface/prompts/Main.txt` | crew phrasing (1–2 lines) | 4 |
 | `Scripts/PlayerManager.cs` + spawn path | register on node arrival (every peer), not on host spawn call | 4 |
 | `Multiplayer/MultiplayerManager.gd` | MAX_CLIENTS=8, bind all interfaces, honor join address; drop redundant register calls | 4, 5 |
-| `Multiplayer/LanDiscovery.gd` | NEW — beacon + listener | 5 |
+| `Multiplayer/LanDiscovery.cs` | NEW C# — beacon + listener | 5 |
 | `Multiplayer/MultiplayerHUD.gd` + `levels/node_3d.tscn` | lobby list + manual address field | 5 |
 | `Scenes/Door.gd`, `Scenes/GameLight.gd` | delete broken `_enter_tree` sync; snap-visuals-to-synced-state on join | 6 |
 
