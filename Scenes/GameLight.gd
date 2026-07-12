@@ -98,7 +98,8 @@ func _process(delta):
 
 func _ready():
 	registry.Register(objectType)
-	
+	add_to_group("late_join_synced")
+
 	noise = FastNoiseLite.new()
 
 	ExplodeSFX = AudioStreamPlayer3D.new()
@@ -283,7 +284,21 @@ func turnOnInstant_impl(_args: Array = []):
 	setEnergiesToDefault()
 	isDead = false
 
-################ GET STATUS 
+################ LATE JOIN
+# Called by MultiplayerManager on the server when a peer joins — isDead isn't in
+# any replication config, so a late joiner needs one authoritative snap.
+func late_join_sync(peer_id: int):
+	_apply_join_state.rpc_id(peer_id, isDead, interactable)
+
+@rpc("authority")
+func _apply_join_state(dead: bool, can_interact: bool):
+	isDead = dead
+	interactable = can_interact
+	if isDead:
+		HumSFX.stop()
+		setEnergy(0.0)
+
+################ GET STATUS
 func getStatus():
 	return "Light Status - " + ("Off" if isDead else "On") + (" " if interactable else "(Dead - " + "(%d" % ((Time.get_ticks_msec() - kill_time) / 1000) + "s ago) (**Player can't interact**)")
 

@@ -54,6 +54,7 @@ func connect_to_event_bus():
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	registry.Register(objectType)
+	add_to_group("late_join_synced")
 	_updateStatusLabel()
 
 	connect_to_event_bus.call_deferred()
@@ -98,17 +99,25 @@ func _updateStatusLabel():
 	
 	statusLabel.text = out
 	
+# Verbs route through RPCUtils so radio state and audio play on every peer,
+# same as GameLight — whether triggered by the ghost (host bus) or a player.
 func turnon():
+	RPCUtils.try_rpc_call(self, "turnon")
+
+func turnon_impl(_args: Array = []):
 	switch.seek(0)
 	switch.play()
 
 	isOn = true
-	
-	stop()
+
+	stop_impl()
 
 	_updateStatusLabel()
 
 func turnoff():
+	RPCUtils.try_rpc_call(self, "turnoff")
+
+func turnoff_impl(_args: Array = []):
 	switch.seek(0)
 	switch.play()
 
@@ -117,29 +126,35 @@ func turnoff():
 	isOn = false
 
 	_updateStatusLabel()
-	
+
 func playfreakymusicon():
+	RPCUtils.try_rpc_call(self, "playfreakymusicon")
+
+func playfreakymusicon_impl(_args: Array = []):
 	switch.seek(0)
 	switch.play()
 
 	if not isOn:
-		turnon()
+		turnon_impl()
 
 	staticSound.stop()
 	song.play(lastSongPosition)
 	isPlaying = true
 
 	_updateStatusLabel()
-	
+
 func stop():
+	RPCUtils.try_rpc_call(self, "stop")
+
+func stop_impl(_args: Array = []):
 	switch.seek(0)
 	switch.play()
 
 	lastSongPosition = song.get_playback_position()
 
 	if not isOn:
-		turnon()
-	
+		turnon_impl()
+
 	song.stop()
 
 	staticSound.play()
@@ -153,6 +168,28 @@ func togglePower():
 	else:
 		turnon()
 
+# Called by MultiplayerManager on the server when a peer joins — radio state
+# isn't in any replication config, so a late joiner needs one authoritative snap.
+func late_join_sync(peer_id: int):
+	_apply_join_state.rpc_id(peer_id, isOn, isPlaying)
+
+@rpc("authority")
+func _apply_join_state(on: bool, playing: bool):
+	isOn = on
+	isPlaying = playing
+
+	if isPlaying:
+		staticSound.stop()
+		song.play(0)
+	elif isOn:
+		song.stop()
+		staticSound.play()
+	else:
+		song.stop()
+		staticSound.stop()
+
+	_updateStatusLabel()
+
 func togglePlay():
 	if isPlaying:
 		stop()
@@ -160,8 +197,14 @@ func togglePlay():
 		playfreakymusicon()
 
 func interact(_player = null):
+	# isOn changes a network round-trip later; capture the intent for the message
+	var turning_on = not isOn
 	togglePower()
-	EventBus.emit_signal("NotableEventOccurred", "Player turned " + ("on" if isOn else "off") + " the radio in " + locator.Room)
+
+	var who = "Player"
+	if _player != null and "player_number" in _player:
+		who = "Player %d" % _player.player_number
+	EventBus.emit_signal("NotableEventOccurred", who + " turned " + ("on" if turning_on else "off") + " the radio in " + locator.Room)
 
 func secondaryInteract(_player = null):
 	togglePlay()

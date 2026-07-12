@@ -46,24 +46,26 @@ func connect_to_event_bus():
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	registry.Register(objectType)
-	
+	add_to_group("late_join_synced")
+
 	connect_to_event_bus.call_deferred()
 
 	ghost = get_tree().current_scene.get_node("Ghost")
 
-func _enter_tree():
-	if multiplayer.is_server():
-		# Sync initial state to new clients
-		sync_state.rpc_id(multiplayer.get_remote_sender_id(), isOpen, locked)
+# Called by MultiplayerManager on the server when a peer joins: the synchronizer
+# streams isOpen/locked, but the door MESH pose is tween-driven, so a late joiner
+# needs one authoritative snap.
+func late_join_sync(peer_id: int):
+	_apply_join_state.rpc_id(peer_id, isOpen, locked)
 
 @rpc("authority")
-func sync_state(door_open: bool, door_locked: bool):
-	isOpen = door_open
-	locked = door_locked
+func _apply_join_state(open: bool, is_locked: bool):
+	isOpen = open
+	locked = is_locked
 	if isOpen:
-		_openStep(1.0)  # Instantly set door to open position
+		_openStep(1.0)
 	else:
-		_closeStep(1.0)  # Instantly set door to closed position
+		_closeStep(1.0)
 
 func open():
 	if multiplayer.is_server():
@@ -195,13 +197,17 @@ func _closeStep(progress: float):
 	door.rotation.y = deg_to_rad(y)
 	
 func interact(_player = null):
+	var who = "Player"
+	if _player != null and "player_number" in _player:
+		who = "Player %d" % _player.player_number
+
 	if locked:
-		EventBus.emit_signal("NotableEventOccurred", "Player tried to open door in " + locator.Room + " - but it was locked")
+		EventBus.emit_signal("NotableEventOccurred", who + " tried to open door in " + locator.Room + " - but it was locked")
 	else:
 		if isOpen:
-			EventBus.emit_signal("NotableEventOccurred", "Player closed door in " + locator.Room)
+			EventBus.emit_signal("NotableEventOccurred", who + " closed door in " + locator.Room)
 		else:
-			EventBus.emit_signal("NotableEventOccurred", "Player opened door in " + locator.Room)
+			EventBus.emit_signal("NotableEventOccurred", who + " opened door in " + locator.Room)
 
 	toggle()
 

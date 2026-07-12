@@ -17,7 +17,19 @@ public partial class VoiceWebServer : Node
     {
         listener = new HttpListener();
         listener.Prefixes.Add("http://localhost:6900/");
-        listener.Start();
+
+        try
+        {
+            listener.Start();
+        }
+        catch (Exception e)
+        {
+            // Usually a second game instance on this machine holding the port.
+            // Voice input is per-machine convenience; the game runs fine without it.
+            GD.PushWarning("VoiceWebServer: could not bind port 6900, voice input disabled: " + e.Message);
+            return;
+        }
+
         GD.Print("Server started on http://localhost:6900/");
 
         listenerThread = new Thread(HandleRequests);
@@ -26,9 +38,15 @@ public partial class VoiceWebServer : Node
 
     private void EmitSaidSignal(string text)
     {
+        var me = PlayerManager.Get().GetPlayer((int)Multiplayer.GetUniqueId());
+        var label = me != null ? $"Player {me.Get("player_number").AsInt32()}" : "Player";
+
         EventBus
             .Get()
-            .EmitSignal(EventBus.SignalName.NotableEventOccurred, "Player said: \"" + text + "\"");
+            .EmitSignal(
+                EventBus.SignalName.NotableEventOccurred,
+                label + " said: \"" + text + "\""
+            );
     }
 
     private void HandleRequests()

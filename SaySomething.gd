@@ -47,8 +47,8 @@ func _input(event):
 			release_focus()
 			return
 
-		# EventBus.emit_signal("NotableEventOccurred", "Player said: \"" + text.strip_edges() + "\"");
-		EventBus.emit_signal("PlayerTalked", text.strip_edges());
+		# Attribute at source: the relay forwards this verbatim, so the ghost knows who spoke
+		EventBus.emit_signal("PlayerTalked", "%s: \"%s\"" % [_my_player_label(), text.strip_edges()]);
 		
 		clear()
 		release_focus()
@@ -69,8 +69,7 @@ func _on_capture_stream_to_text_transcribed_msg(is_partial, new_text):
 	else:
 		# Here, check if new_text is a complete sentence and not just ellipses
 		if _is_complete_sentence(new_text):
-			# EventBus.emit_signal("NotableEventOccurred", "Player said: \"" + new_text.strip_edges() + "\"")
-			EventBus.emit_signal("PlayerTalked", new_text.strip_edges());
+			EventBus.emit_signal("PlayerTalked", "%s: \"%s\"" % [_my_player_label(), new_text.strip_edges()]);
 			completed_text = "" # Reset the completed_text since it's already handled
 			partial_text = "" # Clear partial text as well
 			update_text("You said - " + new_text)
@@ -79,6 +78,13 @@ func _on_capture_stream_to_text_transcribed_msg(is_partial, new_text):
 			# If it's not a complete sentence, just update the partial_text
 			partial_text = new_text
 			update_text("You're saying - " + completed_text + partial_text)
+
+func _my_player_label() -> String:
+	var player_manager = get_node("/root/PlayerManager")
+	var me = player_manager.GetPlayer(multiplayer.get_unique_id())
+	if me != null:
+		return "Player %d" % me.player_number
+	return "Player"
 
 func _is_complete_sentence(t):
 	# Check if the text ends with '.', '!', or '?' and is longer than 6 characters, and not just ellipses
